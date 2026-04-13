@@ -1,0 +1,857 @@
+<template>
+    <div class="container-fluid py-4">
+        <header class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="fw-bold" style="color: var(--green-900); font-family: 'Fraunces';">
+                    Gestión de Personas
+                </h2>
+                <p class="text-muted">Administración de personas registradas en el sistema.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <span class="badge bg-success-subtle text-success border border-success px-3">
+                    <i class="fas fa-users me-2"></i>
+                    <span v-if="totalPersonas > 0">Total de personas: {{ totalPersonas }}</span>
+                    <span v-else>0</span>
+                </span>
+                <button class="btn btn-primary ms-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario"
+                    @click="limpiar">
+                    <i class="fas fa-user-plus me-2"></i>Nuevo Registro
+                </button>
+            </div>
+        </header>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+            <div class="card-body">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" v-model="busqueda" @input="busqueda = busqueda.replace(/[^0-9]/g, '')"
+                        class="form-control border-0 shadow-none"
+                        placeholder="Buscar por cédula de la persona... (Solo números)">
+                </div>
+                <div class="form-text text-muted ms-2 mt-2">
+                    <i class="fas fa-info-circle me-1"></i> Escribe la cédula de una persona para buscar en la base de
+                    datos.
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background: var(--green-800); color: white;">
+                        <tr>
+                            <th class="ps-4">Id</th>
+                            <th class="ps-4">Persona</th>
+                            <th>Teléfono</th>
+                            <th class="text-center">Sexo</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-center">Creación</th>
+                            <th class="text-center">Modificación</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in objetoList" :key="user.id_persona">
+                            <td class="ps-4 fw-bold text-secondary">{{ user.id_persona }}</td>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 bg-light text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                        style="width: 45px; height: 45px; flex-shrink: 0;">
+                                        <img :src="getPhotoUrl(user.id_persona)" @error="handleImageError" alt="Foto"
+                                            class="w-100 h-100" style="object-fit: cover;" />
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
+                                            user.cedula }}</div>
+                                        <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
+                                         <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{ calcularEdad(user.fecha_nacimiento) }} años</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ user.telefono }}</td>
+                            <td class="text-center">
+                                <span v-if="user.sexo === 'M' || user.sexo === 'Masculino'" title="Masculino">
+                                    <i class="fas fa-mars fs-4 text-primary"></i>
+                                </span>
+                                <span v-else-if="user.sexo === 'F' || user.sexo === 'Femenino'" title="Femenino">
+                                    <i class="fas fa-venus fs-4 text-danger"></i>
+                                </span>
+                                <span v-else title="Otro">
+                                    <i class="fas fa-genderless fs-4 text-secondary"></i> {{ user.sexo }}
+                                </span>
+                            </td>
+                            <td class="text-center" v-if="user.estado == 1">
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
+                            </td>
+                            <td class="text-center" v-else>
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
+                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.created_at }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
+                                    <i class="far fa-edit text-primary me-1"></i> {{ user.updated_at }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-light text-info" data-bs-toggle="modal"
+                                        data-bs-target="#modalDetalle" @click="cargarDetalles(user)"
+                                        title="Ver información completa">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light text-primary" data-bs-toggle="modal"
+                                        data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
+                                        title="Editar detalles de esta persona">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light text-danger"
+                                        @click="eliminar(user.id_persona, user.nombres + ' ' + user.apellidos)"
+                                        v-if="user.estado == 1" title="Inhabilitar esta persona">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-light text-success"
+                                        @click="habilitar(user.id_persona, user.nombres + ' ' + user.apellidos)" v-else
+                                        title="Habilitar esta persona nuevamente">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-if="objetoList.length === 0 && !cargando">
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
+                                No se encontraron personas. ¡Haz clic en "Nuevo Registro" para empezar!
+                            </td>
+                        </tr>
+                        <tr v-if="cargando">
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i>
+                                Cargando información...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
+                v-if="lastPage > 1">
+                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
+                        }}</strong></span>
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" :class="{ disabled: currentPage <= 1 }">
+                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
+                                :disabled="currentPage <= 1">Anterior</button>
+                        </li>
+                        <li class="page-item" v-for="page in paginasMostradas" :key="page"
+                            :class="{ active: page === currentPage }">
+                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                        </li>
+                        <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
+                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
+                                :disabled="currentPage >= lastPage">Siguiente</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="modal-header border-0 bg-light rounded-top-4">
+                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-user-plus me-2"></i>Registrar
+                            Nueva Persona</h5>
+                        <button type="button" class="btn-close" id="btnCloseModalCrear"
+                            data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            role="alert">
+                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <div class="small text-dark">
+                                <strong>Guía de Registro:</strong><br>
+                                Completa los datos personales. Asegúrate de ingresar números válidos para cédula y
+                                teléfono. Puedes agregar una foto de perfil seleccionándola desde tu dispositivo.
+                            </div>
+                        </div>
+
+                        <form @submit.prevent="guardarData">
+                            <div class="row">
+                                <div class="col-md-3 text-center border-end mb-3">
+                                    <h6 class="text-muted mb-3">Foto de Perfil</h6>
+                                    <div class="mb-3 d-flex justify-content-center">
+                                        <div class="rounded-circle shadow-sm border overflow-hidden"
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                            <img v-if="objetoData.previewFoto" :src="objetoData.previewFoto"
+                                                class="w-100 h-100" style="object-fit: cover;" alt="Vista previa">
+                                            <i v-else
+                                                class="fas fa-user text-secondary d-flex align-items-center justify-content-center h-100"
+                                                style="font-size: 5rem;"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" class="d-none" id="fotoCrear" accept="image/*"
+                                        @change="handleFileUpload($event, 'crear')">
+                                    <label for="fotoCrear"
+                                        class="btn btn-outline-success btn-sm w-100 rounded-pill shadow-sm">
+                                        <i class="fas fa-camera me-1"></i> Seleccionar Foto
+                                    </label>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.cedula" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.cedula }" id="crearCedula"
+                                                    placeholder="Cédula"
+                                                    @input="objetoData.cedula = objetoData.cedula.replace(/[^0-9]/g, '')"
+                                                    maxlength="10">
+                                                <label for="crearCedula">Cédula</label>
+                                                <div class="invalid-feedback">Ingrese una cédula válida.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.nombres" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.nombres }" id="crearNombres"
+                                                    placeholder="Nombres">
+                                                <label for="crearNombres">Nombres</label>
+                                                <div class="invalid-feedback">Ingrese los nombres.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.apellidos" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.apellidos }" id="crearApellidos"
+                                                    placeholder="Apellidos">
+                                                <label for="crearApellidos">Apellidos</label>
+                                                <div class="invalid-feedback">Ingrese los apellidos.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.fecha_nacimiento" type="date"
+                                                    class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.fecha_nacimiento }"
+                                                    id="crearFecha">
+                                                <label for="crearFecha">Fecha de Nacimiento</label>
+                                                <div class="invalid-feedback">Seleccione una fecha.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.telefono" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.telefono }" id="crearTelefono"
+                                                    placeholder="Teléfono"
+                                                    @input="objetoData.telefono = objetoData.telefono.replace(/[^0-9]/g, '')"
+                                                    maxlength="10">
+                                                <label for="crearTelefono">Teléfono</label>
+                                                <div class="invalid-feedback">Ingrese un teléfono válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select v-model="objetoData.sexo" class="form-select"
+                                                    :class="{ 'is-invalid': errorsData.sexo }" id="crearSexo">
+                                                    <option value="" disabled selected>Seleccione</option>
+                                                    <option value="Masculino">Masculino</option>
+                                                    <option value="Femenino">Femenino</option>
+                                                </select>
+                                                <label for="crearSexo">Sexo</label>
+                                                <div class="invalid-feedback">Seleccione un sexo.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.correo" type="email" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.correo }" id="crearCorreo"
+                                                    placeholder="Correo Electrónico">
+                                                <label for="crearCorreo">Correo Electrónico</label>
+                                                <div class="invalid-feedback">Ingrese un correo válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoData.direccion" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsData.direccion }" id="crearDireccion"
+                                                    placeholder="Dirección">
+                                                <label for="crearDireccion">Dirección</label>
+                                                <div class="invalid-feedback">Ingrese una dirección.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
+                                <i class="fas fa-save me-2"></i>Guardar Persona
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalEditUsuario" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="modal-header border-0 bg-light rounded-top-4">
+                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-user-edit me-2"></i>Editar Persona
+                        </h5>
+                        <button type="button" class="btn-close" id="btnCloseModalEditar"
+                            data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            role="alert">
+                            <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
+                            <div class="small text-dark">
+                                <strong>Actualización de datos:</strong><br>
+                                Modifica la información personal. Puedes cambiar la foto haciendo clic en el botón
+                                debajo de la vista previa.
+                                Nota: Para editar la cédula debes ser superadministrador.
+                            </div>
+                        </div>
+
+                        <form @submit.prevent="editarData">
+                            <div class="row">
+                                <div class="col-md-3 text-center border-end mb-3">
+                                    <h6 class="text-muted mb-3">Foto de Perfil</h6>
+                                    <div class="mb-3 d-flex justify-content-center">
+                                        <div class="rounded-circle shadow-sm border overflow-hidden"
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                            <img v-if="objetoEdit.previewFoto" :src="objetoEdit.previewFoto"
+                                                class="w-100 h-100" style="object-fit: cover;" @error="handleImageError"
+                                                alt="Vista previa">
+                                            <i v-else
+                                                class="fas fa-user text-secondary d-flex align-items-center justify-content-center h-100"
+                                                style="font-size: 5rem;"></i>
+                                        </div>
+                                    </div>
+                                    <input type="file" class="d-none" id="fotoEditar" accept="image/*"
+                                        @change="handleFileUpload($event, 'editar')">
+                                    <label for="fotoEditar"
+                                        class="btn btn-outline-primary btn-sm w-100 rounded-pill shadow-sm">
+                                        <i class="fas fa-camera me-1"></i> Cambiar Foto
+                                    </label>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.cedula" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.cedula }" id="editCedula"
+                                                    placeholder="Cédula"
+                                                    @input="objetoEdit.cedula = objetoEdit.cedula.replace(/[^0-9]/g, '')"
+                                                    maxlength="10" disabled>
+                                                <label for="editCedula">Cédula</label>
+                                                <div class="invalid-feedback">Ingrese una cédula válida.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.nombres" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.nombres }" id="editNombres"
+                                                    placeholder="Nombres">
+                                                <label for="editNombres">Nombres</label>
+                                                <div class="invalid-feedback">Ingrese los nombres.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.apellidos" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.apellidos }" id="editApellidos"
+                                                    placeholder="Apellidos">
+                                                <label for="editApellidos">Apellidos</label>
+                                                <div class="invalid-feedback">Ingrese los apellidos.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.fecha_nacimiento" type="date"
+                                                    class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.fecha_nacimiento }"
+                                                    id="editFecha">
+                                                <label for="editFecha">Fecha de Nacimiento</label>
+                                                <div class="invalid-feedback">Seleccione una fecha.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.telefono" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.telefono }" id="editTelefono"
+                                                    placeholder="Teléfono"
+                                                    @input="objetoEdit.telefono = objetoEdit.telefono.replace(/[^0-9]/g, '')"
+                                                    maxlength="10">
+                                                <label for="editTelefono">Teléfono</label>
+                                                <div class="invalid-feedback">Ingrese un teléfono válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select v-model="objetoEdit.sexo" class="form-select"
+                                                    :class="{ 'is-invalid': errorsEdit.sexo }" id="editSexo">
+                                                    <option value="" disabled selected>Seleccione</option>
+                                                    <option value="Masculino">Masculino</option>
+                                                    <option value="Femenino">Femenino</option>
+                                                </select>
+                                                <label for="editSexo">Sexo</label>
+                                                <div class="invalid-feedback">Seleccione un sexo.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.correo" type="email" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.correo }" id="editCorreo"
+                                                    placeholder="Correo Electrónico">
+                                                <label for="editCorreo">Correo Electrónico</label>
+                                                <div class="invalid-feedback">Ingrese un correo válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input v-model="objetoEdit.direccion" type="text" class="form-control"
+                                                    :class="{ 'is-invalid': errorsEdit.direccion }" id="editDireccion"
+                                                    placeholder="Dirección">
+                                                <label for="editDireccion">Dirección</label>
+                                                <div class="invalid-feedback">Ingrese una dirección.</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-floating">
+                                                <select v-model="objetoEdit.estado" class="form-select border-primary"
+                                                    :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado">
+                                                    <option value="1">Activo</option>
+                                                    <option value="0">Inactivo</option>
+                                                </select>
+                                                <label for="editEstado">Estado en el Sistema</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm rounded-3 fw-bold">
+                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="modal-header border-0 bg-light rounded-top-4">
+                        <h5 class="modal-title fw-bold text-dark"><i class="fas fa-id-badge text-info me-2"></i>Perfil
+                            del Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <div class="mb-4">
+                            <div class="rounded-circle shadow border mx-auto overflow-hidden"
+                                style="width: 160px; height: 160px;">
+                                <img :src="personaSeleccionada.previewFoto" @error="handleImageError" alt="Foto Persona"
+                                    class="w-100 h-100" style="object-fit: cover;">
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-1">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}
+                        </h4>
+                        <p class="text-muted mb-4"><i class="far fa-id-card me-1"></i> {{ personaSeleccionada.cedula }}
+                        </p>
+
+                        <div class="row text-start g-3">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Fecha Nacimiento</small>
+                                <span class="fw-medium"><i class="far fa-calendar-alt text-secondary me-1"></i> {{
+                                    personaSeleccionada.fecha_nacimiento }}</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Sexo</small>
+                                <span class="fw-medium">
+                                    <i v-if="personaSeleccionada.sexo === 'M' || personaSeleccionada.sexo === 'Masculino'"
+                                        class="fas fa-mars text-primary me-1"></i>
+                                    <i v-else-if="personaSeleccionada.sexo === 'F' || personaSeleccionada.sexo === 'Femenino'"
+                                        class="fas fa-venus text-danger me-1"></i>
+                                    <i v-else class="fas fa-genderless text-secondary me-1"></i>
+                                    {{ personaSeleccionada.sexo }}
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Teléfono</small>
+                                <span class="fw-medium"><i class="fas fa-phone-alt text-secondary me-1"></i> {{
+                                    personaSeleccionada.telefono }}</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Estado</small>
+                                <span v-if="personaSeleccionada.estado == 1" class="badge bg-success">Activo</span>
+                                <span v-else class="badge bg-danger">Inactivo</span>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block">Correo Electrónico</small>
+                                <span class="fw-medium"><i class="far fa-envelope text-secondary me-1"></i> {{
+                                    personaSeleccionada.correo }}</span>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block">Dirección</small>
+                                <span class="fw-medium"><i class="fas fa-map-marker-alt text-secondary me-1"></i> {{
+                                    personaSeleccionada.direccion }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary w-100 rounded-pill"
+                            data-bs-dismiss="modal">Cerrar Detalle</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</template>
+
+<script>
+import API from "@/assets/js/axios"
+import { confimar, confimarhabi, mostraralertas2 } from "@/assets/js/funciones/functions";
+
+export default {
+    data() {
+        return {
+            baseUrl: "/sistma", // Corregido de /sistma a /sistema
+            totalPersonas: 0,
+            personaSeleccionada: {}, // Para el modal de detalles
+            objetoData: {
+                cedula: "",
+                nombres: "",
+                apellidos: "",
+                fecha_nacimiento: "",
+                direccion: "",
+                telefono: "",
+                correo: "",
+                sexo: "",
+                foto: "",
+                previewFoto: "",
+                estado: 1,
+            },
+            errorsData: {
+                cedula: false,
+                nombres: false,
+                apellidos: false,
+                fecha_nacimiento: false,
+                direccion: false,
+                telefono: false,
+                correo: false,
+                sexo: false,
+                foto: false
+            },
+            objetoEdit: {
+                id_persona: 0,
+                cedula: "",
+                nombres: "",
+                apellidos: "",
+                fecha_nacimiento: "",
+                direccion: "",
+                telefono: "",
+                correo: "",
+                sexo: "",
+                foto: "",
+                previewFoto: "",
+                estado: "",
+            },
+            errorsEdit: {
+                cedula: false,
+                nombres: false,
+                apellidos: false,
+                fecha_nacimiento: false,
+                direccion: false,
+                telefono: false,
+                correo: false,
+                sexo: false,
+                foto: false,
+                estado: false
+            },
+            busqueda: '',
+            timeoutBusqueda: null,
+            objetoList: [],
+            cargando: false,
+            currentPage: 1,
+            lastPage: 1,
+            refreshKey: Date.now(),
+        }
+    },
+    computed: {
+        paginasMostradas() {
+            let pages = [];
+            let start = Math.max(1, this.currentPage - 2);
+            let end = Math.min(this.lastPage, start + 4);
+
+            if (end - start < 4) {
+                start = Math.max(1, end - 4);
+            }
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+            return pages;
+        }
+    },
+    watch: {
+        busqueda(newVal) {
+            clearTimeout(this.timeoutBusqueda);
+            this.timeoutBusqueda = setTimeout(() => {
+                this.currentPage = 1;
+                this.getData();
+            }, 500);
+        }
+    },
+    async mounted() {
+        await this.getData();
+    },
+    methods: {
+        calcularEdad(fechaNacimiento) {
+            if (!fechaNacimiento) return 0;
+            const hoy = new Date();
+            const nac = new Date(fechaNacimiento);
+            let edad = hoy.getFullYear() - nac.getFullYear();
+            const m = hoy.getMonth() - nac.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
+                edad--;
+            }
+            return edad;
+        },
+        // Carga la foto y genera el base64 para vista previa y envío
+        handleFileUpload(event, action) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                // Guarda la imagen en base64
+                if (action === 'crear') {
+                    this.objetoData.previewFoto = e.target.result;
+                    this.objetoData.foto = e.target.result.split(',')[1]; // Solo la cadena base64 para el backend si lo requiere
+                } else {
+                    this.objetoEdit.previewFoto = e.target.result;
+                    this.objetoEdit.foto = e.target.result.split(',')[1];
+                }
+            };
+            reader.readAsDataURL(file);
+        },
+
+        cargarDetalles(user) {
+            this.personaSeleccionada = { ...user };
+            this.personaSeleccionada.previewFoto = this.getPhotoUrl(user.id_persona);
+        },
+
+        cargarDatosEdicion(user) {
+            this.errorsEdit = { cedula: false, nombres: false, apellidos: false, fecha_nacimiento: false, direccion: false, telefono: false, correo: false, sexo: false, foto: false, estado: false };
+            this.objetoEdit = {
+                id_persona: user.id_persona,
+                cedula: user.cedula,
+                nombres: user.nombres,
+                apellidos: user.apellidos,
+                fecha_nacimiento: user.fecha_nacimiento,
+                direccion: user.direccion,
+                telefono: user.telefono,
+                correo: user.correo,
+                sexo: user.sexo,
+                foto: "", // se mantiene vacía si no se sube una nueva
+                previewFoto: this.getPhotoUrl(user.id_persona), // Carga la URL actual para previsualizar
+                estado: user.estado,
+            };
+        },
+
+        getPhotoUrl(ci) {
+            if (!ci) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+            const baseURL2 = API.defaults.baseURL;
+            return `${baseURL2}/sistma/imagenpersona/${ci}?v=${this.refreshKey}`;
+        },
+
+        handleImageError(event) {
+            event.target.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+        },
+
+        cambiarPagina(page) {
+            if (page >= 1 && page <= this.lastPage) {
+                this.currentPage = page;
+                this.getData();
+            }
+        },
+
+        async getData() {
+            this.cargando = true;
+            try {
+                const response = await API.get(`${this.baseUrl}/personas`, {
+                    params: {
+                        page: this.currentPage,
+                        search_query: this.busqueda
+                    }
+                });
+
+                const data = response.data?.data || [];
+                const pagination = response.data?.pagination || {};
+
+                this.currentPage = pagination.current_page || 1;
+                this.lastPage = pagination.last_page || 1;
+                this.totalPersonas = pagination.total || 0;
+                this.objetoList = data;
+
+            } catch (error) {
+                console.warn("⚠️ Error al obtener datos:", error?.response?.data || error);
+                this.objetoList = [];
+                this.currentPage = 1;
+                this.lastPage = 1;
+            } finally {
+                this.cargando = false;
+            }
+        },
+
+        validarFormularioCrear() {
+            this.errorsData.cedula = !this.objetoData.cedula || this.objetoData.cedula.trim() === "";
+            this.errorsData.nombres = !this.objetoData.nombres || this.objetoData.nombres.trim() === "";
+            this.errorsData.apellidos = !this.objetoData.apellidos || this.objetoData.apellidos.trim() === "";
+            this.errorsData.fecha_nacimiento = !this.objetoData.fecha_nacimiento || this.objetoData.fecha_nacimiento.trim() === "";
+            this.errorsData.direccion = !this.objetoData.direccion || this.objetoData.direccion.trim() === "";
+            this.errorsData.telefono = !this.objetoData.telefono || this.objetoData.telefono.trim() === "";
+            this.errorsData.correo = !this.objetoData.correo || this.objetoData.correo.trim() === "";
+            this.errorsData.sexo = !this.objetoData.sexo || this.objetoData.sexo.trim() === "";
+
+            return !Object.values(this.errorsData).some(val => val === true);
+        },
+
+        async guardarData() {
+            if (!this.validarFormularioCrear()) {
+                return;
+            }
+
+            try {
+                const response = await API.post(`${this.baseUrl}/personas`, this.objetoData);
+                if (response) {
+                    mostraralertas2("Persona creada exitosamente", "success");
+                    this.refreshKey = Date.now(); // Fuerza refresco de imágenes
+                    await this.getData();
+                    this.limpiar();
+                    document.getElementById('btnCloseModalCrear').click();
+                } else {
+                    mostraralertas2("Se recibió una respuesta inesperada del servidor.", "error");
+                }
+            } catch (error) {
+                console.error("❌ Error al crear persona:", error?.response?.data || error);
+                mostraralertas2("Error al crear persona. Por favor, inténtelo de nuevo.", "error");
+            }
+        },
+
+        validarFormularioEditar() {
+            this.errorsEdit.cedula = !this.objetoEdit.cedula || String(this.objetoEdit.cedula).trim() === "";
+            this.errorsEdit.nombres = !this.objetoEdit.nombres || this.objetoEdit.nombres.trim() === "";
+            this.errorsEdit.apellidos = !this.objetoEdit.apellidos || this.objetoEdit.apellidos.trim() === "";
+            this.errorsEdit.fecha_nacimiento = !this.objetoEdit.fecha_nacimiento || String(this.objetoEdit.fecha_nacimiento).trim() === "";
+            this.errorsEdit.direccion = !this.objetoEdit.direccion || this.objetoEdit.direccion.trim() === "";
+            this.errorsEdit.telefono = !this.objetoEdit.telefono || String(this.objetoEdit.telefono).trim() === "";
+            this.errorsEdit.correo = !this.objetoEdit.correo || this.objetoEdit.correo.trim() === "";
+            this.errorsEdit.sexo = !this.objetoEdit.sexo || this.objetoEdit.sexo.trim() === "";
+
+            return !this.errorsEdit.cedula && !this.errorsEdit.nombres && !this.errorsEdit.apellidos && !this.errorsEdit.fecha_nacimiento && !this.errorsEdit.direccion && !this.errorsEdit.telefono && !this.errorsEdit.correo && !this.errorsEdit.sexo;
+        },
+
+        async editarData() {
+            if (!this.validarFormularioEditar()) {
+                return;
+            }
+
+            try {
+                const response = await API.put(`${this.baseUrl}/personas/${this.objetoEdit.id_persona}`, this.objetoEdit);
+                if (response) {
+                    mostraralertas2("Persona actualizada exitosamente", "success");
+                    this.refreshKey = Date.now(); // Fuerza refresco de imágenes
+                    await this.getData();
+                    this.limpiar();
+                    document.getElementById('btnCloseModalEditar').click();
+                } else {
+                    mostraralertas2("Se recibió una respuesta inesperada.", "error");
+                }
+            } catch (error) {
+                console.error("❌ Error al actualizar persona:", error?.response?.data || error);
+                mostraralertas2("Error al actualizar persona. Por favor, inténtelo de nuevo.", "error");
+            }
+        },
+
+        limpiar() {
+            this.objetoData = { cedula: "", nombres: "", apellidos: "", fecha_nacimiento: "", direccion: "", telefono: "", correo: "", sexo: "", foto: "", previewFoto: "", estado: 1 };
+            this.objetoEdit = { id_persona: 0, cedula: "", nombres: "", apellidos: "", fecha_nacimiento: "", direccion: "", telefono: "", correo: "", sexo: "", foto: "", previewFoto: "", estado: "" };
+            this.errorsData = { cedula: false, nombres: false, apellidos: false, fecha_nacimiento: false, direccion: false, telefono: false, correo: false, sexo: false, foto: false };
+            this.errorsEdit = { cedula: false, nombres: false, apellidos: false, fecha_nacimiento: false, direccion: false, telefono: false, correo: false, sexo: false, foto: false, estado: false };
+            this.personaSeleccionada = {};
+
+            // Limpia los inputs file
+            if (document.getElementById('fotoCrear')) document.getElementById('fotoCrear').value = "";
+            if (document.getElementById('fotoEditar')) document.getElementById('fotoEditar').value = "";
+        },
+
+        async eliminar(id, nombre) {
+            try {
+                await confimar(
+                    `${this.baseUrl}/ihabilitar_persona/`,
+                    id,
+                    'Inhabilitar registro',
+                    '¿Realmente desea inhabilitar a ' + nombre + '?',
+                    this.objetoList
+                );
+                setTimeout(() => { this.getData(); }, 1000);
+            } catch (error) {
+                console.error("Error al inhabilitar:", error);
+            }
+        },
+
+        async habilitar(id, nombre) {
+            try {
+                await confimarhabi(
+                    `${this.baseUrl}/habilitar_persona/`,
+                    id,
+                    'Habilitar registro',
+                    '¿Desea habilitar a ' + nombre + '?',
+                    this.objetoList
+                );
+                setTimeout(() => { this.getData(); }, 1000);
+            } catch (error) {
+                console.error("Error al habilitar:", error);
+            }
+        }
+    }
+}
+</script>
+
+<style scoped>
+/* Transiciones suaves y retoques extra */
+.avatar-sm img {
+    transition: transform 0.3s ease;
+}
+
+table tbody tr:hover .avatar-sm img {
+    transform: scale(1.1);
+}
+
+.btn-group .btn {
+    border-radius: 6px !important;
+    margin: 0 2px;
+}
+
+.modal-content {
+    overflow: hidden;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: none;
+    border-color: var(--bs-primary);
+}
+</style>
