@@ -166,6 +166,10 @@
                                         title="Asignar y crear usuario">
                                         <i class="fas fa-user-plus me-1"></i> Crear Usuario
                                     </button>
+                                    <button class="btn btn-sm btn-light text-info border shadow-sm ms-1"
+                                        @click="abrirModalEditar(user)" v-if="user.id_usuario" title="Editar Rol de Usuario">
+                                        <i class="fas fa-user-edit"></i> Editar
+                                    </button>
                                     <button class="btn btn-sm btn-light text-warning border shadow-sm ms-1"
                                         @click="resetearClave(user.id_usuario, user.cedula, user.nombres + ' ' + user.apellidos)"
                                         v-if="user.id_usuario" title="Resetear contraseña (usará la cédula)">
@@ -227,12 +231,20 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
                     <div class="modal-header border-0 bg-light">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-user-plus me-2"></i>Crear Cuenta
                             de Usuario</h5>
                         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
                             id="btnCloseModalUser"></button>
                     </div>
                     <div class="modal-body p-4">
+                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            role="alert">
+                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <div class="small text-dark">
+                                <strong>Guía de Registro:</strong><br>
+                                El usuario de la persona por defecto será su número de cédula. Solo debes asignarle un rol y confirmar para crear su cuenta.
+                            </div>
+                        </div>
                         <div class="text-center mb-4">
                             <img :src="personaSeleccionada.foto" class="rounded-circle shadow"
                                 style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-primary);">
@@ -250,15 +262,49 @@
                             <label class="form-label fw-bold text-muted small">Rol del Sistema</label>
                             <select class="form-select" v-model="objetoData.id_rol">
                                 <option value="" disabled>Seleccione un rol...</option>
-                                <option v-for="rol in objetoRolesList" :key="rol.id_rol" :value="rol.id_rol">
+                                <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.id_rol">
                                     {{ rol.nombre }}
                                 </option>
                             </select>
                         </div>
-
-                        <button class="btn btn-primary w-100 py-2 fw-bold" @click="guardarUsuario"
+                        <button class="btn btn-success w-100 py-2 fw-bold" @click="guardarUsuario"
                             :disabled="!objetoData.id_rol">
                             <i class="fas fa-save me-2"></i> Confirmar y Crear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                    <div class="modal-header border-0 bg-light">
+                        <h5 class="modal-title fw-bold text-info"><i class="fas fa-user-edit me-2"></i>Editar Rol de Usuario</h5>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" id="btnCloseModalEditUser"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-4">
+                            <img :src="personaSeleccionada.foto" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-info);">
+                            <h5 class="mt-3 fw-bold">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}</h5>
+                            <span class="badge bg-secondary">C.I. {{ personaSeleccionada.cedula }}</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">Nombre de Usuario (Bloqueado)</label>
+                            <input type="text" class="form-control bg-light text-muted" v-model="objetoEdit.username" readonly>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small">Actualizar Rol del Sistema</label>
+                            <select class="form-select" v-model="objetoEdit.id_rol">
+                                <option value="" disabled>Seleccione un rol...</option>
+                                <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.id_rol">
+                                    {{ rol.nombre }}
+                                </option>
+                            </select>
+                        </div>
+                        <button class="btn btn-info text-white w-100 py-2 fw-bold shadow-sm" @click="actualizarUsuario" :disabled="!objetoEdit.id_rol">
+                            <i class="fas fa-sync-alt me-2"></i> Actualizar Rol
                         </button>
                     </div>
                 </div>
@@ -283,6 +329,7 @@ export default {
             timeoutBusqueda: null,
             objetoList: [],
             objetoRolesList: [],
+            rolesDisponibles: [],
             cargando: false,
             currentPage: 1,
             lastPage: 1,
@@ -294,6 +341,12 @@ export default {
                 id_persona: "",
                 id_rol: "",
                 username: "",
+            },
+            objetoEdit: { // Para Editar
+                id_usuario: "",
+                id_persona: "",
+                id_rol: "",
+                username: ""
             },
 
             // Variables para registro masivo
@@ -406,8 +459,46 @@ export default {
                 username: user.cedula, // username = cedula
                 id_rol: ""
             };
+            this.filtrarRolesPorEdad(user.fecha_nacimiento);
             const modal = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
             modal.show();
+        },
+        abrirModalEditar(user) {
+            this.personaSeleccionada = {
+                nombres: user.nombres,
+                apellidos: user.apellidos,
+                cedula: user.cedula,
+                foto: this.getPhotoUrl(user.personID)
+            };
+            
+            this.objetoEdit = {
+                id_usuario: user.id_usuario,
+                id_persona: user.personID,
+                id_rol: user.id_rol || "", // Se asegura que tome el ID del rol actual
+                username: user.username
+            };
+
+            // Volvemos a filtrar los roles para que no pueda asignarle algo indebido
+            this.filtrarRolesPorEdad(user.fecha_nacimiento);
+
+            const modal = new bootstrap.Modal(document.getElementById('modalEditarUsuario'));
+            modal.show();
+        },
+        filtrarRolesPorEdad(fechaNacimiento) {
+            const edad = this.calcularEdad(fechaNacimiento);
+            
+            // Suponiendo que el rol de estudiante tiene la palabra "estudiante" en su nombre
+            if (edad > 20) {
+                // Si es mayor a 20, mostramos todos los roles que NO sean estudiante
+                this.rolesDisponibles = this.objetoRolesList.filter(
+                    rol => !rol.nombre.toLowerCase().includes('estudiante')
+                );
+            } else {
+                // Si tiene 20 o menos, mostramos SOLO el rol de estudiante
+                this.rolesDisponibles = this.objetoRolesList.filter(
+                    rol => rol.nombre.toLowerCase().includes('estudiante')
+                );
+            }
         },
 
         async guardarUsuario() {
@@ -424,6 +515,23 @@ export default {
                 }
             } catch (error) {
                 mostraralertas2("Error al crear usuario", "error");
+            }
+        },
+        async actualizarUsuario() {
+            try {
+                // Asegúrate de que esta ruta coincida con la que tienes en tu Laravel
+                const response = await API.put(`${this.baseUrl}/usuarios/update/${this.objetoEdit.id_usuario}`, {
+                    id_persona: this.objetoEdit.id_persona,
+                    id_rol: this.objetoEdit.id_rol,
+                    username: this.objetoEdit.username
+                });
+                
+                mostraralertas2("Rol actualizado correctamente", "success");
+                document.getElementById('btnCloseModalEditUser').click();
+                this.getData();
+            } catch (error) {
+                mostraralertas2("Error al actualizar el usuario", "error");
+                console.error(error);
             }
         },
 

@@ -64,7 +64,8 @@
                                         <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
                                             user.cedula }}</div>
                                         <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
-                                         <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{ calcularEdad(user.fecha_nacimiento) }} años</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
+                                            calcularEdad(user.fecha_nacimiento) }} años</div>
                                     </div>
                                 </div>
                             </td>
@@ -142,7 +143,7 @@
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
                 <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                        }}</strong></span>
+                }}</strong></span>
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
@@ -286,7 +287,34 @@
                                                 <div class="invalid-feedback">Ingrese una dirección.</div>
                                             </div>
                                         </div>
+                                        <div class="col-md-6" v-if="objetoData.crear_usuario">
+                                            <label class="form-label fw-bold text-muted small">Rol del Sistema</label>
+                                            <select class="form-select" v-model="objetoData.id_rol">
+                                                <option value="" disabled>Seleccione un rol...</option>
+                                                <option v-for="rol in rolesDisponibles" :key="rol.id_rol"
+                                                    :value="rol.id_rol">
+                                                    {{ rol.nombre }}
+                                                </option>
+                                            </select>
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <div
+                                    class="form-check form-switch p-3 border rounded-3 bg-light d-flex align-items-center shadow-sm">
+                                    <input class="form-check-input fs-3 ms-0 me-3 mt-0 cursor-pointer" type="checkbox"
+                                        role="switch" id="crearUsuarioSwitch" v-model="objetoData.crear_usuario" @change="verificarCreacionUsuario"
+                                        style="cursor: pointer;">
+                                    <label class="form-check-label flex-grow-1" for="crearUsuarioSwitch"
+                                        style="cursor: pointer;">
+                                        <span class="fw-bold text-dark d-block mb-1"><i
+                                                class="fas fa-user-shield text-success me-2"></i>¿Deseas crear de una
+                                            vez el usuario para esta persona?</span>
+                                        <span class="text-muted small mb-0 d-block">Recuerda que al seleccionar esta
+                                            opción, el <strong>nombre de usuario</strong> y la <strong>clave por
+                                                defecto</strong> serán el número de cédula.</span>
+                                    </label>
                                 </div>
                             </div>
                             <hr class="my-4">
@@ -529,6 +557,8 @@ export default {
             baseUrl: "/sistma", // Corregido de /sistma a /sistema
             totalPersonas: 0,
             personaSeleccionada: {}, // Para el modal de detalles
+            rolesDisponibles: [],
+            objetoRolesList: [],
             objetoData: {
                 cedula: "",
                 nombres: "",
@@ -541,6 +571,8 @@ export default {
                 foto: "",
                 previewFoto: "",
                 estado: 1,
+                crear_usuario: false,
+                id_rol: "",
             },
             errorsData: {
                 cedula: false,
@@ -617,6 +649,59 @@ export default {
         await this.getData();
     },
     methods: {
+        async verificarCreacionUsuario() {
+            // Si el switch se acaba de encender
+            if (this.objetoData.crear_usuario) {
+                
+                const fechaNacimiento = this.objetoData.fecha_nacimiento; 
+
+                // Validación extra: verificar si la fecha ya fue ingresada antes de activar el switch
+                if (!fechaNacimiento) {
+                    mostraralertas2("Por favor, ingrese la fecha de nacimiento primero para poder asignar roles.", "warning");
+                    // Desmarcamos el switch automáticamente porque falta la fecha
+                    this.objetoData.crear_usuario = false; 
+                    return;
+                }
+
+                try {
+                    // Llamamos a los métodos que solicitaste
+                    await this.GetObjetoList();
+                    this.filtrarRolesPorEdad(fechaNacimiento);
+                } catch (error) {
+                    console.error("Error al obtener la lista de roles:", error);
+                    mostraralertas2("Hubo un error al cargar los roles disponibles.", "error");
+                    this.objetoData.crear_usuario = false;
+                }
+            } else {
+                // Si el switch se apagó, simplemente limpiamos los roles disponibles
+                this.rolesDisponibles = [];
+                this.objetoData.id_rol = "";
+            }
+        },
+        filtrarRolesPorEdad(fechaNacimiento) {
+            const edad = this.calcularEdad(fechaNacimiento);
+
+            // Suponiendo que el rol de estudiante tiene la palabra "estudiante" en su nombre
+            if (edad > 20) {
+                // Si es mayor a 20, mostramos todos los roles que NO sean estudiante
+                this.rolesDisponibles = this.objetoRolesList.filter(
+                    rol => !rol.nombre.toLowerCase().includes('estudiante')
+                );
+            } else {
+                // Si tiene 20 o menos, mostramos SOLO el rol de estudiante
+                this.rolesDisponibles = this.objetoRolesList.filter(
+                    rol => rol.nombre.toLowerCase().includes('estudiante')
+                );
+            }
+        },
+        async GetObjetoList() {
+            try {
+                const response = await API.get(`${this.baseUrl}/roleshabilitados`); // Usa tu endpoint Roleshabilitados
+                this.objetoRolesList = response.data?.data || [];
+            } catch (error) {
+                console.error("❌ Error al obtener roles:", error);
+            }
+        },
         calcularEdad(fechaNacimiento) {
             if (!fechaNacimiento) return 0;
             const hoy = new Date();
@@ -704,6 +789,7 @@ export default {
                 this.lastPage = pagination.last_page || 1;
                 this.totalPersonas = pagination.total || 0;
                 this.objetoList = data;
+                
 
             } catch (error) {
                 console.warn("⚠️ Error al obtener datos:", error?.response?.data || error);
@@ -736,11 +822,31 @@ export default {
             try {
                 const response = await API.post(`${this.baseUrl}/personas`, this.objetoData);
                 if (response) {
-                    mostraralertas2("Persona creada exitosamente", "success");
-                    this.refreshKey = Date.now(); // Fuerza refresco de imágenes
-                    await this.getData();
-                    this.limpiar();
-                    document.getElementById('btnCloseModalCrear').click();
+                    console.log(response);
+                    const idpersona = response.data.data.id_persona;
+                    if (this.objetoData.crear_usuario) {
+                        
+                        const response2 = await API.post(`${this.baseUrl}/usuarios/store`, {
+                            id_persona: idpersona,
+                            id_rol: this.objetoData.id_rol,
+                            username: this.objetoData.cedula
+                        });
+                        if (response2) {
+                            mostraralertas2("Persona y usuario creados exitosamente", "success");
+                            this.refreshKey = Date.now(); // Fuerza refresco de imágenes
+                            await this.getData();
+                            this.limpiar();
+                            document.getElementById('btnCloseModalCrear').click();
+                        } else {
+                            mostraralertas2("Se recibió una respuesta inesperada del servidor.", "error");
+                        }
+                    } else {
+                        mostraralertas2("Persona creada exitosamente", "success");
+                        this.refreshKey = Date.now(); // Fuerza refresco de imágenes
+                        await this.getData();
+                        this.limpiar();
+                        document.getElementById('btnCloseModalCrear').click();
+                    }
                 } else {
                     mostraralertas2("Se recibió una respuesta inesperada del servidor.", "error");
                 }
@@ -786,7 +892,7 @@ export default {
         },
 
         limpiar() {
-            this.objetoData = { cedula: "", nombres: "", apellidos: "", fecha_nacimiento: "", direccion: "", telefono: "", correo: "", sexo: "", foto: "", previewFoto: "", estado: 1 };
+            this.objetoData = { cedula: "", nombres: "", apellidos: "", fecha_nacimiento: "", direccion: "", telefono: "", correo: "", sexo: "", foto: "", previewFoto: "", estado: 1, crear_usuario: false };
             this.objetoEdit = { id_persona: 0, cedula: "", nombres: "", apellidos: "", fecha_nacimiento: "", direccion: "", telefono: "", correo: "", sexo: "", foto: "", previewFoto: "", estado: "" };
             this.errorsData = { cedula: false, nombres: false, apellidos: false, fecha_nacimiento: false, direccion: false, telefono: false, correo: false, sexo: false, foto: false };
             this.errorsEdit = { cedula: false, nombres: false, apellidos: false, fecha_nacimiento: false, direccion: false, telefono: false, correo: false, sexo: false, foto: false, estado: false };
