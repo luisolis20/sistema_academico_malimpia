@@ -43,6 +43,7 @@ Route::prefix('sistma')->group(function (){
     Route::delete('ihabilitar_usuario/{id}', [UserController::class, 'destroy']);
     Route::delete('habilitar_usuario/{id}', [UserController::class, 'habilitar']);
     Route::post('usuarios/store', [UserController::class, 'storeUsuario']);
+    Route::put('usuarios/update/{id}', [UserController::class, 'updateUsuario']);
     Route::post('usuarios/store_masivo', [UserController::class, 'storeMasivo']);
     Route::post('resetear_clave/{id}', [UserController::class, 'resetearClave']);
     Route::get('pendientes_masivo', [UserController::class, 'getPendientesMasivo']);

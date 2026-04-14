@@ -50,7 +50,7 @@ class UserController extends Controller
             }
             if ($filterAge === 'under_20') {
                 $query->whereRaw('TIMESTAMPDIFF(YEAR, personas.fecha_nacimiento, CURDATE()) < 20');
-            }elseif ($filterAge === 'over_20') {
+            } elseif ($filterAge === 'over_20') {
                 $query->whereRaw('TIMESTAMPDIFF(YEAR, personas.fecha_nacimiento, CURDATE()) >= 20');
             }
 
@@ -144,6 +144,42 @@ class UserController extends Controller
             return response()->json(['error' => 'Error al crear usuario: ' . $e->getMessage()], 500);
         }
     }
+    public function updateUsuario(Request $request, $id)
+    {
+        try {
+            // 1. Verificamos que el usuario que intentan editar realmente exista
+            $usuarioExiste = DB::table('usuarios')->where('id_usuario', $id)->exists();
+            if (!$usuarioExiste) {
+                return response()->json(['error' => 'Usuario no encontrado.'], 404);
+            }
+
+            // 2. (Opcional pero recomendado) Verificar que el nuevo username no lo tenga otro usuario
+            $usernameOcupado = DB::table('usuarios')
+                ->where('username', $request->username)
+                ->where('id_usuario', '!=', $id) // Excluimos al usuario actual
+                ->exists();
+
+            if ($usernameOcupado) {
+                return response()->json(['error' => 'Este nombre de usuario ya está en uso por otra persona.'], 400);
+            }
+
+            // 3. Ejecutamos la actualización
+            DB::table('usuarios')
+                ->where('id_usuario', $id)
+                ->update([
+                    'id_persona' => $request->id_persona,
+                    'id_rol' => $request->id_rol,
+                    'username' => $request->username,
+                    'clave' => Hash::make($request->username), // Clave por defecto = cedula
+                    'estado' => 1,
+                    'updated_at' => now(),
+                ]);
+
+            return response()->json(['message' => 'Usuario actualizado exitosamente.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al actualizar usuario: ' . $e->getMessage()], 500);
+        }
+    }
 
     // 3. NUEVO ENDPOINT: Registro Masivo por lotes (Chunks)
     public function storeMasivo(Request $request)
@@ -192,8 +228,8 @@ class UserController extends Controller
             // Cambia 'Usuarios' por el nombre de tu modelo si es diferente (ej. User)
             $usuario = User::findOrFail($id);
             $usuario->clave = Hash::make($request->nueva_clave); // Hasheamos la cédula
-            
-             if ($usuario->save()) {
+
+            if ($usuario->save()) {
                 return response()->json([
                     'data' => $usuario,
                     'mensaje' => 'Clave reseteada correctamente',
