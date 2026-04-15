@@ -15,6 +15,7 @@ import PeriodoView from '@/views/PeriodoView.vue'
 import UsuarioView from '@/views/Mantenimiento/Usuarios/UsuarioView.vue'
 import RolesView from '@/views/Mantenimiento/Roles/RolesView.vue'
 import PersonasView from '@/views/Mantenimiento/Personas/PersonasView.vue'
+import FamiliasView from '@/views/Mantenimiento/Familias/FamiliasView.vue'
 
 
 const routes = [
@@ -110,6 +111,11 @@ const routes = [
     path: '/personas',
     name: 'personas',
     component: PersonasView
+  },
+  {
+    path: '/familias',
+    name: 'familias',
+    component: FamiliasView
   },
 ]
 const router = createRouter({
