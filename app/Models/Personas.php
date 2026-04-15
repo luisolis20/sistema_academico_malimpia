@@ -28,4 +28,10 @@ class Personas extends Model
     {
         return $this->hasMany(User::class, 'id_persona');
     }
+    public function familia1(){
+        return $this->hasMany(Familia::class, 'id_representante');
+    }
+    public function familia2(){
+        return $this->hasMany(Familia::class, 'id_estudiante');
+    }
 }

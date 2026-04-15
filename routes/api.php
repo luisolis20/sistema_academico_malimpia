@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RolController; 
 use App\Http\Controllers\PersonaController; 
 use App\Http\Controllers\UserController; 
+use App\Http\Controllers\FamiliaController;
 
 
 /*
@@ -48,6 +49,11 @@ Route::prefix('sistma')->group(function (){
     Route::post('resetear_clave/{id}', [UserController::class, 'resetearClave']);
     Route::get('pendientes_masivo', [UserController::class, 'getPendientesMasivo']);
     Route::get('pendientes_mayores_masivo', [UserController::class, 'getPendientesMayoresMasivo']);
+
+    //Definir las rutas para la familia, permitiendo crear, leer, actualizar familia
+    Route::apiResource('familia', FamiliaController::class);
+    Route::get('familiar/{ci}', [FamiliaController::class, 'show']);
+    Route::post('familia/asignar', [FamiliaController::class, 'store']);
     Route::middleware('auth:api')->group(function (){
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
