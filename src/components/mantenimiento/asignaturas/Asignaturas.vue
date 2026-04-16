@@ -3,14 +3,14 @@
         <header class="row mb-4 align-items-center">
             <div class="col-md-6">
                 <h2 class="fw-bold" style="color: var(--green-900); font-family: 'Fraunces';">
-                    Gestión de Especialidades
+                    Gestión de Asignaturas
                 </h2>
-                <p class="text-muted">Administración de especialidades</p>
+                <p class="text-muted">Administración de asignaturas</p>
             </div>
             <div class="col-md-6 text-md-end">
                 <span class="badge bg-success-subtle text-success border border-success px-3">
-                    <i class="fas fa-users me-2"></i>
-                    <span v-if="totaldata > 0">Total de Especialidades: {{ totaldata }}</span>
+                    <i class="fas fa-book me-2"></i>
+                    <span v-if="totaldata > 0">Total de Asignaturas: {{ totaldata }}</span>
                     <span v-else>0</span>
                 </span>
                 <button class="btn btn-primary ms-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
@@ -24,10 +24,10 @@
                 <div class="input-group">
                     <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
                     <input type="text" v-model="busqueda" class="form-control border-0 shadow-none"
-                        placeholder="Buscar por nombre de la especialidad...">
+                        placeholder="Buscar por nombre de la asignatura...">
                 </div>
                 <div class="form-text text-muted ms-2 mt-2">
-                    <i class="fas fa-info-circle me-1"></i> Escribe el nombre de una especialidad para buscar en la
+                    <i class="fas fa-info-circle me-1"></i> Escribe el nombre de una asignatura para buscar en la
                     base de datos.
                 </div>
             </div>
@@ -47,8 +47,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="user in objetoList" :key="user.id_especialidad">
-                            <td class="ps-4 fw-bold text-secondary">{{ user.id_especialidad }}</td>
+                        <tr v-for="user in objetoList" :key="user.id_asignatura">
+                            <td class="ps-4 fw-bold text-secondary">{{ user.id_asignatura }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <span>{{ user.nombre }}</span>
@@ -76,17 +76,17 @@
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-light text-primary" data-bs-toggle="modal"
                                         data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
-                                        title="Editar detalles de esta especialidad">
+                                        title="Editar detalles de esta asignatura">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger"
-                                        @click="eliminar(user.id_especialidad, user.nombre)" v-if="user.estado == 1"
-                                        title="Inhabilitar esta especialidad (ocultarla del sistema)">
+                                        @click="eliminar(user.id_asignatura, user.nombre)" v-if="user.estado == 1"
+                                        title="Inhabilitar esta asignatura (ocultarla del sistema)">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success"
-                                        @click="habilitar(user.id_especialidad, user.nombre)" v-else
-                                        title="Habilitar esta especialidad nuevamente">
+                                        @click="habilitar(user.id_asignatura, user.nombre)" v-else
+                                        title="Habilitar esta asignatura nuevamente">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </div>
@@ -95,7 +95,7 @@
                         <tr v-if="objetoList.length === 0 && !cargando">
                             <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
-                                No se encontraron especialidades. ¡Haz clic en "Nuevo Registro" para empezar!
+                                No se encontraron asignaturas. ¡Haz clic en "Nuevo Registro" para empezar!
                             </td>
                         </tr>
                         <tr v-if="cargando">
@@ -111,7 +111,7 @@
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
                 <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                        }}</strong></span>
+                }}</strong></span>
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
@@ -142,7 +142,7 @@
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
                         <h5 class="modal-title fw-bold text-success"><i class="fas fa-plus-circle me-2"></i>Registrar
-                            nueva Especialidad</h5>
+                            nueva Asignatura</h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
@@ -153,9 +153,8 @@
                             <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
                             <div class="small text-dark">
                                 <strong>¿Qué hacer aquí?</strong><br>
-                                Registra una especialidad (ej. <em>"Básica" (para escuela)</em>, <em>Informática </em>,
-                                <em>Contabilidad</em>)
-
+                                Registra una asignatura (ej. <em>"Matemáticas" (para escuela)</em>, <em>Lenguaje </em>, <em>Física</em>)
+                                
                             </div>
                         </div>
 
@@ -164,16 +163,15 @@
                                 <div class="form-floating">
                                     <input v-model="objetoData.nombre" type="text" class="form-control"
                                         :class="{ 'is-invalid': errorsData.nombre }" id="crearNombre"
-                                        placeholder="Nombre de la Especialidad">
-                                    <label for="crearNombre">Nombre de la Especialidad</label>
-                                    <div class="invalid-feedback">Por favor, ingrese el nombre de la especialidad.
+                                        placeholder="Nombre de la Asignatura">
+                                    <label for="crearNombre">Nombre de la Asignatura</label>
+                                    <div class="invalid-feedback">Por favor, ingrese el nombre de la asignatura.
                                     </div>
                                 </div>
-                                <div class="form-text text-muted small ms-1">Debe ser un nombre corto y descriptivo. Ej:
-                                    Básica, Informática, Contabilidad...</div>
+                                <div class="form-text text-muted small ms-1">Debe ser un nombre corto y descriptivo. Ej: Matemáticas, Lenguaje, etc</div>
                             </div>
                             <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-save me-2"></i>Crear Especialidad
+                                <i class="fas fa-save me-2"></i>Crear Asignatura
                             </button>
                         </form>
                     </div>
@@ -185,8 +183,7 @@
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-edit me-2"></i>Editar Especialidad
-                        </h5>
+                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-edit me-2"></i>Editar Asignatura</h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
                     </div>
@@ -197,8 +194,8 @@
                             <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
                             <div class="small text-dark">
                                 <strong>Actualización de datos:</strong><br>
-                                Modifica la información de la especialidad. Ten en cuenta que si cambias el estado a
-                                <em>Inactivo</em>, las especialidades podrían perder acceso.
+                                Modifica la información de la asignatura. Ten en cuenta que si cambias el estado a
+                                <em>Inactivo</em>, las asignaturas podrían perder acceso.
                             </div>
                         </div>
 
@@ -206,9 +203,9 @@
                             <div class="form-floating mb-3">
                                 <input v-model="objetoEdit.nombre" type="text" class="form-control"
                                     :class="{ 'is-invalid': errorsEdit.nombre }" id="editNombre"
-                                    placeholder="Nombre de la Especialidad">
-                                <label for="editNombre">Nombre de la Especialidad</label>
-                                <div class="invalid-feedback">Por favor, ingrese el nombre de la especialidad.</div>
+                                    placeholder="Nombre de la Asignatura">
+                                <label for="editNombre">Nombre de la Asignatura</label>
+                                <div class="invalid-feedback">Por favor, ingrese el nombre de la asignatura.</div>
                             </div>
 
                             <div class="mb-4">
@@ -219,10 +216,10 @@
                                         <option value="1">Activo</option>
                                         <option value="0">Inactivo</option>
                                     </select>
-                                    <label for="editEstado">Estado actual de la Especialidad</label>
+                                    <label for="editEstado">Estado actual de la Asignatura</label>
                                     <div class="invalid-feedback">Seleccione un estado válido.</div>
                                 </div>
-                                <div class="form-text text-muted small ms-1">Especialidades inactivas no pueden ser
+                                <div class="form-text text-muted small ms-1">Asignaturas inactivas no pueden ser
                                     asignadas a nuevos usuarios.</div>
                             </div>
 
@@ -255,7 +252,7 @@ export default {
                 nombre: false,
             },
             objetoEdit: {
-                id_especialidad: 0,
+                id_asignatura: 0,
                 nombre: "",
                 estado: "",
             },
@@ -288,7 +285,7 @@ export default {
             }
             return pages;
         },
-
+        
     },
     watch: {
         // Escucha cambios en el input de búsqueda
@@ -300,17 +297,17 @@ export default {
                 this.getData();
             }, 500);
         },
-
+        
     },
     async mounted() {
         await this.getData();
     },
     methods: {
-
+       
         cargarDatosEdicion(user) {
             this.errorsEdit = { nombre: false, estado: false };
             this.objetoEdit = {
-                id_especialidad: user.id_especialidad,
+                id_asignatura: user.id_asignatura,
                 nombre: user.nombre,
                 estado: user.estado,
             };
@@ -328,7 +325,7 @@ export default {
             this.cargando = true;
             try {
                 // Enviamos 'page' y 'search_query' para aprovechar la paginación y filtros de Laravel
-                const response = await API.get(`${this.baseUrl}/especialidades`, {
+                const response = await API.get(`${this.baseUrl}/asignaturas`, {
                     params: {
                         page: this.currentPage,
                         search_query: this.busqueda
@@ -364,18 +361,18 @@ export default {
             }
 
             try {
-                const response = await API.post(`${this.baseUrl}/especialidades`, this.objetoData);
+                const response = await API.post(`${this.baseUrl}/asignaturas`, this.objetoData);
                 if (response) {
-                    mostraralertas2("Especialidad creada exitosamente", "success");
+                    mostraralertas2("Asignatura creada exitosamente", "success");
                     await this.getData();
                     this.limpiar();
                     document.getElementById('btnCloseModalCrear').click();
                 } else {
-                    mostraralertas2("Especialidad creada, pero se recibió una respuesta inesperada del servidor.", "error");
+                    mostraralertas2("Asignatura creada, pero se recibió una respuesta inesperada del servidor.", "error");
                 }
             } catch (error) {
-                console.error("❌ Error al crear especialidad:", error?.response?.data || error);
-                mostraralertas2("Error al crear especialidad. Por favor, inténtelo de nuevo.", "error");
+                console.error("❌ Error al crear asignatura:", error?.response?.data || error);
+                mostraralertas2("Error al crear asignatura. Por favor, inténtelo de nuevo.", "error");
             }
         },
 
@@ -393,27 +390,27 @@ export default {
             try {
                 const params = {
                     nombre: this.objetoEdit.nombre,
-                    id_especialidad: this.objetoEdit.id_especialidad,
+                    id_asignatura: this.objetoEdit.id_asignatura,
                     estado: this.objetoEdit.estado,
                 };
 
-                const response = await API.put(`${this.baseUrl}/especialidades/${this.objetoEdit.id_especialidad}`, params);
+                const response = await API.put(`${this.baseUrl}/asignaturas/${this.objetoEdit.id_asignatura}`, params);
                 if (response) {
-                    mostraralertas2("Especialidad actualizada exitosamente", "success");
+                    mostraralertas2("Asignatura actualizada exitosamente", "success");
                     await this.getData();
                     this.limpiar();
                     document.getElementById('btnCloseModalEditar').click();
                 } else {
-                    mostraralertas2("Especialidad actualizada, pero se recibió una respuesta inesperada.", "error");
+                    mostraralertas2("Asignatura actualizada, pero se recibió una respuesta inesperada.", "error");
                 }
             } catch (error) {
-                console.error("❌ Error al actualizar especialidad:", error?.response?.data || error);
-                mostraralertas2("Error al actualizar especialidad. Por favor, inténtelo de nuevo.", "error");
+                console.error("❌ Error al actualizar asignatura:", error?.response?.data || error);
+                mostraralertas2("Error al actualizar asignatura. Por favor, inténtelo de nuevo.", "error");
             }
         },
 
         limpiar() {
-            this.objetoEdit = { id_especialidad: 0, nombre: "", estado: "" };
+            this.objetoEdit = { id_asignatura: 0, nombre: "", estado: "" };
             this.objetoData = { nombre: "", estado: 1 };
             this.errorsData = { nombre: false, orden_jerarquia: false };
             this.errorsEdit = { nombre: false, orden_jerarquia: false, estado: false };
@@ -422,30 +419,30 @@ export default {
         async eliminar(id, nombre) {
             try {
                 await confimar(
-                    `${this.baseUrl}/ihabilitar_especialidad/`,
+                    `${this.baseUrl}/ihabilitar_asignatura/`,
                     id,
                     'Inhabilitar registro',
-                    '¿Realmente desea inhabilitar la especialidad ' + nombre + '?',
+                    '¿Realmente desea inhabilitar la asignatura ' + nombre + '?',
                     this.objetoList
                 );
                 setTimeout(() => { this.getData(); }, 1000);
             } catch (error) {
-                console.error("Error al inhabilitar la especialidad:", error);
+                console.error("Error al inhabilitar la asignatura:", error);
             }
         },
 
         async habilitar(id, nombre) {
             try {
                 await confimarhabi(
-                    `${this.baseUrl}/habilitar_especialidad/`,
+                    `${this.baseUrl}/habilitar_asignatura/`,
                     id,
                     'Habilitar registro',
-                    '¿Desea habilitar la especialidad ' + nombre + '?',
+                    '¿Desea habilitar la asignatura ' + nombre + '?',
                     this.objetoList
                 );
                 setTimeout(() => { this.getData(); }, 1000);
             } catch (error) {
-                console.error("Error al habilitar la especialidad:", error);
+                console.error("Error al habilitar la asignatura:", error);
             }
         }
     }

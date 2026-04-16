@@ -18,6 +18,7 @@ import PersonasView from '@/views/Mantenimiento/Personas/PersonasView.vue'
 import FamiliasView from '@/views/Mantenimiento/Familias/FamiliasView.vue'
 import Niveles_Academicos from '@/views/Mantenimiento/Nivel_Academico/Nivel_AcademicoView.vue'
 import EspecialidadesView from '@/views/Mantenimiento/Especialidades/EspecialidadesView.vue'
+import AsignaturasView from '@/views/Mantenimiento/Asignaturas/AsignaturasView.vue'
 
 
 const routes = [
@@ -128,6 +129,11 @@ const routes = [
     path: '/especialidades',
     name: 'especialidades',
     component: EspecialidadesView 
+  },
+  {
+    path: '/asignaturas',
+    name: 'asignaturas',
+    component: AsignaturasView
   }
 ]
 const router = createRouter({

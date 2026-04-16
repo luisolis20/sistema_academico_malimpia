@@ -8,6 +8,11 @@
                 <p class="text-muted">Administración de niveles académicos</p>
             </div>
             <div class="col-md-6 text-md-end">
+                <span class="badge bg-success-subtle text-success border border-success px-3">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    <span v-if="totaldata > 0">Total de Niveles Académicos: {{ totaldata }}</span>
+                    <span v-else>0</span>
+                </span>
                 <button class="btn btn-primary ms-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
                     <i class="fas fa-user-plus me-2"></i>Nuevo Registro
                 </button>
@@ -322,6 +327,7 @@ export default {
                 { value: '3ro Bachillerato', label: '3ro Bachillerato' },
                 { value: 'Graduado', label: 'Graduado' },
             ],
+            totaldata: 0,
         }
     },
     computed: {
@@ -433,6 +439,7 @@ export default {
 
                 this.currentPage = pagination.current_page || 1;
                 this.lastPage = pagination.last_page || 1;
+                this.totaldata = pagination.total || 0;
                 this.objetoList = data;
 
             } catch (error) {
