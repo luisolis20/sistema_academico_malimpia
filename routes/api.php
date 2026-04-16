@@ -7,6 +7,9 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\PersonaController; 
 use App\Http\Controllers\UserController; 
 use App\Http\Controllers\FamiliaController;
+use App\Http\Controllers\Niveles_academicosController;
+use App\Http\Controllers\EspecialidadesController;
+
 
 
 /*
@@ -54,6 +57,17 @@ Route::prefix('sistma')->group(function (){
     Route::apiResource('familia', FamiliaController::class);
     Route::get('familiar/{ci}', [FamiliaController::class, 'show']);
     Route::post('familia/asignar', [FamiliaController::class, 'store']);
+
+    //Definir las rutas para los niveles académicos, permitiendo crear, leer, actualizar niveles académicos
+    Route::apiResource('niveles_academicos', Niveles_academicosController::class);
+    //Definir endpoints para habilitar y deshabilitar niveles académicos
+    Route::delete('ihabilitar_nivel/{id}', [Niveles_academicosController::class, 'destroy']);
+    Route::delete('habilitar_nivel/{id}', [Niveles_academicosController::class, 'habilitar']);
+    //Definir las rutas para los especialidades, permitiendo crear, leer, actualizar especialidades
+    Route::apiResource('especialidades', EspecialidadesController::class);
+    //Definir endpoints para habilitar y deshabilitar especialidades
+    Route::delete('ihabilitar_especialidad/{id}', [EspecialidadesController::class, 'destroy']);
+    Route::delete('habilitar_especialidad/{id}', [EspecialidadesController::class, 'habilitar']);
     Route::middleware('auth:api')->group(function (){
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
