@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\Niveles_academicosController;
 use App\Http\Controllers\EspecialidadesController;
+use App\Http\Controllers\AsignaturasController;
 
 
 
@@ -68,6 +69,11 @@ Route::prefix('sistma')->group(function (){
     //Definir endpoints para habilitar y deshabilitar especialidades
     Route::delete('ihabilitar_especialidad/{id}', [EspecialidadesController::class, 'destroy']);
     Route::delete('habilitar_especialidad/{id}', [EspecialidadesController::class, 'habilitar']);
+    //Definir las rutas para los asignaturas, permitiendo crear, leer, actualizar asignaturas
+    Route::apiResource('asignaturas', AsignaturasController::class);
+    //Definir endpoints para habilitar y deshabilitar asignaturas
+    Route::delete('ihabilitar_asignatura/{id}', [AsignaturasController::class, 'destroy']);
+    Route::delete('habilitar_asignatura/{id}', [AsignaturasController::class, 'habilitar']);
     Route::middleware('auth:api')->group(function (){
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
