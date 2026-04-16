@@ -128,6 +128,16 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body bg-light">
+                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            role="alert">
+                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <div class="small text-dark">
+                                <strong>Guía de Registro:</strong><br>
+                                Ingresa la cédula del familiar que deseas asignar. Si el familiar ya existe en el sistema, 
+                                aparecerá su información para que puedas seleccionar el parentesco y añadirlo a la lista. 
+                                Puedes agregar varios familiares antes de guardar los cambios.
+                            </div>
+                        </div>
                         <div class="row mb-4 align-items-end">
                             <div class="col-md-8">
                                 <label class="fw-bold mb-1">Cédula del Familiar a buscar:</label>

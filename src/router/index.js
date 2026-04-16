@@ -16,6 +16,8 @@ import UsuarioView from '@/views/Mantenimiento/Usuarios/UsuarioView.vue'
 import RolesView from '@/views/Mantenimiento/Roles/RolesView.vue'
 import PersonasView from '@/views/Mantenimiento/Personas/PersonasView.vue'
 import FamiliasView from '@/views/Mantenimiento/Familias/FamiliasView.vue'
+import Niveles_Academicos from '@/views/Mantenimiento/Nivel_Academico/Nivel_AcademicoView.vue'
+import EspecialidadesView from '@/views/Mantenimiento/Especialidades/EspecialidadesView.vue'
 
 
 const routes = [
@@ -117,6 +119,16 @@ const routes = [
     name: 'familias',
     component: FamiliasView
   },
+  {
+    path: '/niveles-academicos',
+    name: 'niveles-academicos',
+    component: Niveles_Academicos
+  },
+  {
+    path: '/especialidades',
+    name: 'especialidades',
+    component: EspecialidadesView 
+  }
 ]
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
