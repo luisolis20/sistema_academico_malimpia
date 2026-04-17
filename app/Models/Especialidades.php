@@ -16,4 +16,7 @@ class Especialidades extends Model
         'nombre',
         'estado',
     ];
+    public function cursos(){
+        return $this->hasMany(Cursos::class, 'id_especialidad', 'id_especialidad');
+    }
 }

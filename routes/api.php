@@ -10,6 +10,8 @@ use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\Niveles_academicosController;
 use App\Http\Controllers\EspecialidadesController;
 use App\Http\Controllers\AsignaturasController;
+use App\Http\Controllers\Periodos_lectivosController;
+use App\Http\Controllers\CursosController;
 
 
 
@@ -61,11 +63,13 @@ Route::prefix('sistma')->group(function (){
 
     //Definir las rutas para los niveles académicos, permitiendo crear, leer, actualizar niveles académicos
     Route::apiResource('niveles_academicos', Niveles_academicosController::class);
+    Route::get('niveles_academicos_activos', [Niveles_academicosController::class, 'getActivados']);
     //Definir endpoints para habilitar y deshabilitar niveles académicos
     Route::delete('ihabilitar_nivel/{id}', [Niveles_academicosController::class, 'destroy']);
     Route::delete('habilitar_nivel/{id}', [Niveles_academicosController::class, 'habilitar']);
     //Definir las rutas para los especialidades, permitiendo crear, leer, actualizar especialidades
     Route::apiResource('especialidades', EspecialidadesController::class);
+    Route::get('especialidades_activos', [EspecialidadesController::class, 'getActivados']);
     //Definir endpoints para habilitar y deshabilitar especialidades
     Route::delete('ihabilitar_especialidad/{id}', [EspecialidadesController::class, 'destroy']);
     Route::delete('habilitar_especialidad/{id}', [EspecialidadesController::class, 'habilitar']);
@@ -74,6 +78,17 @@ Route::prefix('sistma')->group(function (){
     //Definir endpoints para habilitar y deshabilitar asignaturas
     Route::delete('ihabilitar_asignatura/{id}', [AsignaturasController::class, 'destroy']);
     Route::delete('habilitar_asignatura/{id}', [AsignaturasController::class, 'habilitar']);
+    //Definir las rutas para los periodos lectivos, permitiendo crear, leer, actualizar periodos lectivos
+    Route::apiResource('periodos_lectivos', Periodos_lectivosController::class);
+    Route::get('periodos_lectivos_activos', [Periodos_lectivosController::class, 'getActivados']);
+    //Definir endpoints para habilitar y deshabilitar periodos lectivos
+    Route::delete('ihabilitar_periodo_lectivo/{id}', [Periodos_lectivosController::class, 'destroy']);
+    Route::delete('habilitar_periodo_lectivo/{id}', [Periodos_lectivosController::class, 'habilitar']);
+    //Definir las rutas para los cursos, permitiendo crear, leer, actualizar cursos
+    Route::apiResource('cursos', CursosController::class);
+    //Definir endpoints para habilitar y deshabilitar cursos
+    Route::delete('ihabilitar_curso/{id}', [CursosController::class, 'destroy']);
+    Route::delete('habilitar_curso/{id}', [CursosController::class, 'habilitar']);
     Route::middleware('auth:api')->group(function (){
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);

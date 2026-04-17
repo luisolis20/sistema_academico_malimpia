@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Especialidades;
+use App\Models\Cursos;
+use App\Models\Personas;
 use Illuminate\Http\Request;
 
 
-class EspecialidadesController extends Controller
+class CursosController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,13 +22,41 @@ class EspecialidadesController extends Controller
             //Obtener la consulta de búsqueda
             $searchQuery = $request->input('search_query');
             //Crear la consulta base
-            $query = Especialidades::select('especialidades.*');
+            $query = Personas::select(
+                'personas.id_persona as personID',
+                'personas.cedula',
+                'personas.nombres',
+                'personas.apellidos',
+                'personas.foto',
+                'personas.sexo',
+                'personas.fecha_nacimiento',
+                'roles.id_rol as RoleID',
+                'roles.nombre as nombre_rol',
+                'cursos.id_curso as CursoID',
+                'cursos.paralelo',
+                'cursos.estado as estado_curso',
+                'cursos.created_at',
+                'cursos.updated_at',
+                'periodos_lectivos.id_periodo as PeriodoID',
+                'periodos_lectivos.nombre as nombre_periodo',
+                'niveles_academicos.id_nivel as NivelID',
+                'niveles_academicos.nombre as nombre_nivel',
+                'especialidades.id_especialidad as EspecialidadID',
+                'especialidades.nombre as nombre_especialidad',
+            )
+                ->join('usuarios', 'usuarios.id_persona', '=', 'personas.id_persona')
+                ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
+                ->leftJoin('cursos', 'cursos.id_docente_tutor', '=', 'personas.id_persona')
+                ->leftJoin('periodos_lectivos', 'periodos_lectivos.id_periodo', '=', 'cursos.id_periodo')
+                ->leftJoin('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
+                ->leftJoin('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
+                ->where('roles.nombre', 'LIKE', '%docente%');
             //Si hay una consulta de búsqueda, aplicarla a los campos relevantes
             if (! empty($searchQuery)) {
                 //Crear una consulta de búsqueda para cada campo relevante
                 $query->where(function ($q) use ($searchQuery) {
                     //Aplicar la consulta de búsqueda a cada campo relevante, en este caso, solo a nombre de nivel académico
-                    $q->where('especialidades.nombre', 'LIKE', "%{$searchQuery}%");
+                    $q->where('personas.cedula', 'LIKE', "%{$searchQuery}%");
                 });
             }
             //Obtener los datos paginados
@@ -40,10 +69,13 @@ class EspecialidadesController extends Controller
             $data->getCollection()->transform(function ($item) {
                 $attributes = $item->getAttributes();
                 foreach ($attributes as $key => $value) {
-                    if (is_string($value)) {
+                    if ($key === 'foto' && ! empty($value)) {
+                        $attributes[$key] = base64_encode($value);
+                    } elseif (is_string($value) && $key !== 'foto') {
                         $attributes[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
                     }
                 }
+
                 return $attributes;
             });
             //Devolver los datos paginados en formato JSON, incluyendo la información de paginación
@@ -61,7 +93,7 @@ class EspecialidadesController extends Controller
             return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
-   
+
     /**
      * Store a newly created resource in storage.
      */
@@ -69,8 +101,8 @@ class EspecialidadesController extends Controller
     {
         //Obtener los datos enviados por el formulario
         $inputs = $request->input();
-        //Crear el objeto Especialidades con los datos enviados
-        $res = Especialidades::create($inputs);
+        //Crear el objeto Cursos con los datos enviados
+        $res = Cursos::create($inputs);
         //Devolver los datos creados en formato JSON, incluyendo un mensaje de éxito
         return response()->json([
             'data' => $res,
@@ -82,8 +114,8 @@ class EspecialidadesController extends Controller
      */
     public function show(string $id)
     {
-        //Obtener el objeto Especialidades con el id proporcionado
-        $res = Especialidades::find($id);
+        //Obtener el objeto Cursos con el id proporcionado
+        $res = Cursos::find($id);
         //Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             return response()->json([
@@ -94,23 +126,8 @@ class EspecialidadesController extends Controller
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
-                'mensaje' => "La Especialidad con id: $id no Existe",
+                'mensaje' => "El Curso con id: $id no Existe",
             ]);
-        }
-    }
-    //Traer especialidades habilitadas
-    public function getActivados(Request $request){
-        try {
-            $especialidades = Especialidades::select('especialidades.*')
-                ->where('estado', 1)
-                ->get();
-
-            return response()->json([
-                'status' => true,
-                'data' => $especialidades,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
         }
     }
     /**
@@ -118,11 +135,15 @@ class EspecialidadesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //Obtener el objeto Especialidades con el id proporcionado
-        $res = Especialidades::find($id);
+        //Obtener el objeto Cursos con el id proporcionado
+        $res = Cursos::find($id);
         //Si el objeto existe, actualizar los datos enviados por el formulario y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
-            $res->nombre = $request->nombre;
+            $res->id_periodo = $request->id_periodo;
+            $res->id_nivel = $request->id_nivel;
+            $res->id_especialidad = $request->id_especialidad;
+            $res->paralelo = $request->paralelo;
+            $res->id_docente_tutor = $request->id_docente_tutor;
             $res->estado = $request->estado;
             //Guardar los cambios en la base de datos
             if ($res->save()) {
@@ -142,7 +163,7 @@ class EspecialidadesController extends Controller
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
-                'mensaje' => "La Especialidad con id: $id no Existe",
+                'mensaje' => "El Curso con id: $id no Existe",
             ]);
         }
     }
@@ -151,8 +172,8 @@ class EspecialidadesController extends Controller
      */
     public function destroy(string $id)
     {
-        //Obtener el objeto Especialidades con el id proporcionado
-        $res = Especialidades::find($id);
+        //Obtener el objeto Cursos con el id proporcionado
+        $res = Cursos::find($id);
         //Si el objeto existe, inhabilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             $res->estado = 0;
@@ -168,21 +189,21 @@ class EspecialidadesController extends Controller
                 //Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "La Especialidad no existe (puede que ya la haya eliminado)",
+                    'mensaje' => "El Curso no existe (puede que ya lo haya eliminado)",
                 ]);
             }
-        } else {     
+        } else {
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
-                'mensaje' => "La Especialidad con id: $id no Existe",
+                'mensaje' => "El Curso con id: $id no Existe",
             ]);
         }
     }
     public function habilitar(string $id)
     {
-        //Obtener el objeto Especialidades con el id proporcionado
-        $res = Especialidades::find($id);
+        //Obtener el objeto Cursos con el id proporcionado
+        $res = Cursos::find($id);
         //Si el objeto existe, habilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             $res->estado = 1;
@@ -198,14 +219,14 @@ class EspecialidadesController extends Controller
                 //Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "La Especialidad no existe (puede que ya la haya eliminado)",
+                    'mensaje' => "El Curso no existe (puede que ya lo haya eliminado)",
                 ]);
             }
         } else {
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
-                'mensaje' => "La Especialidad con id: $id no Existe",
+                'mensaje' => "El Curso con id: $id no Existe",
             ]);
         }
     }

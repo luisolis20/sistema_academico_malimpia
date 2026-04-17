@@ -17,4 +17,7 @@ class Niveles_academicos extends Model
         'orden_jerarquia',
         'estado',
     ];
+    public function cursos(){
+        return $this->hasMany(Cursos::class, 'id_nivel', 'id_nivel');
+    }
 }

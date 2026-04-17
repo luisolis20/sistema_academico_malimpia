@@ -98,6 +98,22 @@ class Niveles_academicosController extends Controller
             ]);
         }
     }
+    // Traer niveles académicos activos
+    public function getActivados()
+    {
+        try {
+            $niveles = Niveles_academicos::select('niveles_academicos.*')
+                ->where('estado', 1)
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $niveles,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+        }
+    }
     /**
      * Update the specified resource in storage.
      */
@@ -184,7 +200,7 @@ class Niveles_academicosController extends Controller
                 //Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "El rol no existe (puede que ya la haya eliminado)",
+                    'mensaje' => "El nivel académico no existe (puede que ya la haya eliminado)",
                 ]);
             }
         } else {

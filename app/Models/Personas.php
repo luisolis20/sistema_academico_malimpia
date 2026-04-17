@@ -34,4 +34,7 @@ class Personas extends Model
     public function familia2(){
         return $this->hasMany(Familia::class, 'id_estudiante');
     }
+    public function cursos(){
+        return $this->hasMany(Cursos::class, 'id_docente_tutor');
+    }
 }
