@@ -19,6 +19,8 @@ import FamiliasView from '@/views/Mantenimiento/Familias/FamiliasView.vue'
 import Niveles_Academicos from '@/views/Mantenimiento/Nivel_Academico/Nivel_AcademicoView.vue'
 import EspecialidadesView from '@/views/Mantenimiento/Especialidades/EspecialidadesView.vue'
 import AsignaturasView from '@/views/Mantenimiento/Asignaturas/AsignaturasView.vue'
+import Periodos_lectivosView from '@/views/Mantenimiento/Periodos_lectivos/Periodos_lectivosView.vue'
+import CursosView from '@/views/Mantenimiento/Cursos/CursosView.vue'
 
 
 const routes = [
@@ -134,7 +136,17 @@ const routes = [
     path: '/asignaturas',
     name: 'asignaturas',
     component: AsignaturasView
-  }
+  },
+  {
+    path: '/periodos-lectivos',
+    name: 'periodos-lectivos',
+    component: Periodos_lectivosView
+  },
+  {
+    path: '/cursos',
+    name: 'cursos',
+    component: CursosView
+  },
 ]
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

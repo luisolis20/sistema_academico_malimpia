@@ -1,20 +1,37 @@
 <template>
     <div class="container-fluid py-4">
-        <header class="row mb-4 align-items-center">
-            <div class="col-md-6">
-                <h2 class="fw-bold" style="color: var(--green-900); font-family: 'Fraunces';">
-                    Gestión de Niveles Académicos
-                </h2>
-                <p class="text-muted">Administración de niveles académicos</p>
+        <header
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+
+            <div class="mb-3 mb-md-0 d-flex align-items-center">
+                <div
+                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
+                    <i class="fas fa-layer-group fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                        Gestión de Niveles Académicos
+                    </h2>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                        Administración y estructuración de los niveles educativos
+                    </p>
+                </div>
             </div>
-            <div class="col-md-6 text-md-end">
-                <span class="badge bg-success-subtle text-success border border-success px-3">
+
+            <div class="d-flex align-items-center gap-3">
+                <div
+                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
                     <i class="fas fa-graduation-cap me-2"></i>
-                    <span v-if="totaldata > 0">Total de Niveles Académicos: {{ totaldata }}</span>
-                    <span v-else>0</span>
-                </span>
-                <button class="btn btn-primary ms-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
-                    <i class="fas fa-user-plus me-2"></i>Nuevo Registro
+                    <span class="fw-medium">
+                        Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
+                    </span>
+                </div>
+
+                <button
+                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
+                    data-bs-toggle="modal" data-bs-target="#modalUsuario">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    <span class="fw-bold fs-6">Nuevo Registro</span>
                 </button>
             </div>
         </header>
@@ -117,7 +134,7 @@
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
                 <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                }}</strong></span>
+                        }}</strong></span>
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
@@ -387,7 +404,7 @@ export default {
         obtenerSiguienteNivel(nombreIngresado) {
             // Si el input está vacío, devolvemos toda la lista
             if (!nombreIngresado || nombreIngresado.trim() === '') {
-                return this.jerarquiaList; 
+                return this.jerarquiaList;
             }
 
             const nombreStr = nombreIngresado.trim().toLowerCase();
@@ -399,11 +416,11 @@ export default {
             // Si encontró una coincidencia y no es el último elemento de la lista
             if (index >= 0 && index < this.jerarquiaList.length - 1) {
                 // Devolvemos estrictamente el SIGUIENTE elemento en un arreglo
-                return [this.jerarquiaList[index + 1]]; 
+                return [this.jerarquiaList[index + 1]];
             }
-            
+
             // Si escribe algo que no coincide con la jerarquía base (ej: "Maternal"), mostramos todo por defecto
-            return this.jerarquiaList; 
+            return this.jerarquiaList;
         },
         cargarDatosEdicion(user) {
             this.errorsEdit = { nombre: false, orden_jerarquia: false, estado: false };
@@ -553,3 +570,57 @@ export default {
     }
 }
 </script>
+<style scoped>
+/* Contenedor principal del header con un borde lateral sutil */
+.custom-header {
+    border-left: 5px solid #198754;
+    /* Cambia al color de tu var(--green-800) si lo prefieres */
+    transition: all 0.3s ease;
+}
+
+.custom-header:hover {
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
+}
+
+/* Animación del ícono principal cuando pasas el mouse por el header */
+.header-icon {
+    width: 55px;
+    height: 55px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-header:hover .header-icon {
+    transform: rotate(-10deg) scale(1.1);
+}
+
+/* Efecto hover interactivo para el contador (Badge) */
+.stat-badge {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.stat-badge:hover {
+    transform: translateY(-2px);
+    background-color: #198754 !important;
+    /* Verde success de Bootstrap */
+    color: white !important;
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+/* Efecto hover para el botón principal */
+.interactive-btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Opcional: puedes ponerle un gradiente en lugar de un color plano */
+    /* background: linear-gradient(135deg, #198754, #20c997); */
+    /* border: none; */
+}
+
+.interactive-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
+}
+
+.interactive-btn:active {
+    transform: translateY(1px);
+}
+</style>

@@ -1,11 +1,21 @@
 <template>
     <div class="container-fluid py-4">
-        <header class="row mb-4 align-items-center">
-            <div class="col-md-6">
-                <h2 class="fw-bold" style="color: var(--green-900); font-family: 'Fraunces';">
-                    Gestión Global de Familias
-                </h2>
-                <p class="text-muted">Administración de familias y sus miembros.</p>
+        <header
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+
+            <div class="mb-3 mb-md-0 d-flex align-items-center">
+                <div
+                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
+                    <i class="fas fa-users-cog fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                        Gestión de Familias
+                    </h2>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                        Administración y control de las familias asignadas a los representantes.
+                    </p>
+                </div>
             </div>
         </header>
 
@@ -446,6 +456,51 @@ export default {
 </script>
 
 <style scoped>
+/* Contenedor principal del header con un borde lateral sutil */
+.custom-header {
+    border-left: 5px solid #198754; /* Cambia al color de tu var(--green-800) si lo prefieres */
+    transition: all 0.3s ease;
+}
+.custom-header:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+}
+
+/* Animación del ícono principal cuando pasas el mouse por el header */
+.header-icon {
+    width: 55px; 
+    height: 55px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.custom-header:hover .header-icon {
+    transform: rotate(-10deg) scale(1.1);
+}
+
+/* Efecto hover interactivo para el contador (Badge) */
+.stat-badge {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+.stat-badge:hover {
+    transform: translateY(-2px);
+    background-color: #198754 !important; /* Verde success de Bootstrap */
+    color: white !important;
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+/* Efecto hover para el botón principal */
+.interactive-btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Opcional: puedes ponerle un gradiente en lugar de un color plano */
+    /* background: linear-gradient(135deg, #198754, #20c997); */
+    /* border: none; */
+}
+.interactive-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
+}
+.interactive-btn:active {
+    transform: translateY(1px);
+}
 /* Transiciones de la tabla e interacciones */
 .avatar-sm img, .avatar-xl img {
     transition: transform 0.3s ease;

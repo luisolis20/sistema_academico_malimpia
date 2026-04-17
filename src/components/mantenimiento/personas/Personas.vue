@@ -1,21 +1,37 @@
 <template>
     <div class="container-fluid py-4">
-        <header class="row mb-4 align-items-center">
-            <div class="col-md-6">
-                <h2 class="fw-bold" style="color: var(--green-900); font-family: 'Fraunces';">
-                    Gestión de Personas
-                </h2>
-                <p class="text-muted">Administración de personas registradas en el sistema.</p>
+    <header
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+
+            <div class="mb-3 mb-md-0 d-flex align-items-center">
+                <div
+                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
+                    <i class="fas fa-users fs-4"></i>
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                        Gestión de Personas
+                    </h2>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                        Administración de personas registradas en el sistema.
+                    </p>
+                </div>
             </div>
-            <div class="col-md-6 text-md-end">
-                <span class="badge bg-success-subtle text-success border border-success px-3">
-                    <i class="fas fa-users me-2"></i>
-                    <span v-if="totalPersonas > 0">Total de personas: {{ totalPersonas }}</span>
-                    <span v-else>0</span>
-                </span>
-                <button class="btn btn-primary ms-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario"
-                    @click="limpiar">
-                    <i class="fas fa-user-plus me-2"></i>Nuevo Registro
+
+            <div class="d-flex align-items-center gap-3">
+                <div
+                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
+                    <i class="fas fa-users me-2 me-2"></i>
+                    <span class="fw-medium">
+                        Total: <span v-if="totalPersonas > 0">{{ totalPersonas }}</span><span v-else>0</span>
+                    </span>
+                </div>
+
+                <button
+                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
+                    data-bs-toggle="modal" data-bs-target="#modalUsuario" @click="limpiar"> 
+                    <i class="fas fa-plus-circle me-2"></i>
+                    <span class="fw-bold fs-6">Nuevo Registro</span>
                 </button>
             </div>
         </header>
@@ -959,5 +975,50 @@ table tbody tr:hover .avatar-sm img {
 .form-select:focus {
     box-shadow: none;
     border-color: var(--bs-primary);
+}
+/* Contenedor principal del header con un borde lateral sutil */
+.custom-header {
+    border-left: 5px solid #198754; /* Cambia al color de tu var(--green-800) si lo prefieres */
+    transition: all 0.3s ease;
+}
+.custom-header:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+}
+
+/* Animación del ícono principal cuando pasas el mouse por el header */
+.header-icon {
+    width: 55px; 
+    height: 55px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.custom-header:hover .header-icon {
+    transform: rotate(-10deg) scale(1.1);
+}
+
+/* Efecto hover interactivo para el contador (Badge) */
+.stat-badge {
+    transition: all 0.3s ease;
+    cursor: default;
+}
+.stat-badge:hover {
+    transform: translateY(-2px);
+    background-color: #198754 !important; /* Verde success de Bootstrap */
+    color: white !important;
+    box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+}
+
+/* Efecto hover para el botón principal */
+.interactive-btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Opcional: puedes ponerle un gradiente en lugar de un color plano */
+    /* background: linear-gradient(135deg, #198754, #20c997); */
+    /* border: none; */
+}
+.interactive-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
+}
+.interactive-btn:active {
+    transform: translateY(1px);
 }
 </style>
