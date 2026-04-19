@@ -21,6 +21,7 @@ import EspecialidadesView from '@/views/Mantenimiento/Especialidades/Especialida
 import AsignaturasView from '@/views/Mantenimiento/Asignaturas/AsignaturasView.vue'
 import Periodos_lectivosView from '@/views/Mantenimiento/Periodos_lectivos/Periodos_lectivosView.vue'
 import CursosView from '@/views/Mantenimiento/Cursos/CursosView.vue'
+import Cursos_AsignaturasView from '@/views/Mantenimiento/Cursos_Asignaturas/Cursos_AsignaturasView.vue'
 
 
 const routes = [
@@ -146,6 +147,11 @@ const routes = [
     path: '/cursos',
     name: 'cursos',
     component: CursosView
+  },
+  {
+    path: '/cursos-asignaturas',
+    name: 'cursos-asignaturas',
+    component: Cursos_AsignaturasView
   },
 ]
 const router = createRouter({

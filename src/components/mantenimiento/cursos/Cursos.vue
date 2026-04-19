@@ -17,6 +17,15 @@
                     </p>
                 </div>
             </div>
+            <div class="d-flex align-items-center gap-3">
+                <div
+                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
+                    <i class="fas fa-book me-2"></i>
+                    <span class="fw-medium">
+                        Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
+                    </span>
+                </div>
+            </div>
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -88,7 +97,8 @@
                                 </span>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
-                            <td v-if="user.paralelo"><span class="badge bg-light text-dark border">{{ user.nombre_periodo }}
+                            <td v-if="user.paralelo"><span class="badge bg-light text-dark border">{{
+                                user.nombre_periodo }}
                                 </span>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
@@ -120,15 +130,19 @@
                                         title="Editar el curso asignado">
                                         <i class="fas fa-user-edit"></i> Editar
                                     </button>
+                                    <button class="btn btn-sm btn-light text-warning border shadow-sm ms-1"
+                                        @click="quitarDocente(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)" v-if="user.CursoID"
+                                        title="Quitar docente de este curso">
+                                        <i class="fas fa-user-minus"></i> Quitar Docente
+                                    </button>
                                     <button class="btn btn-sm btn-light text-danger"
-                                        @click="eliminar(user.CursoID, user.nombres + ' ' + user.apellidos)"
+                                        @click="eliminar(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)"
                                         v-if="user.estado_curso == 1 && user.CursoID" title="Inhabilitar este curso">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success"
-                                        @click="habilitar(user.CursoID, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado_curso == 0 && user.CursoID"
-                                        title="Habilitar este curso">
+                                        @click="habilitar(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)"
+                                        v-if="user.estado_curso == 0 && user.CursoID" title="Habilitar este curso">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 </div>
@@ -416,7 +430,7 @@
 
 <script>
 import API from "@/assets/js/axios";
-import { confimar, confimarhabi, mostraralertas2, confimarreseteo } from "@/assets/js/funciones/functions";
+import { confimar, confimarhabi, mostraralertas2, confimardesasignar } from "@/assets/js/funciones/functions";
 import * as bootstrap from 'bootstrap';
 
 export default {
@@ -453,13 +467,7 @@ export default {
                 id_docente_tutor: "",
                 estado: "",
             },
-
-            // Variables para registro masivo
-            procesandoMasivo: false,
-            progresoMasivo: 0,
-            erroresMasivos: [],
-            totalPendientesMasivo: [],
-            totalPendientesMasivoMayores20: [],
+            totaldata: 0,
         }
     },
     computed: {
@@ -560,18 +568,26 @@ export default {
                     id_docente_tutor: this.objetoData.id_docente_tutor,
                     estado: 1,
                 };
+
                 // LLamada al endpoint individual
                 const response = await API.post(`${this.baseUrl}/cursos`, params);
+
+                // Si la petición es exitosa (código 200)
                 if (response) {
                     mostraralertas2("Curso asignado exitosamente", "success");
                     await this.getData();
                     this.limpiar();
                     document.getElementById('btnCloseModalCrear').click();
-                } else {
-                    mostraralertas2("Curso asignado, pero se recibió una respuesta inesperada del servidor.", "error");
                 }
             } catch (error) {
-                mostraralertas2("Error al crear curso", "error");
+                // Interceptar la respuesta 422 del backend y mostrar nuestro mensaje personalizado
+                if (error.response && error.response.status === 422) {
+                    // El icono "warning" o "info" suele quedar mejor para advertencias de duplicidad
+                    mostraralertas2(error.response.data.mensaje, "warning");
+                } else {
+                    // Para errores 500 u otros problemas de servidor
+                    mostraralertas2("Error al intentar asignar el curso. Intente nuevamente.", "error");
+                }
             }
         },
         async limpiar() {
@@ -591,17 +607,22 @@ export default {
                     estado: this.objetoEdit.estado,
                 });
 
+                // Si la petición es exitosa (código 200)
                 if (response) {
-                    mostraralertas2(" Curso actualizado correctamente", "success");
+                    mostraralertas2("Curso actualizado correctamente", "success");
                     await this.getData();
                     this.limpiar();
                     document.getElementById('btnCloseModalEditar').click();
-                } else {
-                    mostraralertas2("Curso actualizado, pero se recibió una respuesta inesperada.", "error");
                 }
             } catch (error) {
-                mostraralertas2("Error al actualizar el curso", "error");
-                console.error(error);
+                // Interceptar la respuesta 422 del backend (Duplicado)
+                if (error.response && error.response.status === 422) {
+                    mostraralertas2(error.response.data.mensaje, "warning");
+                } else {
+                    // Error genérico (500, 404, etc.)
+                    mostraralertas2("Error al actualizar el curso. Verifique la consola.", "error");
+                    console.error(error);
+                }
             }
         },
 
@@ -650,7 +671,7 @@ export default {
 
                 this.currentPage = pagination.current_page || 1;
                 this.lastPage = pagination.last_page || 1;
-                this.totalPersonas = pagination.total || 0;
+                this.totaldata = pagination.total || 0;
                 this.objetoList = data;
             } catch (error) {
                 this.objetoList = [];
@@ -666,7 +687,7 @@ export default {
                     `${this.baseUrl}/ihabilitar_curso/`,
                     id,
                     'Inhabilitar registro',
-                    '¿Realmente desea inhabilitar a ' + nombre + '?',
+                    '¿Realmente desea inhabilitar el curso ' + nombre + '?',
                     this.objetoList
                 );
                 setTimeout(() => { this.getData(); }, 1000);
@@ -681,12 +702,26 @@ export default {
                     `${this.baseUrl}/habilitar_curso/`,
                     id,
                     'Habilitar registro',
-                    '¿Desea habilitar a ' + nombre + '?',
+                    '¿Desea habilitar el curso ' + nombre + '?',
                     this.objetoList
                 );
                 setTimeout(() => { this.getData(); }, 1000);
             } catch (error) {
                 console.error("Error al habilitar:", error);
+            }
+        },
+        async quitarDocente(id_curso, nombre) {
+            try {
+                await confimardesasignar(
+                    `${this.baseUrl}/desasignar_docente_curso/`,
+                    id_curso,
+                    'Desasignar docente',
+                    '¿Desea desasignar al docente del curso ' + nombre + '?',
+                    this.objetoList
+                );
+                setTimeout(() => { this.getData(); }, 1000);
+            } catch (error) {
+                console.error("Error al desasignar:", error);
             }
         }
     }

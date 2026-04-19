@@ -21,6 +21,43 @@ export function mostraralertas2(titulo,icono){
         buttonsStyling:false
     });
 }
+export function confimardesasignar(urlconslash, id, titulo, mensaje, actualizarTabla) {
+    var url = urlconslash + id;   // 👈 Se construye la URL con el ID
+
+    const swalwithboostrapbutton = Swal.mixin({
+        customClass: {
+            confirmButton: 'btn btn-success me-3',
+            cancelButton: 'btn btn-danger'
+        },
+    });
+
+    return swalwithboostrapbutton.fire({
+        title: titulo,
+        text: mensaje,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-check"></i> Si, Desasignar',
+        cancelButtonText: '<i class="fa-solid fa-ban"></i> Cancelar'
+    }).then((res) => {
+        if (res.isConfirmed) {
+            return API.delete(url)   // 👈 Ya NO mandamos { data: { id } }
+                .then((response) => {
+                    mostraralertas(response.data.mensaje ?? 'Desasignado con éxito', 'success');
+                    if (typeof objetoListFiltrados === "function") {
+                        objetoListFiltrados(); // 🔄 refrescar tabla
+                    }
+                    return response.data;
+                })
+                .catch(() => {
+                    mostraralertas('Error al desasignar', 'error');
+                    throw new Error('Error al desasignar');
+                });
+        } else {
+            mostraralertas('Operación cancelada', 'info');
+            return null;
+        }
+    });
+}
 export function confimarhabi(urlconslash, id, titulo, mensaje, actualizarTabla) {
     var url = urlconslash + id;   // 👈 Se construye la URL con el ID
 
