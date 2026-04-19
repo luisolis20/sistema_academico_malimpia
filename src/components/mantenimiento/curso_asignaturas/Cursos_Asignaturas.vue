@@ -436,7 +436,6 @@ export default {
                 tutor_especialidad: user.tutor_especialidad,
                 tutor_paralelo: user.tutor_paralelo
             };
-            console.log("Docente seleccionado para asignación:", this.personaSeleccionada);
             this.limpiarModalAsignacion();
             await this.GetCursos();
             await this.GetAsignaturas();
@@ -578,8 +577,7 @@ export default {
                 const payload = {
                     id_docente: this.personaSeleccionada.id_docente,
                     asignaciones: this.asignacionesResumen.map(item => ({
-                        curso_id: item.curso_id,
-                        // Ahora enviamos un objeto con id y horas por cada asignatura
+                        id_curso: item.curso_id || item.id_curso,
                         asignaturas: item.asignaturas.map(a => ({
                             id_asignatura: a.id_asignatura,
                             horas_semanales: a.horas_semanales
@@ -588,8 +586,8 @@ export default {
                 };
 
                 const url = this.modoModal === 'crear'
-                    ? `${this.baseUrl}/curso_asignaturas`
-                    : `${this.baseUrl}/curso_asignaturas/actualizar_lote`;
+                    ? `${this.baseUrl}/curso_asignaturas_lote/crear`
+                    : `${this.baseUrl}/curso_asignaturas_lote/actualizar`;
 
                 const response = this.modoModal === 'crear'
                     ? await API.post(url, payload)
@@ -601,7 +599,37 @@ export default {
                     await this.getData();
                 }
             } catch (error) {
-                mostraralertas2(error.response?.data?.mensaje || "Error al procesar la solicitud", "error");
+                // --- AQUÍ ATRAPAMOS EL CONFLICTO 409 ---
+                if (error.response && error.response.status === 409 && error.response.data.conflictos) {
+
+                    let listaErrores = "Ya hay otro docente impartiendo:\n\n";
+
+                    // Recorremos los conflictos devueltos por el backend
+                    error.response.data.conflictos.forEach(conflicto => {
+
+                        // Buscamos el nombre del curso en nuestro resumen
+                        let curso = this.asignacionesResumen.find(c => (c.curso_id || c.id_curso) == conflicto.id_curso);
+                        let nombreCurso = curso ? curso.curso_nombre : `Curso ${conflicto.id_curso}`;
+
+                        // Buscamos el nombre de la asignatura en nuestro resumen
+                        let nombreAsig = `Asignatura ${conflicto.id_asignatura}`;
+                        if (curso) {
+                            let asig = curso.asignaturas.find(a => a.id_asignatura == conflicto.id_asignatura);
+                            if (asig) {
+                                nombreAsig = asig.nombre;
+                            }
+                        }
+
+                        listaErrores += `• ${nombreAsig} en ${nombreCurso}\n`;
+                    });
+
+                    // Mostramos la alerta con el detalle exacto
+                    mostraralertas2(listaErrores, "error");
+
+                } else {
+                    // Manejo de errores generales (500, etc)
+                    mostraralertas2(error.response?.data?.mensaje || "Error al procesar la solicitud", "error");
+                }
             }
         },
         async GetCursos() {
