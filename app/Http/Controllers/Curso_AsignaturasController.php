@@ -109,50 +109,84 @@ class Curso_AsignaturasController extends Controller
         ]);
 
         $id_docente = $request->id_docente;
-        // Asume que obtienes el periodo activo de alguna forma, ej: un helper o tabla
-        $id_periodo_activo = 1;
 
+        // --- 1. VALIDACIÓN DE CONFLICTOS ---
+        $conflictos = [];
+
+        foreach ($request->asignaciones as $asignacion) {
+            $curso_id = $asignacion['curso_id'] ?? $asignacion['id_curso'];
+
+            foreach ($asignacion['asignaturas'] as $asig_data) {
+                $id_asignatura = $asig_data['id_asignatura'];
+
+                // Buscamos si ya existe la combinación curso-asignatura con OTRO docente
+                $existe = DB::table('curso_asignatura')
+                    ->where('id_curso', $curso_id)
+                    ->where('id_asignatura', $id_asignatura)
+                    ->where('id_docente', '!=', $id_docente)
+                    ->exists();
+
+                if ($existe) {
+                    // Si existe, guardamos los IDs conflictivos
+                    $conflictos[] = [
+                        'id_curso' => $curso_id,
+                        'id_asignatura' => $id_asignatura
+                    ];
+                }
+            }
+        }
+
+        // Si encontramos al menos un conflicto, abortamos y avisamos al frontend
+        if (!empty($conflictos)) {
+            return response()->json([
+                'status' => false,
+                'conflictos' => $conflictos,
+                'mensaje' => 'Conflicto de asignación detectado.'
+            ], 409); // Código HTTP 409: Conflict
+        }
+        // --- FIN DE VALIDACIÓN ---
+
+
+        // 2. PROCESO NORMAL DE GUARDADO
         DB::beginTransaction();
         try {
-            // Si es actualización, limpiamos las materias actuales del docente en el periodo activo
-            // Esto es mucho más fácil que verificar una por una cuál quitó o añadió.
-            Curso_Asignaturas::where('id_docente', $id_docente)
+            DB::table('curso_asignatura')
+                ->where('id_docente', $id_docente)
                 ->delete();
 
             $nuevasAsignaciones = [];
 
-            // Recorremos el payload que mandó Vue
             foreach ($request->asignaciones as $asignacion) {
-                $curso_id = $asignacion['curso_id'];
+                $curso_id = $asignacion['curso_id'] ?? $asignacion['id_curso'];
 
                 foreach ($asignacion['asignaturas'] as $asig_data) {
                     $nuevasAsignaciones[] = [
                         'id_curso'        => $curso_id,
                         'id_asignatura'   => $asig_data['id_asignatura'],
-                        'horas_semanales' => $asig_data['horas_semanales'], // Guardamos el valor
                         'id_docente'      => $id_docente,
+                        'horas_semanales' => $asig_data['horas_semanales'],
+                        'estado'          => 1,
                         'created_at'      => now(),
                         'updated_at'      => now()
                     ];
                 }
             }
 
-            // Inserción en bloque para máxima eficiencia
             if (!empty($nuevasAsignaciones)) {
-                Curso_Asignaturas::insert($nuevasAsignaciones);
+                DB::table('curso_asignatura')->insert($nuevasAsignaciones);
             }
 
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'mensaje' => 'Asignaturas gestionadas exitosamente.'
+                'mensaje' => 'Asignaturas actualizadas exitosamente.'
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'mensaje' => 'Error al guardar en la base de datos: ' . $e->getMessage()
+                'mensaje' => 'Error SQL: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -100,8 +100,8 @@ Route::prefix('sistma')->group(function () {
     Route::delete('habilitar_curso_asignatura/{id}', [Curso_AsignaturasController::class, 'habilitar']);
     Route::delete('desasignar_docente_curso_asignatura/{id}', [Curso_AsignaturasController::class, 'desasignarDocente']);
     Route::get('curso_asignaturas/docente/{id}', [Curso_AsignaturasController::class, 'getPorDocente']);
-    Route::post('curso_asignaturas', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
-    Route::put('curso_asignaturas/actualizar_lote', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
+    Route::post('curso_asignaturas_lote/crear', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
+    Route::put('curso_asignaturas_lote/actualizar', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);
