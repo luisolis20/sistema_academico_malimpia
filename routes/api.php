@@ -3,16 +3,16 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\RolController; 
-use App\Http\Controllers\PersonaController; 
-use App\Http\Controllers\UserController; 
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\FamiliaController;
 use App\Http\Controllers\Niveles_academicosController;
 use App\Http\Controllers\EspecialidadesController;
 use App\Http\Controllers\AsignaturasController;
 use App\Http\Controllers\Periodos_lectivosController;
 use App\Http\Controllers\CursosController;
-
+use App\Http\Controllers\Curso_AsignaturasController;
 
 
 /*
@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 //Definir las rutas para el sistema
-Route::prefix('sistma')->group(function (){
+Route::prefix('sistma')->group(function () {
     //Definir las rutas para la autenticación
     Route::post('/login', [AuthController::class, 'login']);
     //Definir las rutas para los roles, permitiendo crear, leer, actualizar roles
@@ -45,7 +45,7 @@ Route::prefix('sistma')->group(function (){
     //Definir endpoints para habilitar y deshabilitar personas
     Route::delete('ihabilitar_persona/{id}', [PersonaController::class, 'destroy']);
     Route::delete('habilitar_persona/{id}', [PersonaController::class, 'habilitar']);
-    Route::apiResource('usuarios', UserController::class);   
+    Route::apiResource('usuarios', UserController::class);
     //Definir endpoints para habilitar y deshabilitar usuarios
     Route::delete('ihabilitar_usuario/{id}', [UserController::class, 'destroy']);
     Route::delete('habilitar_usuario/{id}', [UserController::class, 'habilitar']);
@@ -75,6 +75,7 @@ Route::prefix('sistma')->group(function (){
     Route::delete('habilitar_especialidad/{id}', [EspecialidadesController::class, 'habilitar']);
     //Definir las rutas para los asignaturas, permitiendo crear, leer, actualizar asignaturas
     Route::apiResource('asignaturas', AsignaturasController::class);
+    Route::get('asignaturas_activos', [AsignaturasController::class, 'getActivados']);
     //Definir endpoints para habilitar y deshabilitar asignaturas
     Route::delete('ihabilitar_asignatura/{id}', [AsignaturasController::class, 'destroy']);
     Route::delete('habilitar_asignatura/{id}', [AsignaturasController::class, 'habilitar']);
@@ -86,13 +87,25 @@ Route::prefix('sistma')->group(function (){
     Route::delete('habilitar_periodo_lectivo/{id}', [Periodos_lectivosController::class, 'habilitar']);
     //Definir las rutas para los cursos, permitiendo crear, leer, actualizar cursos
     Route::apiResource('cursos', CursosController::class);
+    Route::get('cursos_activos', [CursosController::class, 'getActivados']);
+    Route::get('cursos_docente/{id}', [CursosController::class, 'getCursosDocente']);
     //Definir endpoints para habilitar y deshabilitar cursos
     Route::delete('ihabilitar_curso/{id}', [CursosController::class, 'destroy']);
     Route::delete('habilitar_curso/{id}', [CursosController::class, 'habilitar']);
-    Route::middleware('auth:api')->group(function (){
+    Route::delete('desasignar_docente_curso/{id}', [CursosController::class, 'desasignarDocente']);
+    //Definir las rutas para los curso_asignaturas, permitiendo crear, leer, actualizar curso_asignaturas
+    Route::apiResource('curso_asignaturas', Curso_AsignaturasController::class);
+    //Definir endpoints para habilitar y deshabilitar curso_asignaturas
+    Route::delete('ihabilitar_curso_asignatura/{id}', [Curso_AsignaturasController::class, 'destroy']);
+    Route::delete('habilitar_curso_asignatura/{id}', [Curso_AsignaturasController::class, 'habilitar']);
+    Route::delete('desasignar_docente_curso_asignatura/{id}', [Curso_AsignaturasController::class, 'desasignarDocente']);
+    Route::get('curso_asignaturas/docente/{id}', [Curso_AsignaturasController::class, 'getPorDocente']);
+    Route::post('curso_asignaturas', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
+    Route::put('curso_asignaturas/actualizar_lote', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
+
+    Route::middleware('auth:api')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/me', [AuthController::class, 'me']);
-        
     });
 });

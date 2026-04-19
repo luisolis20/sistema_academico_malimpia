@@ -6,7 +6,6 @@ use App\Models\Cursos;
 use App\Models\Personas;
 use Illuminate\Http\Request;
 
-
 class CursosController extends Controller
 {
     /**
@@ -15,13 +14,13 @@ class CursosController extends Controller
     public function index(Request $request)
     {
         try {
-            //Definir el número de elementos por página, con un máximo de 50
+            // Definir el número de elementos por página, con un máximo de 50
             $perPage = $request->input('per_page', 10);
-            //Limitar el número de elementos por página a 20
+            // Limitar el número de elementos por página a 20
             $perPage = min($perPage, 20);
-            //Obtener la consulta de búsqueda
+            // Obtener la consulta de búsqueda
             $searchQuery = $request->input('search_query');
-            //Crear la consulta base
+            // Crear la consulta base
             $query = Personas::select(
                 'personas.id_persona as personID',
                 'personas.cedula',
@@ -51,21 +50,21 @@ class CursosController extends Controller
                 ->leftJoin('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
                 ->leftJoin('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
                 ->where('roles.nombre', 'LIKE', '%docente%');
-            //Si hay una consulta de búsqueda, aplicarla a los campos relevantes
+            // Si hay una consulta de búsqueda, aplicarla a los campos relevantes
             if (! empty($searchQuery)) {
-                //Crear una consulta de búsqueda para cada campo relevante
+                // Crear una consulta de búsqueda para cada campo relevante
                 $query->where(function ($q) use ($searchQuery) {
-                    //Aplicar la consulta de búsqueda a cada campo relevante, en este caso, solo a nombre de nivel académico
+                    // Aplicar la consulta de búsqueda a cada campo relevante, en este caso, solo a nombre de nivel académico
                     $q->where('personas.cedula', 'LIKE', "%{$searchQuery}%");
                 });
             }
-            //Obtener los datos paginados
+            // Obtener los datos paginados
             $data = $query->paginate($perPage);
-            //Si no hay datos, devolver un mensaje de error
+            // Si no hay datos, devolver un mensaje de error
             if ($data->isEmpty()) {
                 return response()->json(['data' => [], 'message' => 'No se encontraron datos'], 200);
             }
-            //Transformar los datos a UTF-8 para evitar problemas de codificación al convertir a JSON
+            // Transformar los datos a UTF-8 para evitar problemas de codificación al convertir a JSON
             $data->getCollection()->transform(function ($item) {
                 $attributes = $item->getAttributes();
                 foreach ($attributes as $key => $value) {
@@ -78,7 +77,8 @@ class CursosController extends Controller
 
                 return $attributes;
             });
-            //Devolver los datos paginados en formato JSON, incluyendo la información de paginación
+
+            // Devolver los datos paginados en formato JSON, incluyendo la información de paginación
             return response()->json([
                 'data' => $data->items(),
                 'pagination' => [
@@ -93,141 +93,273 @@ class CursosController extends Controller
             return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
-
+    //Traer cursos habilitados
+    public function getActivados(){
+        try {
+            $cursos = Cursos::select('cursos.*','niveles_academicos.id_nivel as NivelID',
+                'niveles_academicos.nombre as nombre_nivel',
+                'especialidades.id_especialidad as EspecialidadID',
+                'especialidades.nombre as nombre_especialidad',)
+                ->join('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
+                ->join('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
+                ->where('cursos.estado', 1)
+                ->get();    
+            return response()->json([
+                'status' => true,
+                'data' => $cursos,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+        }
+    }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        //Obtener los datos enviados por el formulario
+        // Obtener los datos enviados por el formulario
         $inputs = $request->input();
-        //Crear el objeto Cursos con los datos enviados
+
+        // 1. Buscar si ya existe un curso activo con esos datos
+        $cursoExistente = Cursos::where('id_periodo', $inputs['id_periodo'])
+            ->where('id_nivel', $inputs['id_nivel'])
+            ->where('id_especialidad', $inputs['id_especialidad'])
+            ->where('paralelo', $inputs['paralelo'])
+            ->where('estado', 1) // Validamos solo los que estén activos
+            ->first(); // Traemos el registro, no solo verificamos si existe
+
+        // 2. Si el curso ya existe, verificamos si tiene docente
+        if ($cursoExistente) {
+            if (!is_null($cursoExistente->id_docente_tutor)) {
+                // Si NO es null, significa que ya hay alguien asignado
+                return response()->json([
+                    'error' => true,
+                    'mensaje' => 'Ya existe un docente tutor asignado a este curso',
+                ], 422);
+            } else {
+                // Si ES null, significa que lo desasignaron antes. 
+                // Reutilizamos el registro actualizándole el nuevo docente.
+                $cursoExistente->id_docente_tutor = $inputs['id_docente_tutor'];
+                $cursoExistente->save();
+
+                return response()->json([
+                    'error' => false,
+                    'data' => $cursoExistente,
+                    'mensaje' => 'Agregado con Éxito!!', // Docente asignado al curso huérfano
+                ], 200);
+            }
+        }
+
+        // 3. Si no existe ningún registro previo, crear el objeto Cursos desde cero
         $res = Cursos::create($inputs);
-        //Devolver los datos creados en formato JSON, incluyendo un mensaje de éxito
+
+        // Devolver los datos creados en formato JSON
         return response()->json([
+            'error' => false,
             'data' => $res,
-            'mensaje' => "Agregado con Éxito!!",
-        ]);
+            'mensaje' => 'Agregado con Éxito!!',
+        ], 200);
     }
+
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //Obtener el objeto Cursos con el id proporcionado
+        // Obtener el objeto Cursos con el id proporcionado
         $res = Cursos::find($id);
-        //Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
+        // Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             return response()->json([
                 'data' => $res,
-                'mensaje' => "Encontrado con Éxito!!",
+                'mensaje' => 'Encontrado con Éxito!!',
             ]);
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Curso con id: $id no Existe",
             ]);
         }
     }
+    //buscar cursos por id_docente_tutor
+    public function getCursosDocente($id_docente_tutor){
+        try {
+
+            $cursos = Cursos::select('cursos.*','niveles_academicos.id_nivel as NivelID',
+                'niveles_academicos.nombre as nombre_nivel',
+                'especialidades.id_especialidad as EspecialidadID',
+                'especialidades.nombre as nombre_especialidad',
+                'cursos.id_curso as CursoID',
+                'cursos.paralelo',
+                'cursos.estado as estado_curso',
+                'periodos_lectivos.id_periodo as PeriodoID',
+                'periodos_lectivos.nombre as nombre_periodo',
+            )
+                ->leftJoin('periodos_lectivos', 'periodos_lectivos.id_periodo', '=', 'cursos.id_periodo')
+                ->leftJoin('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
+                ->leftJoin('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
+                ->where('cursos.id_docente_tutor', $id_docente_tutor)
+                ->get();    
+            return response()->json([
+                'status' => true,
+                'data' => $cursos,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-        //Obtener el objeto Cursos con el id proporcionado
+        // Obtener el objeto Cursos con el id proporcionado
         $res = Cursos::find($id);
-        //Si el objeto existe, actualizar los datos enviados por el formulario y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+
+        // Si el objeto existe, procedemos a validar y actualizar
         if (isset($res)) {
+
+            // 1. Validar si ya existe OTRA asignación con los mismos datos
+            $existeAsignacion = Cursos::where('id_periodo', $request->id_periodo)
+                ->where('id_nivel', $request->id_nivel)
+                ->where('id_especialidad', $request->id_especialidad)
+                ->where('paralelo', $request->paralelo)
+                ->where('estado', 1)
+                ->where('id_curso', '!=', $id)
+                ->whereNotNull('id_docente_tutor') // IMPORTANTE: Solo choca si el otro curso YA TIENE docente
+                ->exists();
+
+            // 2. Si ya existe otro, y estamos intentando dejar este como activo, arrojamos error
+            if ($existeAsignacion && $request->estado == 1) {
+                return response()->json([
+                    'error' => true,
+                    'mensaje' => 'Ya existe otro docente asignado y activo para este nivel, especialidad y paralelo en este periodo.',
+                ], 422);
+            }
+
+            // 3. Asignar los nuevos valores
             $res->id_periodo = $request->id_periodo;
             $res->id_nivel = $request->id_nivel;
             $res->id_especialidad = $request->id_especialidad;
             $res->paralelo = $request->paralelo;
             $res->id_docente_tutor = $request->id_docente_tutor;
             $res->estado = $request->estado;
-            //Guardar los cambios en la base de datos
+
+            // Guardar los cambios en la base de datos
             if ($res->save()) {
-                //Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
                 return response()->json([
                     'data' => $res,
-                    'mensaje' => "Actualizado con Éxito!!",
-                ]);
+                    'mensaje' => 'Actualizado con Éxito!!',
+                ], 200);
             } else {
-                //Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'error' => true,
-                    'mensaje' => "Error al Actualizar",
-                ]);
+                    'mensaje' => 'Error al Actualizar',
+                ], 500);
             }
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Curso con id: $id no Existe",
-            ]);
+            ], 404);
         }
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //Obtener el objeto Cursos con el id proporcionado
+        // Obtener el objeto Cursos con el id proporcionado
         $res = Cursos::find($id);
-        //Si el objeto existe, inhabilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+        // Si el objeto existe, inhabilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             $res->estado = 0;
             $res->save();
             $data = $res->toArray();
             if ($data) {
-                //Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+                // Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "Inhabilitado con Éxito!!",
+                    'mensaje' => 'Inhabilitado con Éxito!!',
                 ]);
             } else {
-                //Si ocurre algún error, devolver un mensaje de error en formato JSON
+                // Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "El Curso no existe (puede que ya lo haya eliminado)",
+                    'mensaje' => 'El Curso no existe (puede que ya lo haya eliminado)',
                 ]);
             }
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Curso con id: $id no Existe",
             ]);
         }
     }
+
     public function habilitar(string $id)
     {
-        //Obtener el objeto Cursos con el id proporcionado
+        // Obtener el objeto Cursos con el id proporcionado
         $res = Cursos::find($id);
-        //Si el objeto existe, habilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+        // Si el objeto existe, habilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             $res->estado = 1;
             $res->save();
             $data = $res->toArray();
             if ($data) {
-                //Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+                // Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "Habilitado con Éxito!!",
+                    'mensaje' => 'Habilitado con Éxito!!',
                 ]);
             } else {
-                //Si ocurre algún error, devolver un mensaje de error en formato JSON
+                // Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "El Curso no existe (puede que ya lo haya eliminado)",
+                    'mensaje' => 'El Curso no existe (puede que ya lo haya eliminado)',
                 ]);
             }
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Curso con id: $id no Existe",
             ]);
+        }
+    }
+    public function desasignarDocente(string $id)
+    {
+        // Buscar el curso por su ID
+        $curso = Cursos::find($id);
+
+        if (isset($curso)) {
+            // Establecer el tutor como null (desasignar)
+            $curso->id_docente_tutor = null;
+            $curso->save();
+            $data = $curso->toArray();
+            if ($data) {
+                // Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+                return response()->json([
+                    'data' => $data,
+                    'mensaje' => 'Desasignado con Éxito!!',
+                ]);
+            } else {
+                // Si ocurre algún error, devolver un mensaje de error en formato JSON
+                return response()->json([
+                    'data' => $data,
+                    'mensaje' => 'El Curso no existe (puede que ya lo haya eliminado)',
+                ]);
+            }
+        } else {
+            return response()->json([
+                'error' => true,
+                'mensaje' => "El Curso con id: $id no existe.",
+            ], 404);
         }
     }
 }

@@ -61,6 +61,21 @@ class AsignaturasController extends Controller
             return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
+    //Traer asignaturas habilitadas
+    public function getActivados(){
+        try {
+            $asignaturas = Asignaturas::select('asignaturas.*')
+                ->where('estado', 1)
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => $asignaturas,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+        }
+    }
    
     /**
      * Store a newly created resource in storage.
