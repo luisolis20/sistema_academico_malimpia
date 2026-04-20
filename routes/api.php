@@ -13,6 +13,7 @@ use App\Http\Controllers\AsignaturasController;
 use App\Http\Controllers\Periodos_lectivosController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\Curso_AsignaturasController;
+use App\Http\Controllers\HorariosController;
 
 
 /*
@@ -40,8 +41,8 @@ Route::prefix('sistma')->group(function () {
     Route::delete('habilitar_role/{id}', [RolController::class, 'habilitar']);
     Route::get('roleshabilitados', [RolController::class, 'Roleshabilitados']);
     //Definir endpoint para las personas, permitiendo crear, leer, actualizar personas
-    Route::apiResource('personas', PersonaController::class);
-    Route::get('imagenpersona/{ci}', [PersonaController::class, 'getFotografia']);
+    Route::apiResource('personas', PersonaController::class)->middleware('throttle:10000,1');
+    Route::get('imagenpersona/{ci}', [PersonaController::class, 'getFotografia'])->middleware('throttle:10000,1');
     //Definir endpoints para habilitar y deshabilitar personas
     Route::delete('ihabilitar_persona/{id}', [PersonaController::class, 'destroy']);
     Route::delete('habilitar_persona/{id}', [PersonaController::class, 'habilitar']);
@@ -102,6 +103,8 @@ Route::prefix('sistma')->group(function () {
     Route::get('curso_asignaturas/docente/{id}', [Curso_AsignaturasController::class, 'getPorDocente']);
     Route::post('curso_asignaturas_lote/crear', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
     Route::put('curso_asignaturas_lote/actualizar', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
+    Route::apiResource('horarios_clases', HorariosController::class);
+    Route::post('crearhorario', [HorariosController::class, 'guardarHorario']);
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);

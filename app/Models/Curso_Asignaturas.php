@@ -19,4 +19,16 @@ class Curso_Asignaturas extends Model
         'horas_semanales',
         'estado',
     ];
+    public function curso(){
+        return $this->belongsTo(Cursos::class, 'id_curso', 'id_curso');
+    }
+    public function asignatura(){
+        return $this->belongsTo(Asignaturas::class, 'id_asignatura', 'id_asignatura');
+    }
+    public function docente(){
+        return $this->belongsTo(Personas::class, 'id_docente', 'id_persona');
+    }
+    public function horarios_clases(){
+        return $this->hasMany(Horarios_clases::class, 'id_curso_asignatura');
+    }
 }

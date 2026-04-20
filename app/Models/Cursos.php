@@ -33,4 +33,7 @@ class Cursos extends Model
     public function docentetutor(){
         return $this->belongsTo(Personas::class, 'id_docente_tutor', 'id_persona');
     }
+    public function curso_asignaturas(){
+        return $this->hasMany(Curso_Asignaturas::class, 'id_curso', 'id_curso');
+    }
 }
