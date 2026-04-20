@@ -22,7 +22,7 @@ import AsignaturasView from '@/views/Mantenimiento/Asignaturas/AsignaturasView.v
 import Periodos_lectivosView from '@/views/Mantenimiento/Periodos_lectivos/Periodos_lectivosView.vue'
 import CursosView from '@/views/Mantenimiento/Cursos/CursosView.vue'
 import Cursos_AsignaturasView from '@/views/Mantenimiento/Cursos_Asignaturas/Cursos_AsignaturasView.vue'
-
+import Horarios_clasesView from '@/views/Mantenimiento/Horarios_clases/Horarios_clasesView.vue'
 
 const routes = [
   {
@@ -152,6 +152,11 @@ const routes = [
     path: '/cursos-asignaturas',
     name: 'cursos-asignaturas',
     component: Cursos_AsignaturasView
+  },
+  {
+    path: '/horarios-clases',
+    name: 'horarios-clases',
+    component: Horarios_clasesView
   },
 ]
 const router = createRouter({
