@@ -14,6 +14,7 @@ use App\Http\Controllers\Periodos_lectivosController;
 use App\Http\Controllers\CursosController;
 use App\Http\Controllers\Curso_AsignaturasController;
 use App\Http\Controllers\HorariosController;
+use App\Http\Controllers\Cronograma_matriculasController;
 
 
 /*
@@ -105,6 +106,8 @@ Route::prefix('sistma')->group(function () {
     Route::put('curso_asignaturas_lote/actualizar', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
     Route::apiResource('horarios_clases', HorariosController::class);
     Route::post('crearhorario', [HorariosController::class, 'guardarHorario']);
+    Route::apiResource('cronograma_matriculas', Cronograma_matriculasController::class);
+    Route::post('crearcronograma_matriculas', [Cronograma_matriculasController::class, 'store']);
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);

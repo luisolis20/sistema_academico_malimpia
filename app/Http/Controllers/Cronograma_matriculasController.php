@@ -1,0 +1,242 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cronograma_matriculas;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+
+class Cronograma_matriculasController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $perPage = min($request->input('per_page', 10), 1000);
+            $searchQuery = $request->input('search_query');
+
+            $query = DB::table('cursos')
+                ->select(
+                    'cursos.id_nivel',
+                    'cursos.id_especialidad',
+                    'cursos.id_periodo',
+                    'niveles_academicos.nombre as nivel_academico',
+                    'especialidades.nombre as especialidad',
+                    'periodos_lectivos.nombre as periodo_lectivo',
+                    'periodos_lectivos.matriculas_abiertas',
+                    'periodos_lectivos.estado_activo',
+                    'cronograma_matriculas.id_cronograma',
+                    'cronograma_matriculas.fecha_inicio',
+                    'cronograma_matriculas.fecha_fin'
+                )
+                ->join('niveles_academicos', 'cursos.id_nivel', '=', 'niveles_academicos.id_nivel')
+                ->join('especialidades', 'cursos.id_especialidad', '=', 'especialidades.id_especialidad')
+                ->join('periodos_lectivos', 'cursos.id_periodo', '=', 'periodos_lectivos.id_periodo')
+                ->leftJoin('cronograma_matriculas', function ($join) {
+                    $join->on('cursos.id_nivel', '=', 'cronograma_matriculas.id_nivel')
+                        ->on('cursos.id_especialidad', '=', 'cronograma_matriculas.id_especialidad')
+                        ->on('cursos.id_periodo', '=', 'cronograma_matriculas.id_periodo');
+                })
+                ->where('periodos_lectivos.estado_activo', 1)
+                ->where('cursos.estado', 1);
+
+            if (!empty($searchQuery)) {
+                $query->where(function ($q) use ($searchQuery) {
+                    $q->where('niveles_academicos.nombre', 'LIKE', "%{$searchQuery}%")
+                        ->orWhere('periodos_lectivos.nombre', 'LIKE', "%{$searchQuery}%")
+                        ->orWhere('especialidades.nombre', 'LIKE', "%{$searchQuery}%");
+                });
+            }
+
+            // Agrupamos para evitar duplicados en la paginación
+            $query->groupBy(
+                'cursos.id_nivel',
+                'cursos.id_especialidad',
+                'cursos.id_periodo',
+                'niveles_academicos.nombre',
+                'especialidades.nombre',
+                'periodos_lectivos.nombre',
+                'periodos_lectivos.matriculas_abiertas',
+                'periodos_lectivos.estado_activo',
+                'cronograma_matriculas.id_cronograma',
+                'cronograma_matriculas.fecha_inicio',
+                'cronograma_matriculas.fecha_fin'
+            );
+
+            // Ordenamiento Lógico
+            $query->orderByRaw("
+                CASE 
+                    -- Grupo 1 CORREGIDO: Exactamente '0', o que empiece con '0 ', o tenga 'Inicial'
+                    WHEN niveles_academicos.nombre = '0' 
+                         OR niveles_academicos.nombre LIKE '0 %' 
+                         OR niveles_academicos.nombre LIKE '%Inicial%' 
+                         OR especialidades.nombre LIKE '%Inicial%' THEN 1
+                    
+                    -- Grupo 2: Si la tabla especialidades contiene la palabra 'Básica'
+                    WHEN especialidades.nombre LIKE '%Básica%' THEN 2
+                    
+                    -- Grupo 3: Si el nivel académico contiene la palabra 'Bachillerato'
+                    WHEN niveles_academicos.nombre LIKE '%Bachillerato%' THEN 3
+                    
+                    -- Otros casos
+                    ELSE 4
+                END ASC
+            ")
+                // Ordenamos numéricamente dentro de cada grupo
+                ->orderByRaw("CAST(niveles_academicos.nombre AS UNSIGNED) ASC");
+
+            $data = $query->paginate($perPage);
+
+            if ($data->isEmpty()) {
+                return response()->json(['data' => [], 'message' => 'No se encontraron datos'], 200);
+            }
+
+            $transformedItems = collect($data->items())->map(function ($item) {
+                $attributes = (array) $item;
+                foreach ($attributes as $key => $value) {
+                    if (is_string($value)) {
+                        $attributes[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+                    }
+                }
+                return $attributes;
+            });
+
+            return response()->json([
+                'data' => $transformedItems,
+                'pagination' => [
+                    'current_page' => $data->currentPage(),
+                    'per_page'     => $data->perPage(),
+                    'total'        => $data->total(),
+                    'last_page'    => $data->lastPage(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener los datos: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validación de los datos que llegan del frontend
+        $request->validate([
+            'fecha_inicio'              => 'required|date',
+            'fecha_fin'                 => 'required|date|after_or_equal:fecha_inicio',
+            'niveles'                   => 'required|array|min:1',
+            'niveles.*.id_nivel'        => 'required|integer',
+            'niveles.*.id_especialidad' => 'required|integer',
+            'niveles.*.id_periodo'      => 'required|integer',
+        ], [
+            'fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+            'niveles.required'         => 'Debe seleccionar al menos un nivel académico.',
+        ]);
+
+        try {
+            // 2. Iniciamos una transacción de base de datos
+            // Esto asegura que si hay un error en el nivel 5, los primeros 4 no se guarden (evita datos corruptos)
+            DB::beginTransaction();
+
+            // 3. Iteramos sobre los niveles seleccionados para guardarlos
+            foreach ($request->niveles as $nivel) {
+
+                // Usamos updateOrCreate para ser precavidos. 
+                // Busca si ya existe un registro con ese nivel, especialidad y periodo.
+                // Si existe, le actualiza las fechas. Si no existe, lo crea nuevo.
+                Cronograma_matriculas::updateOrCreate(
+                    [
+                        // Condiciones de búsqueda (Lo que hace único al registro)
+                        'id_nivel'        => $nivel['id_nivel'],
+                        'id_especialidad' => $nivel['id_especialidad'],
+                        'id_periodo'      => $nivel['id_periodo'],
+                    ],
+                    [
+                        // Datos a actualizar o insertar
+                        'fecha_inicio'    => $request->fecha_inicio,
+                        'fecha_fin'       => $request->fecha_fin,
+                    ]
+                );
+            }
+
+            // 4. Si el bucle termina sin errores, confirmamos los cambios en la DB
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cronogramas creados correctamente para ' . count($request->niveles) . ' nivel(es).'
+            ], 200);
+        } catch (\Exception $e) {
+            // Si algo falla, revertimos todos los cambios
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Error al procesar los cronogramas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //Obtener el objeto Cronograma_matriculas con el id proporcionado
+        $res = Cronograma_matriculas::find($id);
+        //Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
+        if (isset($res)) {
+            return response()->json([
+                'data' => $res,
+                'mensaje' => "Encontrado con Éxito!!",
+            ]);
+        } else {
+            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            return response()->json([
+                'error' => true,
+                'mensaje' => "La Cronograma_matriculas con id: $id no Existe",
+            ]);
+        }
+    }
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //Obtener el objeto Cronograma_matriculas con el id proporcionado
+        $res = Cronograma_matriculas::find($id);
+        //Si el objeto existe, actualizar los datos enviados por el formulario y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+        if (isset($res)) {
+            $res->id_periodo = $request->id_periodo;
+            $res->id_nivel = $request->id_nivel;
+            $res->id_especialidad = $request->id_especialidad;
+            $res->fecha_inicio = $request->fecha_inicio;
+            $res->fecha_fin = $request->fecha_fin;
+            //Guardar los cambios en la base de datos
+            if ($res->save()) {
+                //Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+                return response()->json([
+                    'data' => $res,
+                    'mensaje' => "Actualizado con Éxito!!",
+                ]);
+            } else {
+                //Si ocurre algún error, devolver un mensaje de error en formato JSON
+                return response()->json([
+                    'error' => true,
+                    'mensaje' => "Error al Actualizar",
+                ]);
+            }
+        } else {
+            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            return response()->json([
+                'error' => true,
+                'mensaje' => "El Cronograma_matriculas con id: $id no Existe",
+            ]);
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     */
+}

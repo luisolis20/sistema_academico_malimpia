@@ -16,4 +16,7 @@ class Asignaturas extends Model
         'nombre',
         'estado',
     ];
+    public function curso_asignaturas(){
+        return $this->hasMany(Curso_Asignaturas::class, 'id_asignatura', 'id_asignatura');
+    }
 }

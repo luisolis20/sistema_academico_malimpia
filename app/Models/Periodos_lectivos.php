@@ -23,4 +23,7 @@ class Periodos_lectivos extends Model
     public function cursos(){
         return $this->hasMany(Cursos::class, 'id_periodo', 'id_periodo');
     }
+    public function cronograma_matriculas(){
+        return $this->hasMany(Cronograma_matriculas::class, 'id_periodo', 'id_periodo');
+    }
 }

@@ -20,4 +20,7 @@ class Niveles_academicos extends Model
     public function cursos(){
         return $this->hasMany(Cursos::class, 'id_nivel', 'id_nivel');
     }
+    public function especialidades(){
+        return $this->hasMany(Especialidades::class, 'id_nivel', 'id_nivel');
+    }
 }

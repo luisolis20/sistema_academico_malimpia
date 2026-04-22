@@ -19,4 +19,7 @@ class Especialidades extends Model
     public function cursos(){
         return $this->hasMany(Cursos::class, 'id_especialidad', 'id_especialidad');
     }
+    public function niveles_academicos(){
+        return $this->hasMany(Niveles_academicos::class, 'id_especialidad', 'id_especialidad');
+    }
 }
