@@ -23,6 +23,7 @@ import Periodos_lectivosView from '@/views/Mantenimiento/Periodos_lectivos/Perio
 import CursosView from '@/views/Mantenimiento/Cursos/CursosView.vue'
 import Cursos_AsignaturasView from '@/views/Mantenimiento/Cursos_Asignaturas/Cursos_AsignaturasView.vue'
 import Horarios_clasesView from '@/views/Mantenimiento/Horarios_clases/Horarios_clasesView.vue'
+import Cronograma_MatriculasView from '@/views/Mantenimiento/Cronograma_Matriculas/Cronograma_MatriculasView.vue'
 
 const routes = [
   {
@@ -157,6 +158,11 @@ const routes = [
     path: '/horarios-clases',
     name: 'horarios-clases',
     component: Horarios_clasesView
+  },
+  {
+    path: '/cronograma-matriculas',
+    name: 'cronograma-matriculas',
+    component: Cronograma_MatriculasView
   },
 ]
 const router = createRouter({
