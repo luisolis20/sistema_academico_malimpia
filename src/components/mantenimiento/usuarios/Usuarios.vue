@@ -1,24 +1,41 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
-
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
                     <i class="fas fa-user-edit fs-4"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión Global de Usuarios
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de credenciales y perfiles de acceso..
+                        Administración de credenciales y perfiles de acceso.
                     </p>
                 </div>
             </div>
         </header>
-
+        <div class="row mb-4"
+            v-if="estadisticas && estadisticas.totales_por_rol && Object.keys(estadisticas.totales_por_rol).length > 0">
+            <div class="col-12 col-md-3 mb-3 mb-md-0" v-for="(total, rol) in estadisticas.totales_por_rol" :key="rol">
+                <div class="card shadow-sm border-0 h-100"
+                    style="background-color: white; border-radius: 15px; border-left: 5px solid #F4B324 !important;">
+                    <div class="card-body d-flex align-items-center justify-content-between p-4">
+                        <div>
+                            <h6 class="text-muted fw-bold text-uppercase mb-1"
+                                style="letter-spacing: 1px; font-size: 0.8rem;">Rol: {{ rol }}</h6>
+                            <h2 class="fw-bold mb-0" style="color: #1D2A68;">{{ total }}</h2>
+                        </div>
+                        <div style="color: #1D2A68; opacity: 0.8;">
+                            <i class="fas fa-user-tag fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
             <div class="card-body">
                 <div class="row align-items-center">
@@ -96,7 +113,8 @@
                         <div>
                             <h6 class="fw-bold text-success mb-1"><i class="fas fa-users me-2"></i>Registro Masivo
                                 Disponible</h6>
-                            <small class="text-success">Se encontraron {{ totalPendientesMasivoMayores20.length }} personas
+                            <small class="text-success">Se encontraron {{ totalPendientesMasivoMayores20.length }}
+                                personas
                                 mayores de 20 años sin usuario en toda la base de datos.</small>
                         </div>
                     </div>
@@ -107,26 +125,42 @@
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th class="ps-4">Persona</th>
-                            <th>Usuario</th>
-                            <th>Rol</th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-center">Fecha de Creación</th>
-                            <th class="text-center">Fecha de Modificación</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Persona</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Usuario</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Rol</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de Creación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de Modificación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="user in objetoList" :key="user.personID">
                             <td class="ps-4 fw-bold text-secondary" v-if="user.id_usuario">{{ user.id_usuario }}</td>
                             <td class="ps-4 text-muted small" v-else>Sin asignar</td>
-                            <td class="ps-4">
+                            <td class="ps-4 py-3">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-light text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                        style="width: 45px; height: 45px; flex-shrink: 0;">
+                                    <div class="avatar-sm me-3 rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                        style="width: 45px; height: 45px; flex-shrink: 0; background-color: rgba(244, 179, 36, 0.15); border: 2px solid #F4B324;">
                                         <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
                                             class="w-100 h-100" style="object-fit: cover;" />
                                     </div>
@@ -137,10 +171,11 @@
                                         <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
                                             calcularEdad(user.fecha_nacimiento) }} años</div>
                                         <span v-if="user.sexo === 'M' || user.sexo === 'Masculino'" title="Masculino">
-                                            <i class="fas fa-mars fs-6 text-primary"></i>
+                                            <i class="fas fa-mars fs-6" style="color: #3b82f6;"></i>
                                         </span>
-                                        <span v-else-if="user.sexo === 'F' || user.sexo === 'Femenino'" title="Femenino">
-                                            <i class="fas fa-venus fs-6 text-danger"></i>
+                                        <span v-else-if="user.sexo === 'F' || user.sexo === 'Femenino'"
+                                            title="Femenino">
+                                            <i class="fas fa-venus fs-6" style="color: #ec4899;"></i>
                                         </span>
                                         <span v-else title="Otro">
                                             <i class="fas fa-genderless fs-6 text-secondary"></i> {{ user.sexo }}
@@ -148,10 +183,11 @@
                                     </div>
                                 </div>
                             </td>
-                            <td v-if="user.username">{{ user.username }}</td>
+                            <td v-if="user.username"><span class="fw-bold" style="color: #1D2A68;">{{ user.username
+                            }}</span></td>
                             <td class="text-muted small" v-else>Sin usuario</td>
-                            <td v-if="user.nombre_rol"><span class="badge bg-light text-dark border">{{ user.nombre_rol
-                                    }}</span></td>
+                            <td v-if="user.nombre_rol"><span class="badge text-dark border"
+                                    style="background-color: rgba(244, 179, 36, 0.2);">{{ user.nombre_rol }}</span></td>
                             <td class="text-muted small" v-else>Sin rol</td>
                             <td class="text-center">
                                 <span v-if="user.estado == 1"
@@ -161,12 +197,13 @@
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.created_at }}
+                                    <i class="far fa-calendar-plus me-1" style="color: #F4B324;"></i> {{ user.created_at
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-edit text-primary me-1"></i> {{ user.updated_at }}
+                                    <i class="far fa-edit me-1" style="color: #1D2A68;"></i> {{ user.updated_at }}
                                 </span>
                             </td>
                             <td class="text-center">
@@ -176,21 +213,22 @@
                                         title="Asignar y crear usuario">
                                         <i class="fas fa-user-plus me-1"></i> Crear Usuario
                                     </button>
-                                    <button class="btn btn-sm btn-light text-info border shadow-sm ms-1"
-                                        @click="abrirModalEditar(user)" v-if="user.id_usuario" title="Editar Rol de Usuario">
+                                    <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #1D2A68;"
+                                        @click="abrirModalEditar(user)" v-if="user.id_usuario"
+                                        title="Editar Rol de Usuario">
                                         <i class="fas fa-user-edit"></i> Editar
                                     </button>
-                                    <button class="btn btn-sm btn-light text-warning border shadow-sm ms-1"
+                                    <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #F4B324;"
                                         @click="resetearClave(user.id_usuario, user.cedula, user.nombres + ' ' + user.apellidos)"
                                         v-if="user.id_usuario" title="Resetear contraseña (usará la cédula)">
                                         <i class="fas fa-key"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-danger"
+                                    <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.id_usuario, user.nombres + ' ' + user.apellidos)"
                                         v-if="user.estado == 1 && user.id_usuario" title="Inhabilitar esta persona">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-success"
+                                    <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
                                         @click="habilitar(user.id_usuario, user.nombres + ' ' + user.apellidos)"
                                         v-if="user.estado == 0 && user.id_usuario"
                                         title="Habilitar esta persona nuevamente">
@@ -201,13 +239,13 @@
                         </tr>
                         <tr v-if="cargando">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i> Cargando...
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #F4B324;"></i>
+                                Cargando registros...
                             </td>
                         </tr>
-
                         <tr v-if="!cargando && objetoList.length === 0">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-search fs-2 text-secondary mb-2 d-block"></i>
+                                <i class="fas fa-search fs-2 mb-2 d-block" style="color: #1D2A68; opacity: 0.5;"></i>
                                 No se encontraron registros en el sistema.
                             </td>
                         </tr>
@@ -216,21 +254,34 @@
             </div>
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">Anterior</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
+                                Anterior
+                            </button>
                         </li>
+
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
+
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">Siguiente</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
+                                Siguiente
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -239,81 +290,105 @@
 
         <div class="modal fade" id="modalCrearUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="modal-content border-0 shadow-lg"
+                    style="border-radius: 15px; border-top: 5px solid #1D2A68 !important;">
                     <div class="modal-header border-0 bg-light">
-                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-user-plus me-2"></i>Crear Cuenta
-                            de Usuario</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-plus me-2" style="color: #F4B324;"></i>Crear Cuenta de Usuario
+                        </h5>
                         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
                             id="btnCloseModalUser"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
-                            role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
-                            <div class="small text-dark">
+
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(244, 179, 36, 0.15);" role="alert">
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
+                            <div class="small" style="color: #1D2A68;">
                                 <strong>Guía de Registro:</strong><br>
-                                El usuario de la persona por defecto será su número de cédula. Solo debes asignarle un rol y confirmar para crear su cuenta.
+                                El usuario de la persona por defecto será su número de cédula. Solo debes asignarle un
+                                rol y confirmar para crear su cuenta.
                             </div>
                         </div>
+
                         <div class="text-center mb-4">
                             <img :src="personaSeleccionada.foto" class="rounded-circle shadow"
-                                style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-primary);">
-                            <h5 class="mt-3 fw-bold">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos
-                                }}</h5>
-                            <span class="badge bg-secondary">C.I. {{ personaSeleccionada.cedula }}</span>
+                                style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #F4B324;">
+                            <h5 class="mt-3 fw-bold" style="color: #1D2A68;">{{ personaSeleccionada.nombres }} {{
+                                personaSeleccionada.apellidos }}</h5>
+                            <span class="badge" style="background-color: #1D2A68;">C.I. {{ personaSeleccionada.cedula
+                            }}</span>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold text-muted small">Nombre de Usuario (Automático)</label>
-                            <input type="text" class="form-control bg-light" v-model="objetoData.username" readonly>
+                            <input type="text" class="form-control bg-light border-0 shadow-sm"
+                                v-model="objetoData.username" readonly style="color: #1D2A68; font-weight: 500;">
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-bold text-muted small">Rol del Sistema</label>
-                            <select class="form-select" v-model="objetoData.id_rol">
+                            <select class="form-select border shadow-sm" v-model="objetoData.id_rol"
+                                style="border-color: rgba(29, 42, 104, 0.2);">
                                 <option value="" disabled>Seleccione un rol...</option>
                                 <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.id_rol">
                                     {{ rol.nombre }}
                                 </option>
                             </select>
                         </div>
-                        <button class="btn btn-success w-100 py-2 fw-bold" @click="guardarUsuario"
+
+                        <button class="btn w-100 py-2 fw-bold border-0 shadow-sm"
+                            style="background-color: #1D2A68; color: white;" @click="guardarUsuario"
                             :disabled="!objetoData.id_rol">
-                            <i class="fas fa-save me-2"></i> Confirmar y Crear
+                            <i class="fas fa-save me-2" style="color: #F4B324;"></i> Confirmar y Crear
                         </button>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="modal-content border-0 shadow-lg"
+                    style="border-radius: 15px; border-top: 5px solid #F4B324 !important;">
                     <div class="modal-header border-0 bg-light">
-                        <h5 class="modal-title fw-bold text-info"><i class="fas fa-user-edit me-2"></i>Editar Rol de Usuario</h5>
-                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" id="btnCloseModalEditUser"></button>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-edit me-2" style="color: #F4B324;"></i>Editar Rol de Usuario
+                        </h5>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"
+                            id="btnCloseModalEditUser"></button>
                     </div>
                     <div class="modal-body p-4">
+
                         <div class="text-center mb-4">
-                            <img :src="personaSeleccionada.foto" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-info);">
-                            <h5 class="mt-3 fw-bold">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}</h5>
-                            <span class="badge bg-secondary">C.I. {{ personaSeleccionada.cedula }}</span>
+                            <img :src="personaSeleccionada.foto" class="rounded-circle shadow"
+                                style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #1D2A68;">
+                            <h5 class="mt-3 fw-bold" style="color: #1D2A68;">{{ personaSeleccionada.nombres }} {{
+                                personaSeleccionada.apellidos }}</h5>
+                            <span class="badge" style="background-color: #1D2A68;">C.I. {{ personaSeleccionada.cedula
+                            }}</span>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold text-muted small">Nombre de Usuario (Bloqueado)</label>
-                            <input type="text" class="form-control bg-light text-muted" v-model="objetoEdit.username" readonly>
+                            <input type="text" class="form-control bg-light text-muted border-0 shadow-sm"
+                                v-model="objetoEdit.username" readonly>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-bold text-muted small">Actualizar Rol del Sistema</label>
-                            <select class="form-select" v-model="objetoEdit.id_rol">
+                            <select class="form-select border shadow-sm" v-model="objetoEdit.id_rol"
+                                style="border-color: rgba(29, 42, 104, 0.2);">
                                 <option value="" disabled>Seleccione un rol...</option>
                                 <option v-for="rol in rolesDisponibles" :key="rol.id_rol" :value="rol.id_rol">
                                     {{ rol.nombre }}
                                 </option>
                             </select>
                         </div>
-                        <button class="btn btn-info text-white w-100 py-2 fw-bold shadow-sm" @click="actualizarUsuario" :disabled="!objetoEdit.id_rol">
+
+                        <button class="btn w-100 py-2 fw-bold shadow-sm"
+                            style="background-color: #F4B324; color: #1D2A68; border: none;" @click="actualizarUsuario"
+                            :disabled="!objetoEdit.id_rol">
                             <i class="fas fa-sync-alt me-2"></i> Actualizar Rol
                         </button>
                     </div>
@@ -365,6 +440,10 @@ export default {
             erroresMasivos: [],
             totalPendientesMasivo: [],
             totalPendientesMasivoMayores20: [],
+            estadisticas: {
+                total_general: 0,
+                totales_por_rol: {}
+            },
         }
     },
     computed: {
@@ -480,7 +559,7 @@ export default {
                 cedula: user.cedula,
                 foto: this.getPhotoUrl(user.personID)
             };
-            
+
             this.objetoEdit = {
                 id_usuario: user.id_usuario,
                 id_persona: user.personID,
@@ -496,7 +575,7 @@ export default {
         },
         filtrarRolesPorEdad(fechaNacimiento) {
             const edad = this.calcularEdad(fechaNacimiento);
-            
+
             // Suponiendo que el rol de estudiante tiene la palabra "estudiante" en su nombre
             if (edad > 20) {
                 // Si es mayor a 20, mostramos todos los roles que NO sean estudiante
@@ -518,9 +597,9 @@ export default {
                 mostraralertas2("Usuario creado con éxito", "success");
                 document.getElementById('btnCloseModalUser').click();
                 this.getData();
-                if(this.filtroMayores20){
+                if (this.filtroMayores20) {
                     this.obtenerPendientesMasivoMayores20(); // <-- Llamada nueva para mayores de 20
-                }else{
+                } else {
                     this.obtenerPendientesMasivo(); // <-- Llamada nueva para menores de 20
                 }
             } catch (error) {
@@ -535,7 +614,7 @@ export default {
                     id_rol: this.objetoEdit.id_rol,
                     username: this.objetoEdit.username
                 });
-                
+
                 mostraralertas2("Rol actualizado correctamente", "success");
                 document.getElementById('btnCloseModalEditUser').click();
                 this.getData();
@@ -600,9 +679,9 @@ export default {
             this.cargando = true;
             try {
                 let filtromayomeno;
-                if(this.filtroMenores20){
+                if (this.filtroMenores20) {
                     filtromayomeno = 'under_20';
-                }else if(this.filtroMayores20){
+                } else if (this.filtroMayores20) {
                     filtromayomeno = 'over_20';
                 }
                 const response = await API.get(`${this.baseUrl}/usuarios`, {
@@ -618,6 +697,8 @@ export default {
                 this.currentPage = pagination.current_page || 1;
                 this.lastPage = pagination.last_page || 1;
                 this.totalPersonas = pagination.total || 0;
+                const stats = response.data?.estadisticas || { total_general: 0, totales_por_rol: {} };
+                this.estadisticas = stats;
                 this.objetoList = data;
             } catch (error) {
                 this.objetoList = [];
@@ -681,19 +762,22 @@ export default {
 <style scoped>
 /* Contenedor principal del header con un borde lateral sutil */
 .custom-header {
-    border-left: 5px solid #198754; /* Cambia al color de tu var(--green-800) si lo prefieres */
+    border-left: 5px solid #198754;
+    /* Cambia al color de tu var(--green-800) si lo prefieres */
     transition: all 0.3s ease;
 }
+
 .custom-header:hover {
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
 }
 
 /* Animación del ícono principal cuando pasas el mouse por el header */
 .header-icon {
-    width: 55px; 
+    width: 55px;
     height: 55px;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .custom-header:hover .header-icon {
     transform: rotate(-10deg) scale(1.1);
 }
@@ -703,9 +787,11 @@ export default {
     transition: all 0.3s ease;
     cursor: default;
 }
+
 .stat-badge:hover {
     transform: translateY(-2px);
-    background-color: #198754 !important; /* Verde success de Bootstrap */
+    background-color: #198754 !important;
+    /* Verde success de Bootstrap */
     color: white !important;
     box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
 }
@@ -717,13 +803,16 @@ export default {
     /* background: linear-gradient(135deg, #198754, #20c997); */
     /* border: none; */
 }
+
 .interactive-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
 }
+
 .interactive-btn:active {
     transform: translateY(1px);
 }
+
 /* Transiciones suaves y retoques extra */
 .avatar-sm img {
     transition: transform 0.3s ease;

@@ -1,44 +1,47 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
 
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
-                    <i class="fas fa-calendar-alt fs-4"></i>
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                    <i class="fas fa-calendar-alt fs-4" style="color: #F4B324;"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión de Periodos Lectivos
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración y control de los peridos lectivos
+                        Administración y control de los periodos lectivos
                     </p>
                 </div>
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <div
-                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
-                    <i class="fas fa-book me-2"></i>
-                    <span class="fw-medium">
+                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
+                    style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
+                    <i class="fas fa-book me-2" style="color: #F4B324;"></i>
+                    <span class="fw-bold">
                         Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
                     </span>
                 </div>
 
                 <button
-                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
-                    data-bs-toggle="modal" data-bs-target="#modalUsuario" @click="limpiar"> 
-                    <i class="fas fa-plus-circle me-2"></i>
+                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                    data-bs-toggle="modal" data-bs-target="#modalUsuario" @click="limpiar"
+                    style="background-color: #1D2A68; color: white;">
+                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
                     <span class="fw-bold fs-6">Nuevo Registro</span>
                 </button>
             </div>
         </header>
 
-        <div v-if="hayPeriodoAbiertoYActivo"
-            class="alert alert-warning border-warning shadow-sm d-flex align-items-center mb-4" role="alert">
-            <i class="fas fa-exclamation-triangle fs-4 me-3"></i>
+        <div v-if="hayPeriodoAbiertoYActivo" class="alert border-0 shadow-sm d-flex align-items-center mb-4 rounded-3"
+            style="background-color: rgba(244, 179, 36, 0.15); border-left: 4px solid #F4B324 !important; color: #1D2A68;"
+            role="alert">
+            <i class="fas fa-exclamation-triangle fs-4 me-3" style="color: #F4B324;"></i>
             <div>
                 <strong>¡Atención!</strong> Ya existe un periodo lectivo <b>Activo</b> y con <b>Matrículas Abiertas</b>.
                 Debe inhabilitarlo o cerrar sus matrículas antes de poder habilitar uno nuevo.
@@ -62,15 +65,33 @@
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th>Perido Lectivo</th>
-                            <th class="text-center">Fecha Inicio</th>
-                            <th class="text-center">Fecha Fin</th>
-                            <th class="text-center">Matriculas Abiertas</th>
-                            <th class="text-center">Estado del Periodo</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Periodo Lectivo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha
+                                Inicio</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha Fin
+                            </th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Matrículas Abiertas</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado
+                                del Periodo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,47 +99,53 @@
                             <td class="ps-4 fw-bold text-secondary">{{ user.id_periodo }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span>{{ user.nombre }}</span>
+                                    <span class="fw-bold" style="color: #1D2A68;">{{ user.nombre }}</span>
                                 </div>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.fecha_inicio }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-calendar-alt me-1" style="color: #F4B324;"></i> {{
+                                        user.fecha_inicio }}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.fecha_fin }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-calendar-check me-1" style="color: #F4B324;"></i> {{ user.fecha_fin
+                                    }}
                                 </span>
                             </td>
+
                             <td class="text-center" v-if="user.matriculas_abiertas == 1">
-                                <span class="badge bg-success-subtle text-success border border-success px-3">Si</span>
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success px-3 rounded-pill shadow-sm">Sí</span>
                             </td>
                             <td class="text-center" v-else>
-                                <span class="badge bg-danger-subtle text-danger border border-danger px-3">No</span>
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill shadow-sm">No</span>
                             </td>
+
                             <td class="text-center" v-if="user.estado_activo == 1">
                                 <span
-                                    class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
+                                    class="badge bg-success-subtle text-success border border-success px-3 rounded-pill shadow-sm">Activo</span>
                             </td>
                             <td class="text-center" v-else>
                                 <span
-                                    class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill shadow-sm">Inactivo</span>
                             </td>
 
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-light text-primary" data-bs-toggle="modal"
-                                        data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
-                                        title="Editar detalles">
+                                    <button class="btn btn-sm btn-light border shadow-sm" style="color: #1D2A68;"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditUsuario"
+                                        @click="cargarDatosEdicion(user)" title="Editar detalles">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-danger"
+                                    <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.id_periodo, user.nombre)" v-if="user.estado_activo == 1"
                                         title="Inhabilitar este periodo">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-success"
+                                    <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
                                         @click="habilitar(user.id_periodo, user.nombre)" v-else
                                         :disabled="hayPeriodoAbiertoYActivo"
                                         :title="hayPeriodoAbiertoYActivo ? 'Bloqueado: Ya existe un periodo activo con matrículas abiertas' : 'Habilitar este periodo'">
@@ -127,15 +154,18 @@
                                 </div>
                             </td>
                         </tr>
+
                         <tr v-if="objetoList.length === 0 && !cargando">
                             <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
+                                <i class="fas fa-folder-open fs-1 mb-3 d-block"
+                                    style="color: #1D2A68; opacity: 0.3;"></i>
                                 No se encontraron periodos lectivos. ¡Haz clic en "Nuevo Registro" para empezar!
                             </td>
                         </tr>
+
                         <tr v-if="cargando">
                             <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i>
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #F4B324;"></i>
                                 Cargando información...
                             </td>
                         </tr>
@@ -145,25 +175,32 @@
 
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                        }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
                                 Anterior
                             </button>
                         </li>
 
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
 
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
                                 Siguiente
                             </button>
                         </li>
@@ -176,18 +213,21 @@
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-plus-circle me-2"></i>Registrar
-                            nuevo Periodo Lectivo</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>Registrar nuevo Periodo
+                            Lectivo
+                        </h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>¿Qué hacer aquí?</strong><br>
+                                <strong style="color: #1D2A68;">¿Qué hacer aquí?</strong><br>
                                 Registra un nuevo periodo lectivo (ej. <em>"2023-2024"</em>).
                             </div>
                         </div>
@@ -199,35 +239,40 @@
                                         <div class="form-floating">
                                             <input v-model="objetoData.nombre" type="text" class="form-control"
                                                 :class="{ 'is-invalid': errorsData.nombre }" id="crearNombre"
-                                                placeholder="Nombre del Periodo Lectivo">
+                                                placeholder="Nombre del Periodo Lectivo"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                             <label for="crearNombre">Nombre del Periodo Lectivo</label>
                                             <div class="invalid-feedback">Por favor, ingrese el nombre del periodo
-                                                lectivo.
-                                            </div>
+                                                lectivo.</div>
                                         </div>
                                         <div class="form-text text-muted small ms-1">Ej: 2023-2024, 2024-2025</div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input v-model="objetoData.fecha_inicio" type="date" class="form-control"
-                                                :class="{ 'is-invalid': errorsData.fecha_inicio }" id="crearFecha">
+                                                :class="{ 'is-invalid': errorsData.fecha_inicio }" id="crearFecha"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                             <label for="crearFecha">Fecha de Inicio</label>
                                             <div class="invalid-feedback">Seleccione una fecha.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input v-model="objetoData.fecha_fin" type="date" class="form-control"
-                                                :class="{ 'is-invalid': errorsData.fecha_fin }" id="crearFechaFin">
+                                                :class="{ 'is-invalid': errorsData.fecha_fin }" id="crearFechaFin"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                             <label for="crearFechaFin">Fecha de Fin</label>
                                             <div class="invalid-feedback">Seleccione una fecha.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-12">
                                         <div class="form-floating">
                                             <select v-model="objetoData.matriculas_abiertas" class="form-select"
                                                 :class="{ 'is-invalid': errorsData.matriculas_abiertas }"
-                                                id="crearMatriculas">
+                                                id="crearMatriculas" style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <option value="" disabled selected>Seleccione</option>
                                                 <option value="1">Sí</option>
                                                 <option value="0">No</option>
@@ -236,12 +281,14 @@
                                             <div class="invalid-feedback">Seleccione una opción.</div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
+
                             <hr class="my-4">
-                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-save me-2"></i>Crear Periodo Lectivo
+
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-save me-2" style="color: #F4B324;"></i>Crear Periodo Lectivo
                             </button>
                         </form>
                     </div>
@@ -253,8 +300,8 @@
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-edit me-2"></i>Editar Periodo
-                            Lectivo
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-edit me-2" style="color: #F4B324;"></i>Editar Periodo Lectivo
                         </h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
@@ -267,32 +314,38 @@
                                     <div class="form-floating mb-3">
                                         <input v-model="objetoEdit.nombre" type="text" class="form-control"
                                             :class="{ 'is-invalid': errorsEdit.nombre }" id="editNombre"
-                                            placeholder="Nombre del Periodo Lectivo">
+                                            placeholder="Nombre del Periodo Lectivo"
+                                            style="border-color: rgba(29, 42, 104, 0.2);">
                                         <label for="editNombre">Nombre del Periodo Lectivo</label>
                                         <div class="invalid-feedback">Por favor, ingrese el nombre del periodo lectivo.
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input v-model="objetoEdit.fecha_inicio" type="date" class="form-control"
-                                                :class="{ 'is-invalid': errorsEdit.fecha_inicio }" id="editFecha">
+                                                :class="{ 'is-invalid': errorsEdit.fecha_inicio }" id="editFecha"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                             <label for="editFecha">Fecha de Inicio</label>
                                             <div class="invalid-feedback">Seleccione una fecha.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input v-model="objetoEdit.fecha_fin" type="date" class="form-control"
-                                                :class="{ 'is-invalid': errorsEdit.fecha_fin }" id="editFechaFin">
+                                                :class="{ 'is-invalid': errorsEdit.fecha_fin }" id="editFechaFin"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                             <label for="editFechaFin">Fecha de Fin</label>
                                             <div class="invalid-feedback">Seleccione una fecha.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <select v-model="objetoEdit.matriculas_abiertas" class="form-select"
                                                 :class="{ 'is-invalid': errorsEdit.matriculas_abiertas }"
-                                                id="editMatriculas">
+                                                id="editMatriculas" style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <option value="" disabled selected>Seleccione</option>
                                                 <option value="1">Sí</option>
                                                 <option value="0">No</option>
@@ -301,11 +354,12 @@
                                             <div class="invalid-feedback">Seleccione una opción.</div>
                                         </div>
                                     </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
-                                            <select v-model="objetoEdit.estado_activo"
-                                                class="form-select border-primary"
-                                                :class="{ 'is-invalid': errorsEdit.estado_activo }" id="editEstado">
+                                            <select v-model="objetoEdit.estado_activo" class="form-select"
+                                                :class="{ 'is-invalid': errorsEdit.estado_activo }" id="editEstado"
+                                                style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <option value="" disabled selected>Seleccione un estado</option>
                                                 <option value="1">Activo</option>
                                                 <option value="0">Inactivo</option>
@@ -316,9 +370,12 @@
                                     </div>
                                 </div>
                             </div>
+
                             <hr class="my-4">
-                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-sync-alt me-2" style="color: #F4B324;"></i>Guardar Cambios
                             </button>
                         </form>
                     </div>
@@ -590,19 +647,22 @@ export default {
 <style scoped>
 /* Contenedor principal del header con un borde lateral sutil */
 .custom-header {
-    border-left: 5px solid #198754; /* Cambia al color de tu var(--green-800) si lo prefieres */
+    border-left: 5px solid #198754;
+    /* Cambia al color de tu var(--green-800) si lo prefieres */
     transition: all 0.3s ease;
 }
+
 .custom-header:hover {
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
 }
 
 /* Animación del ícono principal cuando pasas el mouse por el header */
 .header-icon {
-    width: 55px; 
+    width: 55px;
     height: 55px;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .custom-header:hover .header-icon {
     transform: rotate(-10deg) scale(1.1);
 }
@@ -612,9 +672,11 @@ export default {
     transition: all 0.3s ease;
     cursor: default;
 }
+
 .stat-badge:hover {
     transform: translateY(-2px);
-    background-color: #198754 !important; /* Verde success de Bootstrap */
+    background-color: #198754 !important;
+    /* Verde success de Bootstrap */
     color: white !important;
     box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
 }
@@ -626,10 +688,12 @@ export default {
     /* background: linear-gradient(135deg, #198754, #20c997); */
     /* border: none; */
 }
+
 .interactive-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
 }
+
 .interactive-btn:active {
     transform: translateY(1px);
 }

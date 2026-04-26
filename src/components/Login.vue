@@ -2,7 +2,7 @@
   <div class="login-container d-flex align-items-center justify-content-center">
     <div class="card shadow-lg border-0" style="max-width: 400px; width: 100%;">
       <div class="card-header border-0 text-center py-4 custom-header">
-        <img src="@/assets/img/mile.jpg" alt="milenio" class="img-fluid mb-3 rounded-circle shadow-sm" style="max-height: 120px; width: 120px; object-fit: cover;">
+        <img src="@/assets/img/mile.png" alt="milenio" class="img-fluid mb-3 rounded-circle shadow-sm" style="max-height: 120px; width: 120px; object-fit: cover;">
         <h3 class="mb-0 fw-bold text-dark">Sistema Académico</h3>
         <small class="text-secondary">Bienvenido, por favor identifícate</small>
       </div>

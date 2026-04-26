@@ -1,15 +1,16 @@
 <template>
     <div class="container-fluid py-4">
-    <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+        <header
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
 
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
                     <i class="fas fa-users fs-4"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión de Personas
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
@@ -19,18 +20,19 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <div
-                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
-                    <i class="fas fa-users me-2 me-2"></i>
+                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border"
+                    style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68;">
+                    <i class="fas fa-users me-2" style="color: #F4B324;"></i>
                     <span class="fw-medium">
                         Total: <span v-if="totalPersonas > 0">{{ totalPersonas }}</span><span v-else>0</span>
                     </span>
                 </div>
 
                 <button
-                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
-                    data-bs-toggle="modal" data-bs-target="#modalUsuario" @click="limpiar"> 
-                    <i class="fas fa-plus-circle me-2"></i>
+                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                    style="background-color: #1D2A68; color: white;" data-bs-toggle="modal"
+                    data-bs-target="#modalUsuario" @click="limpiar">
+                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
                     <span class="fw-bold fs-6">Nuevo Registro</span>
                 </button>
             </div>
@@ -54,16 +56,32 @@
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th class="ps-4">Persona</th>
-                            <th>Teléfono</th>
-                            <th class="text-center">Sexo</th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-center">Creación</th>
-                            <th class="text-center">Modificación</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Persona</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Teléfono</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Sexo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Creación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Modificación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,32 +89,35 @@
                             <td class="ps-4 fw-bold text-secondary">{{ user.id_persona }}</td>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-light text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                        style="width: 45px; height: 45px; flex-shrink: 0;">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                        style="width: 45px; height: 45px; flex-shrink: 0; border: 2px solid #F4B324;">
                                         <img :src="getPhotoUrl(user.id_persona)" @error="handleImageError" alt="Foto"
                                             class="w-100 h-100" style="object-fit: cover;" />
                                     </div>
                                     <div>
-                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
-                                            user.cedula }}</div>
+                                        <div class="text-muted small fw-bold mb-1">
+                                            <i class="far fa-id-card me-1" style="color: #1D2A68;"></i>{{ user.cedula }}
+                                        </div>
                                         <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
-                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
-                                            calcularEdad(user.fecha_nacimiento) }} años</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">
+                                            Edad: {{ calcularEdad(user.fecha_nacimiento) }} años
+                                        </div>
                                     </div>
                                 </div>
                             </td>
                             <td>{{ user.telefono }}</td>
                             <td class="text-center">
                                 <span v-if="user.sexo === 'M' || user.sexo === 'Masculino'" title="Masculino">
-                                    <i class="fas fa-mars fs-4 text-primary"></i>
+                                    <i class="fas fa-mars fs-4" style="color: #1D2A68;"></i>
                                 </span>
                                 <span v-else-if="user.sexo === 'F' || user.sexo === 'Femenino'" title="Femenino">
-                                    <i class="fas fa-venus fs-4 text-danger"></i>
+                                    <i class="fas fa-venus fs-4" style="color: #F4B324;"></i>
                                 </span>
                                 <span v-else title="Otro">
                                     <i class="fas fa-genderless fs-4 text-secondary"></i> {{ user.sexo }}
                                 </span>
                             </td>
+
                             <td class="text-center" v-if="user.estado == 1">
                                 <span
                                     class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
@@ -105,26 +126,28 @@
                                 <span
                                     class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
                             </td>
+
                             <td class="text-center">
                                 <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.created_at }}
+                                    <i class="far fa-calendar-plus me-1" style="color: #1D2A68;"></i> {{ user.created_at
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-edit text-primary me-1"></i> {{ user.updated_at }}
+                                    <i class="far fa-edit me-1" style="color: #F4B324;"></i> {{ user.updated_at }}
                                 </span>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-light text-info" data-bs-toggle="modal"
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal"
                                         data-bs-target="#modalDetalle" @click="cargarDetalles(user)"
-                                        title="Ver información completa">
+                                        title="Ver información completa" style="color: #1D2A68;">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-primary" data-bs-toggle="modal"
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal"
                                         data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
-                                        title="Editar detalles de esta persona">
+                                        title="Editar detalles de esta persona" style="color: #F4B324;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger"
@@ -140,15 +163,17 @@
                                 </div>
                             </td>
                         </tr>
+
                         <tr v-if="objetoList.length === 0 && !cargando">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
+                                <i class="fas fa-folder-open fs-1 mb-3 d-block" style="color: #F4B324;"></i>
                                 No se encontraron personas. ¡Haz clic en "Nuevo Registro" para empezar!
                             </td>
                         </tr>
+
                         <tr v-if="cargando">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i>
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #1D2A68;"></i>
                                 Cargando información...
                             </td>
                         </tr>
@@ -158,21 +183,34 @@
 
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">Anterior</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
+                                Anterior
+                            </button>
                         </li>
+
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
+
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">Siguiente</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
+                                Siguiente
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -183,17 +221,19 @@
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-user-plus me-2"></i>Registrar
-                            Nueva Persona</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-plus me-2" style="color: #F4B324;"></i>Registrar Nueva Persona
+                        </h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Guía de Registro:</strong><br>
+                                <strong style="color: #1D2A68;">Guía de Registro:</strong><br>
                                 Completa los datos personales. Asegúrate de ingresar números válidos para cédula y
                                 teléfono. Puedes agregar una foto de perfil seleccionándola desde tu dispositivo.
                             </div>
@@ -205,19 +245,19 @@
                                     <h6 class="text-muted mb-3">Foto de Perfil</h6>
                                     <div class="mb-3 d-flex justify-content-center">
                                         <div class="rounded-circle shadow-sm border overflow-hidden"
-                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa; border-color: rgba(29, 42, 104, 0.2) !important;">
                                             <img v-if="objetoData.previewFoto" :src="objetoData.previewFoto"
                                                 class="w-100 h-100" style="object-fit: cover;" alt="Vista previa">
                                             <i v-else
-                                                class="fas fa-user text-secondary d-flex align-items-center justify-content-center h-100"
-                                                style="font-size: 5rem;"></i>
+                                                class="fas fa-user d-flex align-items-center justify-content-center h-100"
+                                                style="font-size: 5rem; color: #1D2A68; opacity: 0.2;"></i>
                                         </div>
                                     </div>
                                     <input type="file" class="d-none" id="fotoCrear" accept="image/*"
                                         @change="handleFileUpload($event, 'crear')">
-                                    <label for="fotoCrear"
-                                        class="btn btn-outline-success btn-sm w-100 rounded-pill shadow-sm">
-                                        <i class="fas fa-camera me-1"></i> Seleccionar Foto
+                                    <label for="fotoCrear" class="btn btn-sm w-100 rounded-pill shadow-sm fw-medium"
+                                        style="border: 1px solid #1D2A68; color: #1D2A68; background-color: transparent;">
+                                        <i class="fas fa-camera me-1" style="color: #F4B324;"></i> Seleccionar Foto
                                     </label>
                                 </div>
 
@@ -320,22 +360,27 @@
                                 <div
                                     class="form-check form-switch p-3 border rounded-3 bg-light d-flex align-items-center shadow-sm">
                                     <input class="form-check-input fs-3 ms-0 me-3 mt-0 cursor-pointer" type="checkbox"
-                                        role="switch" id="crearUsuarioSwitch" v-model="objetoData.crear_usuario" @change="verificarCreacionUsuario"
-                                        style="cursor: pointer;">
+                                        role="switch" id="crearUsuarioSwitch" v-model="objetoData.crear_usuario"
+                                        @change="verificarCreacionUsuario" style="cursor: pointer;">
                                     <label class="form-check-label flex-grow-1" for="crearUsuarioSwitch"
                                         style="cursor: pointer;">
-                                        <span class="fw-bold text-dark d-block mb-1"><i
-                                                class="fas fa-user-shield text-success me-2"></i>¿Deseas crear de una
-                                            vez el usuario para esta persona?</span>
+                                        <span class="fw-bold text-dark d-block mb-1">
+                                            <i class="fas fa-user-shield me-2" style="color: #F4B324;"></i>¿Deseas crear
+                                            de una
+                                            vez el usuario para esta persona?
+                                        </span>
                                         <span class="text-muted small mb-0 d-block">Recuerda que al seleccionar esta
-                                            opción, el <strong>nombre de usuario</strong> y la <strong>clave por
-                                                defecto</strong> serán el número de cédula.</span>
+                                            opción, el <strong style="color: #1D2A68;">nombre de usuario</strong> y la
+                                            <strong style="color: #1D2A68;">clave por
+                                                defecto</strong> serán el número de cédula.
+                                        </span>
                                     </label>
                                 </div>
                             </div>
                             <hr class="my-4">
-                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-save me-2"></i>Guardar Persona
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-save me-2" style="color: #F4B324;"></i>Guardar Persona
                             </button>
                         </form>
                     </div>
@@ -347,20 +392,23 @@
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-user-edit me-2"></i>Editar Persona
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-edit me-2" style="color: #F4B324;"></i>Editar Persona
                         </h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
+                            <i class="fas fa-info-circle fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Actualización de datos:</strong><br>
+                                <strong style="color: #1D2A68;">Actualización de datos:</strong><br>
                                 Modifica la información personal. Puedes cambiar la foto haciendo clic en el botón
-                                debajo de la vista previa.
-                                Nota: Para editar la cédula debes ser superadministrador.
+                                debajo de la vista previa.<br>
+                                <span class="text-muted">Nota: Para editar la cédula debes ser
+                                    superadministrador.</span>
                             </div>
                         </div>
 
@@ -370,20 +418,20 @@
                                     <h6 class="text-muted mb-3">Foto de Perfil</h6>
                                     <div class="mb-3 d-flex justify-content-center">
                                         <div class="rounded-circle shadow-sm border overflow-hidden"
-                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa; border-color: rgba(29, 42, 104, 0.2) !important;">
                                             <img v-if="objetoEdit.previewFoto" :src="objetoEdit.previewFoto"
                                                 class="w-100 h-100" style="object-fit: cover;" @error="handleImageError"
                                                 alt="Vista previa">
                                             <i v-else
-                                                class="fas fa-user text-secondary d-flex align-items-center justify-content-center h-100"
-                                                style="font-size: 5rem;"></i>
+                                                class="fas fa-user d-flex align-items-center justify-content-center h-100"
+                                                style="font-size: 5rem; color: #1D2A68; opacity: 0.2;"></i>
                                         </div>
                                     </div>
                                     <input type="file" class="d-none" id="fotoEditar" accept="image/*"
                                         @change="handleFileUpload($event, 'editar')">
-                                    <label for="fotoEditar"
-                                        class="btn btn-outline-primary btn-sm w-100 rounded-pill shadow-sm">
-                                        <i class="fas fa-camera me-1"></i> Cambiar Foto
+                                    <label for="fotoEditar" class="btn btn-sm w-100 rounded-pill shadow-sm fw-medium"
+                                        style="border: 1px solid #1D2A68; color: #1D2A68; background-color: transparent;">
+                                        <i class="fas fa-camera me-1" style="color: #F4B324;"></i> Cambiar Foto
                                     </label>
                                 </div>
 
@@ -471,8 +519,9 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-floating">
-                                                <select v-model="objetoEdit.estado" class="form-select border-primary"
-                                                    :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado">
+                                                <select v-model="objetoEdit.estado" class="form-select"
+                                                    :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado"
+                                                    style="border-color: rgba(29, 42, 104, 0.3);">
                                                     <option value="1">Activo</option>
                                                     <option value="0">Inactivo</option>
                                                 </select>
@@ -483,8 +532,9 @@
                                 </div>
                             </div>
                             <hr class="my-4">
-                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-sync-alt me-2" style="color: #F4B324;"></i>Guardar Cambios
                             </button>
                         </form>
                     </div>
@@ -496,65 +546,82 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-dark"><i class="fas fa-id-badge text-info me-2"></i>Perfil
-                            del Usuario</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-id-badge me-2" style="color: #F4B324;"></i>Perfil del Usuario
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4 text-center">
                         <div class="mb-4">
-                            <div class="rounded-circle shadow border mx-auto overflow-hidden"
-                                style="width: 160px; height: 160px;">
+                            <div class="rounded-circle shadow-sm border mx-auto overflow-hidden"
+                                style="width: 160px; height: 160px; border-color: rgba(29, 42, 104, 0.2) !important;">
                                 <img :src="personaSeleccionada.previewFoto" @error="handleImageError" alt="Foto Persona"
                                     class="w-100 h-100" style="object-fit: cover;">
                             </div>
                         </div>
-                        <h4 class="fw-bold mb-1">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}
+                        <h4 class="fw-bold mb-1" style="color: #1D2A68;">
+                            {{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}
                         </h4>
-                        <p class="text-muted mb-4"><i class="far fa-id-card me-1"></i> {{ personaSeleccionada.cedula }}
+                        <p class="text-muted mb-4">
+                            <i class="far fa-id-card me-1" style="color: #F4B324;"></i> {{ personaSeleccionada.cedula }}
                         </p>
 
                         <div class="row text-start g-3">
                             <div class="col-6">
-                                <small class="text-muted d-block">Fecha Nacimiento</small>
-                                <span class="fw-medium"><i class="far fa-calendar-alt text-secondary me-1"></i> {{
-                                    personaSeleccionada.fecha_nacimiento }}</span>
+                                <small class="fw-semibold d-block" style="color: rgba(29, 42, 104, 0.7);">Fecha
+                                    Nacimiento</small>
+                                <span class="fw-medium">
+                                    <i class="far fa-calendar-alt me-1" style="color: #F4B324;"></i> {{
+                                    personaSeleccionada.fecha_nacimiento }}
+                                </span>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted d-block">Sexo</small>
+                                <small class="fw-semibold d-block" style="color: rgba(29, 42, 104, 0.7);">Sexo</small>
                                 <span class="fw-medium">
                                     <i v-if="personaSeleccionada.sexo === 'M' || personaSeleccionada.sexo === 'Masculino'"
-                                        class="fas fa-mars text-primary me-1"></i>
+                                        class="fas fa-mars me-1" style="color: #1D2A68;"></i>
                                     <i v-else-if="personaSeleccionada.sexo === 'F' || personaSeleccionada.sexo === 'Femenino'"
-                                        class="fas fa-venus text-danger me-1"></i>
-                                    <i v-else class="fas fa-genderless text-secondary me-1"></i>
+                                        class="fas fa-venus me-1" style="color: #1D2A68;"></i>
+                                    <i v-else class="fas fa-genderless me-1" style="color: #1D2A68;"></i>
                                     {{ personaSeleccionada.sexo }}
                                 </span>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted d-block">Teléfono</small>
-                                <span class="fw-medium"><i class="fas fa-phone-alt text-secondary me-1"></i> {{
-                                    personaSeleccionada.telefono }}</span>
+                                <small class="fw-semibold d-block"
+                                    style="color: rgba(29, 42, 104, 0.7);">Teléfono</small>
+                                <span class="fw-medium">
+                                    <i class="fas fa-phone-alt me-1" style="color: #F4B324;"></i> {{
+                                    personaSeleccionada.telefono }}
+                                </span>
                             </div>
                             <div class="col-6">
-                                <small class="text-muted d-block">Estado</small>
+                                <small class="fw-semibold d-block" style="color: rgba(29, 42, 104, 0.7);">Estado</small>
                                 <span v-if="personaSeleccionada.estado == 1" class="badge bg-success">Activo</span>
                                 <span v-else class="badge bg-danger">Inactivo</span>
                             </div>
                             <div class="col-12">
-                                <small class="text-muted d-block">Correo Electrónico</small>
-                                <span class="fw-medium"><i class="far fa-envelope text-secondary me-1"></i> {{
-                                    personaSeleccionada.correo }}</span>
+                                <small class="fw-semibold d-block" style="color: rgba(29, 42, 104, 0.7);">Correo
+                                    Electrónico</small>
+                                <span class="fw-medium">
+                                    <i class="far fa-envelope me-1" style="color: #F4B324;"></i> {{
+                                    personaSeleccionada.correo }}
+                                </span>
                             </div>
                             <div class="col-12">
-                                <small class="text-muted d-block">Dirección</small>
-                                <span class="fw-medium"><i class="fas fa-map-marker-alt text-secondary me-1"></i> {{
-                                    personaSeleccionada.direccion }}</span>
+                                <small class="fw-semibold d-block"
+                                    style="color: rgba(29, 42, 104, 0.7);">Dirección</small>
+                                <span class="fw-medium">
+                                    <i class="fas fa-map-marker-alt me-1" style="color: #F4B324;"></i> {{
+                                    personaSeleccionada.direccion }}
+                                </span>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 bg-light rounded-bottom-4">
-                        <button type="button" class="btn btn-secondary w-100 rounded-pill"
-                            data-bs-dismiss="modal">Cerrar Detalle</button>
+                        <button type="button" class="btn w-100 rounded-pill fw-bold border-0 shadow-sm"
+                            style="background-color: #1D2A68; color: white;" data-bs-dismiss="modal">
+                            Cerrar Detalle
+                        </button>
                     </div>
                 </div>
             </div>
@@ -668,14 +735,14 @@ export default {
         async verificarCreacionUsuario() {
             // Si el switch se acaba de encender
             if (this.objetoData.crear_usuario) {
-                
-                const fechaNacimiento = this.objetoData.fecha_nacimiento; 
+
+                const fechaNacimiento = this.objetoData.fecha_nacimiento;
 
                 // Validación extra: verificar si la fecha ya fue ingresada antes de activar el switch
                 if (!fechaNacimiento) {
                     mostraralertas2("Por favor, ingrese la fecha de nacimiento primero para poder asignar roles.", "warning");
                     // Desmarcamos el switch automáticamente porque falta la fecha
-                    this.objetoData.crear_usuario = false; 
+                    this.objetoData.crear_usuario = false;
                     return;
                 }
 
@@ -805,7 +872,7 @@ export default {
                 this.lastPage = pagination.last_page || 1;
                 this.totalPersonas = pagination.total || 0;
                 this.objetoList = data;
-                
+
 
             } catch (error) {
                 console.warn("⚠️ Error al obtener datos:", error?.response?.data || error);
@@ -841,7 +908,7 @@ export default {
                     console.log(response);
                     const idpersona = response.data.data.id_persona;
                     if (this.objetoData.crear_usuario) {
-                        
+
                         const response2 = await API.post(`${this.baseUrl}/usuarios/store`, {
                             id_persona: idpersona,
                             id_rol: this.objetoData.id_rol,
@@ -976,21 +1043,25 @@ table tbody tr:hover .avatar-sm img {
     box-shadow: none;
     border-color: var(--bs-primary);
 }
+
 /* Contenedor principal del header con un borde lateral sutil */
 .custom-header {
-    border-left: 5px solid #198754; /* Cambia al color de tu var(--green-800) si lo prefieres */
+    border-left: 5px solid #198754;
+    /* Cambia al color de tu var(--green-800) si lo prefieres */
     transition: all 0.3s ease;
 }
+
 .custom-header:hover {
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
 }
 
 /* Animación del ícono principal cuando pasas el mouse por el header */
 .header-icon {
-    width: 55px; 
+    width: 55px;
     height: 55px;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .custom-header:hover .header-icon {
     transform: rotate(-10deg) scale(1.1);
 }
@@ -1000,9 +1071,11 @@ table tbody tr:hover .avatar-sm img {
     transition: all 0.3s ease;
     cursor: default;
 }
+
 .stat-badge:hover {
     transform: translateY(-2px);
-    background-color: #198754 !important; /* Verde success de Bootstrap */
+    background-color: #198754 !important;
+    /* Verde success de Bootstrap */
     color: white !important;
     box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
 }
@@ -1014,10 +1087,12 @@ table tbody tr:hover .avatar-sm img {
     /* background: linear-gradient(135deg, #198754, #20c997); */
     /* border: none; */
 }
+
 .interactive-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
 }
+
 .interactive-btn:active {
     transform: translateY(1px);
 }
