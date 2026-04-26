@@ -18,9 +18,10 @@ class UserController extends Controller
         try {
             $perPage = min($request->input('per_page', 10), 20);
             $searchQuery = $request->input('search_query');
-            $status = $request->input('status'); // <-- Nuevo parámetro
+            $status = $request->input('status');
             $filterAge = $request->input('filter_age');
 
+            // 1. Consulta principal (Paginada y filtrada)
             $query = Personas::select(
                 'personas.id_persona as personID',
                 'personas.cedula',
@@ -54,13 +55,13 @@ class UserController extends Controller
                 $query->whereRaw('TIMESTAMPDIFF(YEAR, personas.fecha_nacimiento, CURDATE()) >= 20');
             }
 
-
             $data = $query->paginate($perPage);
 
             if ($data->isEmpty()) {
                 return response()->json(['data' => [], 'message' => 'No se encontraron datos'], 200);
             }
 
+            // Transformación de datos (Imágenes y codificación)
             $data->getCollection()->transform(function ($item) {
                 $attributes = $item->getAttributes();
                 foreach ($attributes as $key => $value) {
@@ -70,12 +71,31 @@ class UserController extends Controller
                         $attributes[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
                     }
                 }
-
                 return $attributes;
             });
 
+            // ---------------------------------------------------------
+            // 2. NUEVO: Estadísticas Generales
+            // ---------------------------------------------------------
+            
+            // Total de usuarios en el sistema (que tienen un registro en la tabla usuarios)
+            $totalUsuarios = DB::table('usuarios')->count();
+
+            // Total de usuarios agrupados por rol
+            // Retornará algo como: {"Estudiante": 150, "Profesor": 25, "Admin": 5}
+            $usuariosPorRol = DB::table('usuarios')
+                ->join('roles', 'usuarios.id_rol', '=', 'roles.id_rol')
+                ->select('roles.nombre', DB::raw('count(usuarios.id_usuario) as total'))
+                ->groupBy('roles.id_rol', 'roles.nombre')
+                ->pluck('total', 'roles.nombre');
+
+            // 3. Retornamos la respuesta incluyendo las estadísticas
             return response()->json([
                 'data' => $data->items(),
+                'estadisticas' => [
+                    'total_general' => $totalUsuarios,
+                    'totales_por_rol' => $usuariosPorRol
+                ],
                 'pagination' => [
                     'current_page' => $data->currentPage(),
                     'per_page' => $data->perPage(),
@@ -83,6 +103,7 @@ class UserController extends Controller
                     'last_page' => $data->lastPage(),
                 ],
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
         }

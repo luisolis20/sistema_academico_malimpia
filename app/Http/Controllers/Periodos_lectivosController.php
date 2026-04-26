@@ -59,7 +59,7 @@ class Periodos_lectivosController extends Controller
 
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
 
@@ -68,15 +68,24 @@ class Periodos_lectivosController extends Controller
      */
     public function store(Request $request)
     {
-        // Obtener los datos enviados por el formulario
         $inputs = $request->input();
-        // Crear el objeto Periodos_lectivos con los datos enviados
+
+        // 1. Verificar si ya existe un periodo activo
+        $existeActivo = Periodos_lectivos::where('estado_activo', 1)->exists();
+
+        if ($existeActivo) {
+            // Si ya hay uno activo, el nuevo se guarda inhabilitado por seguridad
+            $inputs['estado_activo'] = 0;
+            $inputs['matriculas_abiertas'] = 0;
+        }
+
         $res = Periodos_lectivos::create($inputs);
 
-        // Devolver los datos creados en formato JSON, incluyendo un mensaje de éxito
         return response()->json([
             'data' => $res,
-            'mensaje' => 'Agregado con Éxito!!',
+            'mensaje' => $existeActivo
+                ? 'Agregado (Inhabilitado porque ya existe un periodo activo)'
+                : 'Agregado con Éxito!!',
         ]);
     }
 
@@ -115,7 +124,7 @@ class Periodos_lectivosController extends Controller
                 'data' => $periodos,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
 
@@ -124,36 +133,47 @@ class Periodos_lectivosController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Obtener el objeto Periodos_lectivos con el id proporcionado
         $res = Periodos_lectivos::find($id);
-        // Si el objeto existe, actualizar los datos enviados por el formulario y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+
         if (isset($res)) {
+            // 1. Verificar si existe OTRO periodo activo (excluyendo el actual)
+            $otroPeriodoActivo = Periodos_lectivos::where('estado_activo', 1)
+                ->where('id_periodo', '!=', $id)
+                ->exists();
+
+            if ($otroPeriodoActivo) {
+                // Si intentamos activar este pero ya hay otro, forzamos a 0
+                $res->estado_activo = 0;
+                $res->matriculas_abiertas = 0;
+            } else {
+                // Si no hay conflictos, tomamos los valores del request normalmente
+                $res->estado_activo = $request->estado_activo;
+                $res->matriculas_abiertas = $request->matriculas_abiertas;
+            }
+
             $res->nombre = $request->nombre;
             $res->fecha_inicio = $request->fecha_inicio;
             $res->fecha_fin = $request->fecha_fin;
-            $res->matriculas_abiertas = $request->matriculas_abiertas;
-            $res->estado_activo = $request->estado_activo;
-            // Guardar los cambios en la base de datos
+
             if ($res->save()) {
-                // Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
                 return response()->json([
                     'data' => $res,
-                    'mensaje' => 'Actualizado con Éxito!!',
-                ]);
-            } else {
-                // Si ocurre algún error, devolver un mensaje de error en formato JSON
-                return response()->json([
-                    'error' => true,
-                    'mensaje' => 'Error al Actualizar',
+                    'mensaje' => $otroPeriodoActivo
+                        ? 'Actualizado (Se mantuvo inhabilitado por conflicto de periodos activos)'
+                        : 'Actualizado con Éxito!!',
                 ]);
             }
-        } else {
-            // Si el objeto no existe, devolver un mensaje de error en formato JSON
+
             return response()->json([
                 'error' => true,
-                'mensaje' => "El Periodo Lectivo con id: $id no Existe",
-            ]);
+                'mensaje' => 'Error al Actualizar',
+            ], 500);
         }
+
+        return response()->json([
+            'error' => true,
+            'mensaje' => "El Periodo Lectivo con id: $id no Existe",
+        ], 404);
     }
 
     /**

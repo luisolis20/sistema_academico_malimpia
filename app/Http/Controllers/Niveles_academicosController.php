@@ -14,29 +14,45 @@ class Niveles_academicosController extends Controller
     public function index(Request $request)
     {
         try {
-            //Definir el número de elementos por página, con un máximo de 50
             $perPage = $request->input('per_page', 10);
-            //Limitar el número de elementos por página a 20
             $perPage = min($perPage, 20);
-            //Obtener la consulta de búsqueda
             $searchQuery = $request->input('search_query');
-            //Crear la consulta base
+
             $query = Niveles_academicos::select('niveles_academicos.*');
-            //Si hay una consulta de búsqueda, aplicarla a los campos relevantes
-            if (! empty($searchQuery)) {
-                //Crear una consulta de búsqueda para cada campo relevante
-                $query->where(function ($q) use ($searchQuery) {
-                    //Aplicar la consulta de búsqueda a cada campo relevante, en este caso, solo a nombre de nivel académico
-                    $q->where('niveles_academicos.nombre', 'LIKE', "%{$searchQuery}%");
-                });
+
+            if (!empty($searchQuery)) {
+                $query->where('niveles_academicos.nombre', 'LIKE', "%{$searchQuery}%");
             }
-            //Obtener los datos paginados
+
+            // --- LÓGICA DE ORDENAMIENTO PERSONALIZADO ---
+            // Usamos CASE para asignar un peso específico a cada patrón de nombre
+            $query->orderByRaw("
+            CASE 
+                WHEN nombre = '0' THEN 1
+                WHEN nombre LIKE '1ro%' AND nombre NOT LIKE '%Bachillerato' THEN 2
+                WHEN nombre LIKE '2do%' AND nombre NOT LIKE '%Bachillerato' THEN 3
+                WHEN nombre LIKE '3ro%' AND nombre NOT LIKE '%Bachillerato' THEN 4
+                WHEN nombre LIKE '4to%' THEN 5
+                WHEN nombre LIKE '5to%' THEN 6
+                WHEN nombre LIKE '6to%' THEN 7
+                WHEN nombre LIKE '7mo%' THEN 8
+                WHEN nombre LIKE '8vo%' THEN 9
+                WHEN nombre LIKE '9no%' THEN 10
+                WHEN nombre LIKE '10mo%' THEN 11
+                WHEN nombre LIKE '1ro%Bachillerato' THEN 12
+                WHEN nombre LIKE '2do%Bachillerato' THEN 13
+                WHEN nombre LIKE '3ro%Bachillerato' THEN 14
+                ELSE 99 
+            END ASC
+        ");
+
             $data = $query->paginate($perPage);
-            //Si no hay datos, devolver un mensaje de error
+
             if ($data->isEmpty()) {
                 return response()->json(['data' => [], 'message' => 'No se encontraron datos'], 200);
             }
-            //Transformar los datos a UTF-8 para evitar problemas de codificación al convertir a JSON
+
+            // Transformación de datos (UTF-8)
             $data->getCollection()->transform(function ($item) {
                 $attributes = $item->getAttributes();
                 foreach ($attributes as $key => $value) {
@@ -46,7 +62,7 @@ class Niveles_academicosController extends Controller
                 }
                 return $attributes;
             });
-            //Devolver los datos paginados en formato JSON, incluyendo la información de paginación
+
             return response()->json([
                 'data' => $data->items(),
                 'pagination' => [
@@ -55,13 +71,12 @@ class Niveles_academicosController extends Controller
                     'total' => $data->total(),
                     'last_page' => $data->lastPage(),
                 ],
-
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error en el servidor: ' . $e->getMessage()], 500);
         }
     }
-   
+
     /**
      * Store a newly created resource in storage.
      */
@@ -111,7 +126,7 @@ class Niveles_academicosController extends Controller
                 'data' => $niveles,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
     /**
@@ -173,7 +188,7 @@ class Niveles_academicosController extends Controller
                     'mensaje' => "El nivel académico no existe (puede que ya la haya eliminado)",
                 ]);
             }
-        } else {     
+        } else {
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
