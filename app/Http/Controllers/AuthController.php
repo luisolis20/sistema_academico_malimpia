@@ -25,12 +25,15 @@ class AuthController extends Controller
         }
         $correo = $request->input('correo');
         $contrasena = $request->input('contrasena');
-        $user = User::select('usuarios.*', 'roles.nombre_rol')
+        $user = User::select('usuarios.*', 'roles.nombre as nombre_rol',
+        'personas.nombres as nombre_persona', 'personas.apellidos as apellidos_persona',
+        'personas.correo as correo_persona','personas.cedula as cedula_persona')
             ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
-            ->where('correo', $correo)
+            ->join('personas', 'personas.id_persona', '=', 'usuarios.id_persona')
+            ->where('username', $correo)
             ->first();
         if($user){
-            if(!Hash::check($contrasena, $user->contrasena)){
+            if(!Hash::check($contrasena, $user->clave)){
                 return response()->json([
                     'error' => 'Contraseña incorrecta',
                 ], Response::HTTP_UNAUTHORIZED);
@@ -46,8 +49,11 @@ class AuthController extends Controller
                 'token' => $token,
                 'token_type' => 'bearer',
                 'expires_in' => config('jwt.ttl') * 60,
-                'nombre' => $user->nombre,
-                'correo' => $user->correo,
+                'username' => $user->username,
+                'correo' => $user->correo_persona,
+                'nombre' => $user->nombre_persona,
+                'apellidos' => $user->apellidos_persona,
+                'cedula' => $user->cedula_persona,
                 'rol' => $user->nombre_rol,
                 'id_usuario' => $user->id_usuario,
             ]);
