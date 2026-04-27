@@ -1,20 +1,23 @@
 <template>
   <div class="login-container d-flex align-items-center justify-content-center">
-    <div class="card shadow-lg border-0" style="max-width: 400px; width: 100%;">
-      <div class="card-header border-0 text-center py-4 custom-header">
-        <img src="@/assets/img/mile.png" alt="milenio" class="img-fluid mb-3 rounded-circle shadow-sm" style="max-height: 120px; width: 120px; object-fit: cover;">
-        <h3 class="mb-0 fw-bold text-dark">Sistema Académico</h3>
-        <small class="text-secondary">Bienvenido, por favor identifícate</small>
+    <div class="card shadow-lg border-0" style="max-width: 400px; width: 100%;" data-aos="zoom-in">
+      
+      <div class="card-header border-0 text-center py-5 custom-header">
+        <div class="logo-wrapper mb-3">
+          <img src="@/assets/img/mile.png" alt="milenio" class="img-fluid rounded-circle shadow logo-img">
+        </div>
+        <h3 class="mb-1 fw-bold text-white">Sistema Académico</h3>
+        <p class="text-gold mb-0 small fw-bold">U.E. "MALIMPIA"</p>
       </div>
 
-      <div class="card-body p-4">
+      <div class="card-body p-4 pt-5">
         <form @submit.prevent="login">
           <div class="mb-3">
-            <label for="correo" class="form-label small fw-bold text-muted">CORREO ELECTRÓNICO</label>
-            <div class="input-group">
-              <span class="input-group-text custom-icon-box"><i class="bi bi-envelope-fill"></i></span>
+            <label for="correo" class="form-label small fw-bold text-muted">USUARIO</label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text custom-icon-box"><i class="fas fa-user-circle"></i></span>
               <input 
-                type="email" 
+                type="text" 
                 id="correo"
                 v-model="correolo" 
                 class="form-control custom-input" 
@@ -26,8 +29,8 @@
 
           <div class="mb-4">
             <label for="contrasena" class="form-label small fw-bold text-muted">CONTRASEÑA</label>
-            <div class="input-group">
-              <span class="input-group-text custom-icon-box"><i class="bi bi-lock-fill"></i></span>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text custom-icon-box"><i class="fas fa-lock"></i></span>
               <input 
                 type="password" 
                 id="contrasena"
@@ -39,21 +42,21 @@
             </div>
           </div>
 
-          <div class="d-grid">
-            <button type="submit" class="btn btn-purple btn-lg shadow-sm" :disabled="loading">
+          <div class="d-grid pt-2">
+            <button type="submit" class="btn btn-gold btn-lg shadow-sm text-blue fw-bold" :disabled="loading">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ loading ? 'Iniciando sesión...' : 'Ingresar' }}
+              {{ loading ? 'VERIFICANDO...' : 'INGRESAR' }}
             </button>
           </div>
 
-          <div v-if="error" class="alert alert-danger mt-3 text-center py-2" role="alert">
-            <small>{{ error }}</small>
+          <div v-if="error" class="alert alert-danger mt-3 text-center py-2 border-0 shadow-sm" role="alert">
+            <small class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ error }}</small>
           </div>
         </form>
       </div>
 
       <div class="card-footer bg-white border-0 text-center pb-4">
-        <a href="#" class="text-decoration-none small forgot-link">¿Olvidaste tu contraseña?</a>
+        <a href="#" class="text-decoration-none small forgot-link fw-bold">¿Olvidaste tu contraseña?</a>
       </div>
     </div>
   </div>
@@ -61,80 +64,119 @@
 
 <script>
 import script3 from "@/assets/js/login.js";
+import AOS from 'aos';
+
 export default {
   name: 'Login',
   mixins: [script3],
-  data() {
-    return {
-    }
-  },
-  methods: {
-    
-    
+  mounted() {
+    AOS.init();
   }
 }
 </script>
 
 <style scoped>
-/* Fondo general Blanco */
+/* Colores Institucionales */
+.text-gold { color: #F4B324 !important; }
+.text-blue { color: #1D2A68 !important; }
+
+/* Fondo con degradado institucional */
 .login-container {
+  /* Asegura que ocupe todo el ancho y alto sin dejar huecos */
+  width: 100vw; 
   min-height: 100vh;
-  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #1D2A68 0%, #151e4b 100%);
+  /* Evita el scroll horizontal innecesario */
+  overflow-x: hidden; 
 }
 
-/* Cabecera Turquesa Claro */
+/* Decoración de fondo opcional (puntos o formas) */
+.login-container::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  opacity: 0.1;
+}
+
+/* Cabecera Azul con Borde Oro */
 .custom-header {
-  background-color: #e0f7f9; /* Turquesa muy suave */
-  border-bottom: 2px solid #b2ebf2;
+  background-color: #1D2A68;
+  border-bottom: 5px solid #F4B324 !important;
+  position: relative;
+}
+
+.logo-wrapper {
+  margin-top: -20px;
+}
+
+.logo-img {
+  max-height: 110px;
+  width: 110px;
+  object-fit: cover;
+  border: 4px solid #F4B324;
+  background-color: white;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .logo-img {
+  transform: rotate(5deg) scale(1.05);
 }
 
 .card {
-  border-radius: 20px;
+  border-radius: 25px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: #ffffff;
+  z-index: 1;
 }
 
-/* Iconos en Turquesa */
+/* Iconos y Inputs */
 .custom-icon-box {
-  background-color: #e0f7f9;
-  border: 1px solid #b2ebf2;
-  color: #00acc1; /* Turquesa oscuro para el icono */
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-right: none;
+  color: #1D2A68;
 }
 
 .custom-input {
-  border: 1px solid #b2ebf2;
+  border: 1px solid #dee2e6;
+  border-left: none;
 }
 
 .custom-input:focus {
-  border-color: #4dd0e1;
-  box-shadow: 0 0 0 0.25rem rgba(77, 208, 225, 0.25);
+  border-color: #dee2e6;
+  box-shadow: none;
 }
 
-/* Botón Morado */
-.btn-purple {
-  background-color: #6f42c1;
-  border-color: #6f42c1;
-  color: white;
-  font-weight: 600;
+/* Botón Oro */
+.btn-gold {
+  background-color: #F4B324;
+  border: none;
+  color: #1D2A68;
   transition: all 0.3s ease;
 }
 
-.btn-purple:hover {
-  background-color: #59359a;
-  border-color: #51308c;
+.btn-gold:hover:not(:disabled) {
+  background-color: #e0a31f;
   transform: translateY(-2px);
-  color: white;
+  box-shadow: 0 5px 15px rgba(244, 179, 36, 0.4) !important;
 }
 
-.btn-purple:active {
-  transform: translateY(0);
+.btn-gold:disabled {
+  background-color: #d4af37;
+  opacity: 0.7;
 }
 
 .forgot-link {
-  color: #6f42c1;
+  color: #1D2A68;
+  opacity: 0.7;
+  transition: opacity 0.3s;
 }
 
 .forgot-link:hover {
-  color: #00acc1;
+  opacity: 1;
+  color: #F4B324;
 }
 </style>

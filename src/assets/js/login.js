@@ -1,7 +1,7 @@
 import { mostraralertas } from "@/assets/js/funciones/functions";
 import { enviarsolilogin } from "@/assets/js/funciones/loginfunction";
 import store from "@/store";
-import { getMe } from '@/assets/js/auth';
+import { getMe } from "@/assets/js/auth";
 export default {
   data() {
     return {
@@ -9,7 +9,7 @@ export default {
       clave2: "",
       url2: `${__API_SITMA__}/sistma/login`,
       loading: false,
-      error: null
+      error: null,
     };
   },
   methods: {
@@ -23,42 +23,60 @@ export default {
           contrasena: this.clave2.trim(),
         };
 
-        const response = await enviarsolilogin('POST', parametros, this.url2, 'Logueado');
-        //console.log("Respuesta del login:", response);
-        if (response.error) {
-          mostraralertas(response.mensaje, 'warning');
-        } else if (response) {
-          //  getMe() justo después de guardar el token
-          const usuario = await getMe(); // Esto obtiene los datos del usuario autenticado desde /auth/me
-          //console.log("Usuario autenticado:", usuario);
-
-          // Redirección según el rol
-          const role = response.Rol;
-          const tok = response.token;
-          //console.log(response.id);
-          //console.log(response);
-          if (role === 'Administrador') {
-            mostraralertas('LE DAMOS LA BIENVENIDA ADMIN ' + (response.Nombre || ''), 'success');
-            this.$router.push('/panel-admin');
-          } else if (role === 'Estudiante') {
-            mostraralertas('LE DAMOS LA BIENVENIDA ESTUDIANTE ' + (response.Nombre || ''), 'success');
-            this.$router.push('/panel-estudiante');
-
-          } else if (role === 'Docente') {
-            mostraralertas('LE DAMOS LA BIENVENIDA DOCENTE ' + (response.Nombre || ''), 'success');
-            this.$router.push('/panel-docente');
-          }
-          
+        const response = await enviarsolilogin(
+          "POST",
+          parametros,
+          this.url2,
+          "Logueado",
+        );
+        if (!response || response.error) {
+          const msg = response?.mensaje || "Credenciales incorrectas";
+          mostraralertas(msg, "warning");
+          this.error = msg;
+          return; // Detenemos la ejecución aquí
         }
+
+        await getMe();
+        const role = response.Rol;
+        const tok = response.token;
+        if (role === "Administrador") {
+          mostraralertas(
+            "BIENVENIDO ADMIN " + (response.Nombre || ""),
+            "success",
+          );
+          this.$router.push("/principal");
+        } else if (role === "Representante") {
+          mostraralertas(
+            "BIENVENIDO REPRESENTANTE " + (response.Nombre || ""),
+            "success",
+          );
+          this.$router.push("/principal");
+        } else if (role === "Estudiante") {
+          mostraralertas(
+            "BIENVENIDO ESTUDIANTE " + (response.Nombre || ""),
+            "success",
+          );
+          this.$router.push("/principal");
+        } else if (role === "Docente") {
+          mostraralertas(
+            "BIENVENIDO DOCENTE " + (response.Nombre || ""),
+            "success",
+          );
+          this.$router.push("/principal");
+        }
+
       } catch (error) {
         console.error("Error en login:", error);
-         this.error = "Credenciales incorrectas. Inténtalo de nuevo.";
+        this.error = "Credenciales incorrectas. Inténtalo de nuevo.";
         if (error.response?.data?.mensaje) {
-          mostraralertas(error.response.data.mensaje, 'warning');
+          mostraralertas(error.response.data.mensaje, "warning");
         } else {
-          mostraralertas('No se pudo conectar con el servidor o error inesperado.', 'error');
+          mostraralertas(
+            "No se pudo conectar con el servidor o error inesperado.",
+            "error",
+          );
         }
-      }finally {
+      } finally {
         this.loading = false;
       }
     },

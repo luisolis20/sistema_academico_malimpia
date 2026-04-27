@@ -119,16 +119,15 @@
             @mouseenter="hoverDropdown('usuario')" @mouseleave="leaveDropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center justify-content-center justify-content-lg-start px-0 px-lg-3"
               href="#" role="button" @click.prevent="toggleDropdown('usuario')">
-              <img src="https://ui-avatars.com/api/?name=Usuario&background=F4B324&color=1D2A68&bold=true" alt="Avatar"
-                width="38" height="38" class="rounded-circle me-2 border border-2 border-warning shadow-sm">
-              <span class="fw-semibold text-white">Mi Perfil</span>
+              <img :src="getPhotoUrl(idUsuario)" @error="handleImageError" alt="Avatar" width="38" height="38"
+                class="rounded-circle me-2 border border-2 border-warning shadow-sm">
+              <span class="fw-semibold text-white">{{ nombreUsuario }}</span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 custom-dropdown mt-2 w-100"
               :class="{ 'show': activeDropdown === 'usuario' }">
               <li class="px-3 py-2 text-center border-bottom mb-1 bg-light">
-                <span class="d-block fw-bold text-dark">Nombre del Usuario</span>
-                <span class="d-block text-muted small">Administrador</span>
+                <span class="d-block text-muted small">{{ rolUsuario }}</span>
               </li>
               <li>
                 <router-link class="dropdown-item py-2" to="/perfil" @click="closeMenu">
@@ -139,7 +138,7 @@
                 <hr class="dropdown-divider my-1">
               </li>
               <li>
-                <a class="dropdown-item py-2 text-danger fw-bold hover-danger" @click.prevent="cerrarSesion" href="#">
+                <a class="dropdown-item py-2 text-danger fw-bold hover-danger" @click="cerrarSesion" href="#">
                   <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
                 </a>
               </li>
@@ -160,6 +159,7 @@
 import script2 from '@/store/custom.js';
 import API from "@/assets/js/axios";
 
+
 export default {
   mixins: [script2],
   data() {
@@ -168,7 +168,19 @@ export default {
       activeDropdown: null,
     };
   },
+  async mounted() {
+
+  },
+
+
   methods: {
+    getPhotoUrl(ci) {
+      if (!ci) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+      return `${API.defaults.baseURL}/sistma/imagenpersona/${ci}?v=${this.refreshKey}`;
+    },
+    handleImageError(event) {
+      event.target.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+    },
     // ABRE el menú si pasamos el mouse (Solo en pantallas grandes)
     hoverDropdown(menuName) {
       if (window.innerWidth >= 992) {
@@ -198,21 +210,28 @@ export default {
 
       if (!token) {
         localStorage.clear();
-        window.location.href = "/login";
+        this.$router.push("/login");
         return;
       }
 
       try {
-        await API.get("/sistma/logout", {
+        // CORRECCIÓN: Axios GET recibe (url, config)
+        const response = await API.get("/sistma/logout", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        console.log("✅ Sesión cerrada en servidor:", response.data);
       } catch (error) {
-        console.error("Error al cerrar sesión", error);
+        console.error("❌ Error al cerrar sesión en servidor:", error);
       } finally {
+        // Siempre limpiamos localmente y redirigimos, falle o no la red
         localStorage.clear();
-        this.$router.push("/login");
+
+        // Usar window.location.href es más seguro para un logout 
+        // porque fuerza una limpieza total del estado de la app
+        window.location.href = "/login";
       }
     }
   }
@@ -285,18 +304,44 @@ export default {
   width: 80%;
 }
 
-.user-dropdown .nav-link::after {
-  display: none;
+/* --- ESTILOS DE DROPDOWN (ESCRITORIO) --- */
+.custom-dropdown {
+  border-radius: 8px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+  padding: 0.5rem 0;
 }
 
-.custom-toggler {
-  border-color: rgba(244, 179, 36, 0.5);
+.custom-dropdown .dropdown-item {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color: #1D2A68;
+  /* Texto base en azul */
 }
 
-.custom-toggler:focus {
-  box-shadow: 0 0 0 0.25rem rgba(244, 179, 36, 0.25);
+@media (min-width: 992px) {
+  .custom-dropdown {
+    margin-top: 0 !important;
+  }
+
+  /* EFECTO HOVER ORO */
+  .custom-dropdown .dropdown-item:hover {
+    background-color: #F4B324 !important;
+    /* Fondo ORO */
+    color: #1D2A68 !important;
+    /* Texto AZUL */
+    font-weight: 600;
+    transform: translateX(5px);
+  }
+
+  /* Cambiar color de iconos al hacer hover */
+  .custom-dropdown .dropdown-item:hover i {
+    color: #1D2A68 !important;
+  }
 }
 
+/* --- AJUSTES MÓVILES --- */
 @media (max-width: 991px) {
   .custom-mobile-border {
     border-color: rgba(255, 255, 255, 0.1) !important;
@@ -311,53 +356,20 @@ export default {
   }
 
   .custom-dropdown .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #F4B324 !important;
-  }
-
-  .bg-light.border-bottom {
-    background-color: transparent !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: #F4B324 !important;
+    /* Fondo ORO en móvil */
+    color: #1D2A68 !important;
+    /* Texto AZUL en móvil */
   }
 
   .bg-light .text-dark {
     color: #F4B324 !important;
   }
-
-  .bg-light .text-muted {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-}
-
-.custom-dropdown {
-  border-radius: 8px;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease;
-}
-
-.custom-dropdown .dropdown-item {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-}
-
-@media (min-width: 992px) {
-
-  /* Pegamos el dropdown ligeramente al menú principal para que no se cierre al mover el mouse en el espacio vacío */
-  .custom-dropdown {
-    margin-top: 0 !important;
-  }
-
-  .custom-dropdown .dropdown-item:hover {
-    background-color: #f8f9fa;
-    color: #1D2A68;
-    transform: translateX(5px);
-  }
 }
 
 .hover-danger:hover {
-  background-color: #fee2e2 !important;
-  color: #dc3545 !important;
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
 }
 
 @keyframes fadeIn {
