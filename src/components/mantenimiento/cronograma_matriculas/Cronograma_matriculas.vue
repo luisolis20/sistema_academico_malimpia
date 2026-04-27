@@ -1,15 +1,17 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 5px solid #F4B324;">
 
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
-                    <i class="fas fa-layer-group fs-4"></i>
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; width: 55px; height: 55px;">
+                    <i class="fas fa-layer-group fs-4" style="color: #F4B324;"></i>
                 </div>
+
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión del cronograma de matrículas
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
@@ -17,15 +19,17 @@
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-3">
 
+            <div class="d-flex align-items-center gap-3">
                 <button
-                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
-                    data-bs-toggle="modal" data-bs-target="#modalCrear" @click="prepararCreacion">
-                    <i class="fas fa-plus-circle me-2"></i>
+                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 text-white"
+                    style="background-color: #1D2A68; border: none;" data-bs-toggle="modal" data-bs-target="#modalCrear"
+                    @click="prepararCreacion">
+                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
                     <span class="fw-bold fs-6">Crear Cronograma</span>
                 </button>
             </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -43,75 +47,110 @@
         </div>
 
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
-            <div class="table-responsive">
+            <div class="table-responsive shadow-sm rounded-3">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th>Nivel </th>
-                            <th>Especialidad</th>
-                            <th class="text-center">Periodo</th>
-                            <th class="text-center">Matriculas Abiertas</th>
-                            <th class="text-center">Inicio</th>
-                            <th class="text-center">Fin</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Nivel</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Especialidad</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Periodo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Matrículas Abiertas</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Inicio</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fin</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="user in objetoList" :key="user.id_nivel + '-' + user.id_especialidad">
-                            <td class="ps-4 fw-bold text-secondary" v-if="user.id_cronograma">{{ user.id_cronograma }}</td>
+                            <td class="ps-4 fw-bold" style="color: #1D2A68;" v-if="user.id_cronograma">
+                                {{ user.id_cronograma }}
+                            </td>
                             <td class="ps-4 fw-bold text-secondary" v-else>
-                                <span class="text-muted small"><i class="fas fa-exclamation-circle text-warning"></i> Sin asignar</span>
+                                <span class="small" style="color: #F4B324;">
+                                    <i class="fas fa-exclamation-circle"></i> Sin asignar
+                                </span>
                             </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <span>{{ user.nivel_academico }}</span>
+
+                            <td class="text-center">
+                                <div class="ps-4 fw-semibold text-dark">
+                                    {{ user.nivel_academico }}
                                 </div>
                             </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <span>{{ user.especialidad }}</span>
+                            <td class="text-center">
+                                <div class="ps-4 align-items-center">
+                                    {{ user.especialidad }}
                                 </div>
                             </td>
+
                             <td class="text-center">
                                 <span class="badge bg-light text-dark border">{{ user.periodo_lectivo }}</span>
                             </td>
+
                             <td class="text-center" v-if="user.matriculas_abiertas == 1">
-                                <span class="badge bg-success-subtle text-success border border-success px-3">Si</span>
+                                <span class="badge px-3 border"
+                                    style="background-color: rgba(29, 42, 104, 0.1); color: #1D2A68; border-color: #1D2A68 !important;">
+                                    Si
+                                </span>
                             </td>
                             <td class="text-center" v-else>
-                                <span class="badge bg-danger-subtle text-danger border border-danger px-3">No</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger px-3">
+                                    No
+                                </span>
                             </td>
+
                             <td class="text-center">
-                                <span v-if="user.fecha_inicio" class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.fecha_inicio }}
+                                <span v-if="user.fecha_inicio"
+                                    class="badge bg-light text-secondary border fw-normal px-2 py-1">
+                                    <i class="far fa-calendar-plus me-1" style="color: #F4B324;"></i> {{
+                                        user.fecha_inicio }}
                                 </span>
                                 <span v-else class="text-muted">-</span>
                             </td>
                             <td class="text-center">
-                                <span v-if="user.fecha_fin" class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-edit text-primary me-1"></i> {{ user.fecha_fin }}
+                                <span v-if="user.fecha_fin"
+                                    class="badge bg-light text-secondary border fw-normal px-2 py-1">
+                                    <i class="far fa-edit me-1" style="color: #1D2A68;"></i> {{ user.fecha_fin }}
                                 </span>
                                 <span v-else class="text-muted">-</span>
                             </td>
+
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button v-if="user.id_cronograma" class="btn btn-sm btn-outline-primary"
-                                        data-bs-toggle="modal" data-bs-target="#modalEditar" @click="prepararEdicion(user)">
-                                        <i class="fas fa-edit"></i> Editar
+                                    <button v-if="user.id_cronograma" class="btn btn-sm text-white shadow-sm"
+                                        style="background-color: #1D2A68;" data-bs-toggle="modal"
+                                        data-bs-target="#modalEditar" @click="prepararEdicion(user)">
+                                        <i class="fas fa-edit me-1" style="color: #F4B324;"></i> Editar
                                     </button>
                                 </div>
                             </td>
                         </tr>
+
                         <tr v-if="objetoList.length === 0 && !cargando">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
+                                <i class="fas fa-folder-open fs-1 mb-3 d-block" style="color: #dee2e6;"></i>
                                 No se encontraron niveles académicos.
                             </td>
                         </tr>
                         <tr v-if="cargando">
                             <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i>
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #1D2A68;"></i>
                                 Cargando información...
                             </td>
                         </tr>
@@ -121,17 +160,34 @@
 
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">Anterior</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
+                                Anterior
+                            </button>
                         </li>
-                        <li class="page-item" v-for="page in paginasMostradas" :key="page" :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+
+                        <li class="page-item" v-for="page in paginasMostradas" :key="page"
+                            :class="{ active: page === currentPage }">
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
+
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">Siguiente</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
+                                Siguiente
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -140,63 +196,94 @@
 
         <div class="modal fade" id="modalCrear" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success-subtle text-success">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-calendar-plus me-2"></i> Crear Cronograma Masivo</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header text-white"
+                        style="background-color: #1D2A68; border-bottom: 4px solid #F4B324;">
+                        <h5 class="modal-title fw-bold">
+                            <i class="fas fa-calendar-plus me-2" style="color: #F4B324;"></i>
+                            Crear Cronograma Masivo
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+
+                    <div class="modal-body p-4">
                         <div class="row">
                             <div class="col-md-7 border-end">
-                                <h6 class="fw-bold mb-3 text-secondary">Seleccione los niveles:</h6>
-                                
-                                <div v-if="cargandoNiveles" class="text-center py-3">
-                                    <i class="fas fa-spinner fa-spin text-success"></i> Cargando niveles...
+                                <h6 class="fw-bold mb-3" style="color: #1D2A68;">Seleccione los niveles académicos:</h6>
+
+                                <div v-if="cargandoNiveles" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fs-4" style="color: #1D2A68;"></i>
+                                    <p class="mt-2 text-muted">Cargando niveles...</p>
                                 </div>
 
-                                <div class="list-group" v-else style="max-height: 400px; overflow-y: auto;">
-                                    <label class="list-group-item d-flex justify-content-between align-items-center list-group-item-action" 
-                                           v-for="nv in listaTodosNiveles" :key="'modal-'+nv.id_nivel+'-'+nv.id_especialidad"
-                                           :class="{'bg-light': nv.id_cronograma}">
-                                        
+                                <div class="list-group shadow-sm" v-else style="max-height: 400px; overflow-y: auto;">
+                                    <label
+                                        class="list-group-item d-flex justify-content-between align-items-center list-group-item-action border-start-0 border-end-0 py-3"
+                                        v-for="nv in listaTodosNiveles"
+                                        :key="'modal-' + nv.id_nivel + '-' + nv.id_especialidad"
+                                        :class="{ 'bg-light': nv.id_cronograma }">
+
                                         <div class="d-flex align-items-center">
-                                            <input class="form-check-input me-3" type="checkbox" 
-                                                   :value="nv" v-model="nivelesSeleccionados" 
-                                                   :disabled="nv.id_cronograma != null">
+                                            <input class="form-check-input me-3" type="checkbox" :value="nv"
+                                                v-model="nivelesSeleccionados" :disabled="nv.id_cronograma != null"
+                                                style="cursor: pointer; width: 1.2rem; height: 1.2rem;">
                                             <div>
-                                                <span class="fw-bold" :class="{'text-muted': nv.id_cronograma}">{{ nv.nivel_academico }}</span>
-                                                <small class="d-block text-muted">{{ nv.especialidad }}</small>
+                                                <span class="fw-bold d-block"
+                                                    :style="{ color: nv.id_cronograma ? '#adb5bd' : '#1D2A68' }">
+                                                    {{ nv.nivel_academico }}
+                                                </span>
+                                                <small class="text-muted">{{ nv.especialidad }}</small>
                                             </div>
                                         </div>
-                                        
-                                        <span v-if="nv.id_cronograma" class="badge bg-secondary">Ya asignado</span>
+
+                                        <span v-if="nv.id_cronograma"
+                                            class="badge rounded-pill bg-secondary opacity-75">
+                                            <i class="fas fa-check-circle me-1"></i> Ya asignado
+                                        </span>
                                     </label>
                                 </div>
                             </div>
 
-                            <div class="col-md-5 ps-4">
-                                <h6 class="fw-bold mb-3 text-secondary">Configurar Fechas:</h6>
-                                
-                                <div class="alert alert-info py-2" v-if="nivelesSeleccionados.length === 0">
-                                    <small><i class="fas fa-info-circle"></i> Selecciona al menos un nivel a la izquierda para habilitar las fechas.</small>
+                            <div class="col-md-5 ps-md-4">
+                                <h6 class="fw-bold mb-3" style="color: #1D2A68;">Configurar Fechas:</h6>
+
+                                <div class="alert border-0 shadow-sm mb-4" v-if="nivelesSeleccionados.length === 0"
+                                    style="background-color: rgba(244, 179, 36, 0.1); color: #856404;">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1" style="color: #F4B324;"></i>
+                                        Selecciona al menos un nivel a la izquierda para habilitar las fechas.
+                                    </small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold small text-muted">Fecha y Hora de Inicio</label>
-                                    <input type="datetime-local" class="form-control" v-model="formCrear.fecha_inicio" 
-                                           :disabled="nivelesSeleccionados.length === 0">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0"><i
+                                                class="far fa-calendar-alt" style="color: #1D2A68;"></i></span>
+                                        <input type="datetime-local" class="form-control border-start-0"
+                                            v-model="formCrear.fecha_inicio"
+                                            :disabled="nivelesSeleccionados.length === 0">
+                                    </div>
                                 </div>
-                                
+
                                 <div class="mb-4">
                                     <label class="form-label fw-bold small text-muted">Fecha y Hora de Fin</label>
-                                    <input type="datetime-local" class="form-control" v-model="formCrear.fecha_fin"
-                                           :disabled="nivelesSeleccionados.length === 0">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0"><i
+                                                class="far fa-calendar-check" style="color: #1D2A68;"></i></span>
+                                        <input type="datetime-local" class="form-control border-start-0"
+                                            v-model="formCrear.fecha_fin" :disabled="nivelesSeleccionados.length === 0">
+                                    </div>
                                 </div>
 
                                 <div class="d-grid">
-                                    <button class="btn btn-success" :disabled="nivelesSeleccionados.length === 0 || !formCrear.fecha_inicio || !formCrear.fecha_fin"
-                                            @click="guardarCronogramaMasivo">
-                                        <i class="fas fa-save me-2"></i> Crear para {{ nivelesSeleccionados.length }} nivel(es)
+                                    <button class="btn btn-lg text-white fw-bold shadow-sm"
+                                        style="background-color: #1D2A68;"
+                                        :disabled="nivelesSeleccionados.length === 0 || !formCrear.fecha_inicio || !formCrear.fecha_fin"
+                                        @click="guardarCronogramaMasivo">
+                                        <i class="fas fa-save me-2" style="color: #F4B324;"></i>
+                                        Crear para {{ nivelesSeleccionados.length }} nivel(es)
                                     </button>
                                 </div>
                             </div>
@@ -208,28 +295,59 @@
 
         <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary-subtle text-primary">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i> Editar Cronograma</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeModalEditar"></button>
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header text-white"
+                        style="background-color: #1D2A68; border-bottom: 4px solid #F4B324;">
+                        <h5 class="modal-title fw-bold">
+                            <i class="fas fa-edit me-2" style="color: #F4B324;"></i> Editar Cronograma
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close" id="closeModalEditar"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
+
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
                             <label class="form-label text-muted small fw-bold">Nivel y Especialidad</label>
-                            <input type="text" class="form-control bg-light" :value="formEditar.nombre_mostrar" readonly>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-graduation-cap" style="color: #1D2A68;"></i>
+                                </span>
+                                <input type="text" class="form-control bg-light border-start-0 fw-bold"
+                                    style="color: #1D2A68;" :value="formEditar.nombre_mostrar" readonly>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha y Hora de Inicio</label>
-                            <input type="datetime-local" class="form-control" v-model="formEditar.fecha_inicio">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha y Hora de Fin</label>
-                            <input type="datetime-local" class="form-control" v-model="formEditar.fecha_fin">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #1D2A68;">Fecha y Hora de Inicio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="far fa-calendar-alt text-muted"></i>
+                                    </span>
+                                    <input type="datetime-local" class="form-control border-start-0"
+                                        v-model="formEditar.fecha_inicio">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" style="color: #1D2A68;">Fecha y Hora de Fin</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="far fa-calendar-check text-muted"></i>
+                                    </span>
+                                    <input type="datetime-local" class="form-control border-start-0"
+                                        v-model="formEditar.fecha_fin">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-primary" @click="actualizarCronograma">Guardar Cambios</button>
+
+                    <div class="modal-footer bg-light border-top-0">
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn text-white fw-bold px-4 shadow-sm"
+                            style="background-color: #1D2A68;" @click="actualizarCronograma">
+                            <i class="fas fa-save me-2" style="color: #F4B324;"></i> Guardar Cambios
+                        </button>
                     </div>
                 </div>
             </div>
@@ -252,17 +370,17 @@ export default {
             cargando: false,
             currentPage: 1,
             lastPage: 1,
-            
+
             // --- Nuevas variables para los modales ---
             listaTodosNiveles: [], // Todos los niveles sin paginación para el modal
             cargandoNiveles: false,
             nivelesSeleccionados: [],
-            
+
             formCrear: {
                 fecha_inicio: '',
                 fecha_fin: ''
             },
-            
+
             formEditar: {
                 id_cronograma: null,
                 id_nivel: null,
@@ -303,7 +421,7 @@ export default {
         await this.getData();
     },
     methods: {
-         cambiarPagina(page) {
+        cambiarPagina(page) {
             if (page >= 1 && page <= this.lastPage) {
                 this.currentPage = page;
                 this.getData();
@@ -373,13 +491,13 @@ export default {
 
                 // Petición al backend (Debes crear este endpoint en Laravel)
                 await API.post(`${this.baseUrl}/crearcronograma_matriculas`, payload);
-                
+
                 mostraralertas2('Cronogramas creados correctamente', "success");
 
-                
+
                 // Cerrar modal usando Bootstrap (opcional, si usas jquery o refs)
                 document.querySelector('#modalCrear .btn-close').click();
-                
+
                 // Refrescamos la tabla
                 this.getData();
             } catch (error) {
@@ -401,7 +519,7 @@ export default {
             // Formatear la fecha para que el input datetime-local lo acepte (ej: 2026-04-15T10:30)
             this.formEditar.fecha_inicio = item.fecha_inicio ? item.fecha_inicio.replace(' ', 'T') : '';
             this.formEditar.fecha_fin = item.fecha_fin ? item.fecha_fin.replace(' ', 'T') : '';
-            
+
         },
 
         async actualizarCronograma() {
@@ -416,8 +534,8 @@ export default {
                 };
 
                 await API.put(`${this.baseUrl}/cronograma_matriculas/${this.formEditar.id_cronograma}`, payload);
-                
-                
+
+
                 mostraralertas2("ronograma actualizado correctamente", "success");
                 document.getElementById('closeModalEditar').click();
                 this.getData();
@@ -436,24 +554,30 @@ export default {
     border-left: 5px solid #198754;
     transition: all 0.3s ease;
 }
+
 .custom-header:hover {
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .08) !important;
 }
+
 .header-icon {
     width: 55px;
     height: 55px;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .custom-header:hover .header-icon {
     transform: rotate(-10deg) scale(1.1);
 }
+
 .interactive-btn {
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
 .interactive-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 6px 12px rgba(25, 135, 84, 0.25) !important;
 }
+
 .interactive-btn:active {
     transform: translateY(1px);
 }

@@ -57,16 +57,30 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4 py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Id</th>
-                            <th class="py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Nombre</th>
-                            <th class="py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Orden Jerarquía</th>
-                            <th class="text-center py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Estado
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Nombre</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Orden Jerarquía</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado
                             </th>
-                            <th class="text-center py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Fecha de
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
                                 Creación</th>
-                            <th class="text-center py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Fecha de
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
                                 Modificación</th>
-                            <th class="text-center py-3" style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">Acciones
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones
                             </th>
                         </tr>
                     </thead>
@@ -82,7 +96,7 @@
                                 <div class="badge rounded-pill px-3 py-2"
                                     style="background-color: rgba(29, 42, 104, 0.05); color: #1D2A68; border: 1px solid rgba(29, 42, 104, 0.1);">
                                     <i class="fas fa-sort-numeric-down me-1" style="color: #F4B324;"></i> {{
-                                    user.orden_jerarquia }}
+                                        user.orden_jerarquia }}
                                 </div>
                             </td>
 
@@ -182,26 +196,27 @@
                 </nav>
             </div>
         </div>
-
         <div class="modal fade" id="modalUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-plus-circle me-2"></i>Registrar
-                            nuevo Nivel Académico</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>Registrar nuevo Nivel
+                            Académico
+                        </h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>¿Qué hacer aquí?</strong><br>
-                                Registra un nivel académico (ej. <em>Inicial</em>, <em>1ro </em>, <em>... 10mo, 1ro
-                                    Bachillerato</em>)
-                                y añade el orden de jerarquía correspondiente.
+                                <strong style="color: #1D2A68;">¿Qué hacer aquí?</strong><br>
+                                Registra un nivel académico (ej. <em>Inicial</em>, <em>1ro</em>, <em>... 10mo, 1ro
+                                    Bachillerato</em>) y añade el orden de jerarquía correspondiente.
                             </div>
                         </div>
 
@@ -210,7 +225,8 @@
                                 <div class="form-floating">
                                     <input v-model="objetoData.nombre" type="text" class="form-control"
                                         :class="{ 'is-invalid': errorsData.nombre }" id="crearNombre"
-                                        placeholder="Nombre del Nivel Académico">
+                                        placeholder="Nombre del Nivel Académico"
+                                        style="border-color: rgba(29, 42, 104, 0.2);">
                                     <label for="crearNombre">Nombre del Nivel Académico</label>
                                     <div class="invalid-feedback">Por favor, ingrese el nombre del nivel académico.
                                     </div>
@@ -223,45 +239,47 @@
                                 <div class="form-floating">
                                     <select v-model="objetoData.orden_jerarquia" class="form-select"
                                         :class="{ 'is-invalid': errorsData.orden_jerarquia }"
-                                        id="crearOrdenJerarquizado">
+                                        id="crearOrdenJerarquizado" style="border-color: rgba(29, 42, 104, 0.2);">
                                         <option value="" disabled>Seleccione el nivel jerarquizado...</option>
                                         <option v-for="item in opcionesJerarquiaData" :key="item.value"
                                             :value="item.value">
                                             {{ item.label }}
                                         </option>
                                     </select>
-                                    <label for="crearNivelJerarquizado">Nivel Jerarquía</label>
+                                    <label for="crearOrdenJerarquizado">Nivel Jerarquía</label>
                                     <div class="invalid-feedback">Por favor, seleccione el nivel jerarquizado.</div>
                                 </div>
-                                <div class="form-text text-muted small ms-1">Ej: 0, 1ro, 2do, 3ro, 4to, 5to,
-                                    6to...</div>
+                                <div class="form-text text-muted small ms-1">Ej: 0, 1ro, 2do, 3ro, 4to, 5to, 6to...
+                                </div>
                             </div>
 
-                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-save me-2"></i>Crear Nivel Académico
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-save me-2" style="color: #F4B324;"></i>Crear Nivel Académico
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="modal fade" id="modalEditUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-edit me-2"></i>Editar Nivel
-                            Académico</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-edit me-2" style="color: #F4B324;"></i>Editar Nivel Académico
+                        </h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
+                            <i class="fas fa-info-circle fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Actualización de datos:</strong><br>
+                                <strong style="color: #1D2A68;">Actualización de datos:</strong><br>
                                 Modifica la información del nivel académico. Ten en cuenta que si cambias el estado a
                                 <em>Inactivo</em>, los niveles académicos podrían perder acceso.
                             </div>
@@ -271,27 +289,30 @@
                             <div class="form-floating mb-3">
                                 <input v-model="objetoEdit.nombre" type="text" class="form-control"
                                     :class="{ 'is-invalid': errorsEdit.nombre }" id="editNombre"
-                                    placeholder="Nombre del Nivel Académico">
+                                    placeholder="Nombre del Nivel Académico"
+                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                 <label for="editNombre">Nombre del Nivel Académico</label>
                                 <div class="invalid-feedback">Por favor, ingrese el nombre del nivel académico.</div>
                             </div>
 
                             <div class="form-floating mb-3">
                                 <select v-model="objetoEdit.orden_jerarquia" class="form-select"
-                                    :class="{ 'is-invalid': errorsEdit.orden_jerarquia }" id="editOrdenJerarquizado">
+                                    :class="{ 'is-invalid': errorsEdit.orden_jerarquia }" id="editOrdenJerarquizado"
+                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                     <option value="" disabled>Seleccione el nivel jerarquizado...</option>
                                     <option v-for="item in opcionesJerarquiaEdit" :key="item.value" :value="item.value">
                                         {{ item.label }}
                                     </option>
                                 </select>
-                                <label for="crearNivelJerarquizado">Nivel Jerarquía</label>
+                                <label for="editOrdenJerarquizado">Nivel Jerarquía</label>
                                 <div class="invalid-feedback">Por favor, seleccione el nivel jerarquizado.</div>
                             </div>
 
                             <div class="mb-4">
                                 <div class="form-floating">
-                                    <select v-model="objetoEdit.estado" class="form-select border-primary"
-                                        :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado">
+                                    <select v-model="objetoEdit.estado" class="form-select"
+                                        :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado"
+                                        style="border-color: rgba(29, 42, 104, 0.2);">
                                         <option value="" disabled selected>Seleccione un estado</option>
                                         <option value="1">Activo</option>
                                         <option value="0">Inactivo</option>
@@ -303,16 +324,15 @@
                                     asignados a nuevos usuarios.</div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-sync-alt me-2" style="color: #F4B324;"></i>Guardar Cambios
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
 </template>
 

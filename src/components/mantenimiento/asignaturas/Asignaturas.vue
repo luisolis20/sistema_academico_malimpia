@@ -1,15 +1,15 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
-
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
-                    <i class="fas fa-book-open fs-4"></i>
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                    <i class="fas fa-book-open fs-4" style="color: #F4B324;"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión de Asignaturas
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
@@ -19,18 +19,19 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <div
-                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
-                    <i class="fas fa-layer-group me-2"></i>
-                    <span class="fw-medium">
+                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
+                    style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
+                    <i class="fas fa-layer-group me-2" style="color: #F4B324;"></i>
+                    <span class="fw-bold">
                         Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
                     </span>
                 </div>
 
                 <button
-                    class="btn btn-success btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4"
-                    data-bs-toggle="modal" data-bs-target="#modalUsuario">
-                    <i class="fas fa-plus-circle me-2"></i>
+                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                    data-bs-toggle="modal" data-bs-target="#modalUsuario"
+                    style="background-color: #1D2A68; color: white;">
+                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
                     <span class="fw-bold fs-6">Nuevo Registro</span>
                 </button>
             </div>
@@ -53,14 +54,30 @@
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th>Nombre </th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-center">Fecha de Creación</th>
-                            <th class="text-center">Fecha de Modificación</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Nombre</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado
+                            </th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
+                                Creación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
+                                Modificación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,40 +85,44 @@
                             <td class="ps-4 fw-bold text-secondary">{{ user.id_asignatura }}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span>{{ user.nombre }}</span>
+                                    <span class="fw-bold" style="color: #1D2A68;">{{ user.nombre }}</span>
                                 </div>
                             </td>
+
                             <td class="text-center" v-if="user.estado == 1">
                                 <span
-                                    class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
+                                    class="badge bg-success-subtle text-success border border-success px-3 rounded-pill shadow-sm">Activo</span>
                             </td>
                             <td class="text-center" v-else>
                                 <span
-                                    class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill shadow-sm">Inactivo</span>
                             </td>
+
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.created_at }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-calendar-plus me-1" style="color: #F4B324;"></i> {{ user.created_at
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-edit text-primary me-1"></i> {{ user.updated_at }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-edit me-1" style="color: #F4B324;"></i> {{ user.updated_at }}
                                 </span>
                             </td>
+
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-light text-primary" data-bs-toggle="modal"
-                                        data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
-                                        title="Editar detalles de esta asignatura">
+                                    <button class="btn btn-sm btn-light border shadow-sm" style="color: #1D2A68;"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditUsuario"
+                                        @click="cargarDatosEdicion(user)" title="Editar detalles de esta asignatura">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-danger"
+                                    <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.id_asignatura, user.nombre)" v-if="user.estado == 1"
                                         title="Inhabilitar esta asignatura (ocultarla del sistema)">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-success"
+                                    <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
                                         @click="habilitar(user.id_asignatura, user.nombre)" v-else
                                         title="Habilitar esta asignatura nuevamente">
                                         <i class="fas fa-check"></i>
@@ -109,15 +130,18 @@
                                 </div>
                             </td>
                         </tr>
+
                         <tr v-if="objetoList.length === 0 && !cargando">
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fas fa-folder-open fs-1 text-light mb-3 d-block"></i>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fs-1 mb-3 d-block"
+                                    style="color: #1D2A68; opacity: 0.3;"></i>
                                 No se encontraron asignaturas. ¡Haz clic en "Nuevo Registro" para empezar!
                             </td>
                         </tr>
+
                         <tr v-if="cargando">
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #F4B324;"></i>
                                 Cargando información...
                             </td>
                         </tr>
@@ -127,25 +151,32 @@
 
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                        }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
                                 Anterior
                             </button>
                         </li>
 
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
 
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
                                 Siguiente
                             </button>
                         </li>
@@ -158,21 +189,22 @@
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-success"><i class="fas fa-plus-circle me-2"></i>Registrar
-                            nueva Asignatura</h5>
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>Registrar nueva Asignatura
+                        </h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>¿Qué hacer aquí?</strong><br>
-                                Registra una asignatura (ej. <em>"Matemáticas" (para escuela)</em>, <em>Lenguaje </em>,
+                                <strong style="color: #1D2A68;">¿Qué hacer aquí?</strong><br>
+                                Registra una asignatura (ej. <em>"Matemáticas" (para escuela)</em>, <em>Lenguaje</em>,
                                 <em>Física</em>)
-
                             </div>
                         </div>
 
@@ -181,39 +213,42 @@
                                 <div class="form-floating">
                                     <input v-model="objetoData.nombre" type="text" class="form-control"
                                         :class="{ 'is-invalid': errorsData.nombre }" id="crearNombre"
-                                        placeholder="Nombre de la Asignatura">
+                                        placeholder="Nombre de la Asignatura"
+                                        style="border-color: rgba(29, 42, 104, 0.2);">
                                     <label for="crearNombre">Nombre de la Asignatura</label>
                                     <div class="invalid-feedback">Por favor, ingrese el nombre de la asignatura.
                                     </div>
                                 </div>
                                 <div class="form-text text-muted small ms-1">Debe ser un nombre corto y descriptivo. Ej:
-                                    Matemáticas, Lenguaje, etc</div>
+                                    Matemáticas, Lenguaje, etc.</div>
                             </div>
-                            <button type="submit" class="btn btn-success w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-save me-2"></i>Crear Asignatura
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-save me-2" style="color: #F4B324;"></i>Crear Asignatura
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="modal fade" id="modalEditUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary"><i class="fas fa-edit me-2"></i>Editar Asignatura
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-edit me-2" style="color: #F4B324;"></i>Editar Asignatura
                         </h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
+                            <i class="fas fa-info-circle fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Actualización de datos:</strong><br>
+                                <strong style="color: #1D2A68;">Actualización de datos:</strong><br>
                                 Modifica la información de la asignatura. Ten en cuenta que si cambias el estado a
                                 <em>Inactivo</em>, las asignaturas podrían perder acceso.
                             </div>
@@ -223,15 +258,16 @@
                             <div class="form-floating mb-3">
                                 <input v-model="objetoEdit.nombre" type="text" class="form-control"
                                     :class="{ 'is-invalid': errorsEdit.nombre }" id="editNombre"
-                                    placeholder="Nombre de la Asignatura">
+                                    placeholder="Nombre de la Asignatura" style="border-color: rgba(29, 42, 104, 0.2);">
                                 <label for="editNombre">Nombre de la Asignatura</label>
                                 <div class="invalid-feedback">Por favor, ingrese el nombre de la asignatura.</div>
                             </div>
 
                             <div class="mb-4">
                                 <div class="form-floating">
-                                    <select v-model="objetoEdit.estado" class="form-select border-primary"
-                                        :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado">
+                                    <select v-model="objetoEdit.estado" class="form-select"
+                                        :class="{ 'is-invalid': errorsEdit.estado }" id="editEstado"
+                                        style="border-color: rgba(29, 42, 104, 0.2);">
                                         <option value="" disabled selected>Seleccione un estado</option>
                                         <option value="1">Activo</option>
                                         <option value="0">Inactivo</option>
@@ -243,16 +279,15 @@
                                     asignadas a nuevos usuarios.</div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm rounded-3 fw-bold">
-                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+                            <button type="submit" class="btn w-100 py-2 shadow-sm rounded-3 fw-bold border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-sync-alt me-2" style="color: #F4B324;"></i>Guardar Cambios
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
 </template>
 

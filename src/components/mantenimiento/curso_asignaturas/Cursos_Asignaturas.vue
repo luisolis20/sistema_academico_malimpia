@@ -1,15 +1,15 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
-
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
-                    <i class="fas fa-user-edit fs-4"></i>
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                    <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión Global de Asignaturas en cada Curso
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
@@ -37,102 +37,137 @@
         </div>
 
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="background: var(--green-800); color: white;">
-                    <tr>
-                        <th class="ps-4">Id</th>
-                        <th class="ps-4">Docente</th>
-                        <th>¿Tiene Asignaturas?</th>
-                        <th>¿Es docente tutor?</th>
-                        <th class="text-center">Periodo</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="user in objetoList" :key="user.personID">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background-color: #1D2A68 !important;">
+                        <tr>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                ¿Tiene Asignaturas?</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                ¿Tiene Asignaturas?</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                ¿Es docente tutor?</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Periodo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in objetoList" :key="user.personID">
 
-                        <td class="ps-4 fw-bold text-secondary" v-if="user.tiene_asignaturas">{{ user.personID }}</td>
-                        <td class="ps-4 text-muted small" v-else>Sin asignar Materias</td>
+                            <td class="ps-4 fw-bold text-secondary" v-if="user.tiene_asignaturas">{{ user.personID }}
+                            </td>
+                            <td class="ps-4 text-muted small" v-else>Sin asignar Materias</td>
 
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
-                                <div class="avatar-sm me-3 bg-light text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                    style="width: 45px; height: 45px; flex-shrink: 0;">
-                                    <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
-                                        class="w-100 h-100" style="object-fit: cover;" />
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                        style="width: 45px; height: 45px; flex-shrink: 0; color: #1D2A68; border: 1px solid rgba(244, 179, 36, 0.5);">
+                                        <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
+                                            class="w-100 h-100" style="object-fit: cover;" />
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
+                                            user.cedula }}</div>
+                                        <div class="fw-bold" style="color: #1D2A68;">{{ user.nombres }} {{
+                                            user.apellidos }}</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
+                                            calcularEdad(user.fecha_nacimiento) }} años</div>
+                                        <span title="Rol">
+                                            Rol: {{ user.nombre_rol }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
-                                        user.cedula }}</div>
-                                    <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
-                                    <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
-                                        calcularEdad(user.fecha_nacimiento) }} años</div>
-                                    <span title="Rol">
-                                        Rol: {{ user.nombre_rol }}
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
+                            </td>
 
-                        <td>
-                            <span v-if="user.tiene_asignaturas" class="badge bg-success">Sí</span>
-                            <span v-else class="badge bg-danger">No</span>
-                        </td>
+                            <td>
+                                <span v-if="user.tiene_asignaturas" class="badge"
+                                    style="background-color: #1D2A68; color: white;">Sí</span>
+                                <span v-else class="badge bg-danger">No</span>
+                            </td>
 
-                        <td>
-                            <span v-if="user.es_tutor_general === 1" class="badge bg-info">Sí</span>
-                            <span v-else class="text-muted small">No</span>
-                        </td>
+                            <td>
+                                <span v-if="user.es_tutor_general === 1" class="badge fw-bold"
+                                    style="background-color: #F4B324; color: #1D2A68;">Sí</span>
+                                <span v-else class="text-muted small">No</span>
+                            </td>
 
-                        <td class="text-center">
-                            <span v-if="user.tiene_asignaturas && user.nombre_periodo"
-                                class="badge bg-light text-dark border">{{ user.nombre_periodo }}</span>
-                            <span v-else class="badge bg-danger-subtle text-danger border border-danger px-3">-</span>
-                        </td>
+                            <td class="text-center">
+                                <span v-if="user.tiene_asignaturas && user.nombre_periodo"
+                                    class="badge bg-light text-dark border">{{ user.nombre_periodo }}</span>
+                                <span v-else
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3">-</span>
+                            </td>
 
-                        <td class="text-center">
-                            <button v-if="!user.tiene_asignaturas" @click="abrirModalAsignacion(user, 'crear')"
-                                class="btn btn-sm btn-primary interactive-btn">
-                                <i class="fas fa-plus"></i> Asignar
-                            </button>
-                            <button v-else @click="abrirModalAsignacion(user, 'editar')"
-                                class="btn btn-sm btn-info text-white interactive-btn">
-                                <i class="fas fa-eye"></i> Ver/Editar
-                            </button>
-                        </td>
+                            <td class="text-center">
+                                <button v-if="!user.tiene_asignaturas" @click="abrirModalAsignacion(user, 'crear')"
+                                    class="btn btn-sm text-white interactive-btn"
+                                    style="background-color: #1D2A68; border: none;">
+                                    <i class="fas fa-plus" style="color: #F4B324;"></i> Asignar
+                                </button>
+                                <button v-else @click="abrirModalAsignacion(user, 'editar')"
+                                    class="btn btn-sm interactive-btn fw-bold"
+                                    style="background-color: #F4B324; color: #1D2A68; border: none;">
+                                    <i class="fas fa-eye"></i> Ver/Editar
+                                </button>
+                            </td>
 
-                    </tr>
+                        </tr>
 
-                    <tr v-if="cargando">
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i> Cargando...
-                        </td>
-                    </tr>
-                    <tr v-if="!cargando && objetoList.length === 0">
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="fas fa-search fs-2 text-secondary mb-2 d-block"></i>
-                            No se encontraron registros en el sistema.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        <tr v-if="cargando">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #1D2A68;"></i>
+                                Cargando...
+                            </td>
+                        </tr>
+                        <tr v-if="!cargando && objetoList.length === 0">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-search fs-2 mb-2 d-block" style="color: #F4B324;"></i>
+                                No se encontraron registros en el sistema.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                        }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">Anterior</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
+                                Anterior
+                            </button>
                         </li>
+
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
+
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">Siguiente</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
+                                Siguiente
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -141,9 +176,10 @@
         <div class="modal fade" id="modalAsignacion" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content border-0 shadow">
-                    <div class="modal-header bg-success text-white">
+                    <div class="modal-header text-white"
+                        style="background-color: #1D2A68; border-bottom: 3px solid #F4B324;">
                         <h5 class="modal-title fw-bold">
-                            <i class="fas fa-book-open me-2"></i>
+                            <i class="fas fa-book-open me-2" style="color: #F4B324;"></i>
                             {{ modoModal === 'crear' ? 'Asignar Materias' : 'Gestionar Materias Asignadas' }}
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -156,10 +192,10 @@
                                 <div class="card border-0 shadow-sm mb-3">
                                     <div class="card-body text-center">
                                         <img :src="personaSeleccionada.foto" @error="handleImageError"
-                                            class="rounded-circle mb-3 border border-3 border-success"
-                                            style="width: 100px; height: 100px; object-fit: cover;">
-                                        <h5 class="fw-bold mb-0">{{ personaSeleccionada.nombres }} {{
-                                            personaSeleccionada.apellidos }}</h5>
+                                            class="rounded-circle mb-3 border border-3"
+                                            style="width: 100px; height: 100px; object-fit: cover; border-color: #F4B324 !important;">
+                                        <h5 class="fw-bold mb-0" style="color: #1D2A68;">{{ personaSeleccionada.nombres
+                                            }} {{ personaSeleccionada.apellidos }}</h5>
                                         <p class="text-muted small mb-0"><i class="far fa-id-card me-1"></i>{{
                                             personaSeleccionada.cedula }}</p>
                                     </div>
@@ -167,14 +203,18 @@
 
                                 <div class="card border-0 shadow-sm">
                                     <div class="card-body">
-                                        <h6 class="fw-bold text-success border-bottom pb-2 mb-3">Cursos a Asignar</h6>
+                                        <h6 class="fw-bold border-bottom pb-2 mb-3"
+                                            style="color: #1D2A68; border-color: rgba(244, 179, 36, 0.5) !important;">
+                                            Cursos a Asignar
+                                        </h6>
 
                                         <div v-if="personaSeleccionada.es_tutor">
-                                            <div class="alert alert-info py-2 small mb-3">
+                                            <div class="alert py-2 small mb-3"
+                                                style="background-color: rgba(29, 42, 104, 0.05); color: #1D2A68; border-left: 4px solid #F4B324;">
                                                 <strong>Docente Tutor de:</strong><br>
                                                 {{ personaSeleccionada.tutor_nivel }} - {{
-                                                    personaSeleccionada.tutor_especialidad }} "{{
-                                                    personaSeleccionada.tutor_paralelo }}"
+                                                personaSeleccionada.tutor_especialidad }} "{{
+                                                personaSeleccionada.tutor_paralelo }}"
                                             </div>
                                             <div v-if="esTutorRestringido" class="text-danger small mb-2">
                                                 <i class="fas fa-exclamation-triangle"></i> Por su nivel/especialidad,
@@ -194,7 +234,7 @@
                                                         @change="actualizarTablaSeleccion">
                                                     <label class="form-check-label small">
                                                         {{ curso.nombre_nivel }} {{ curso.nombre_especialidad }} "{{
-                                                            curso.paralelo }}"
+                                                        curso.paralelo }}"
                                                     </label>
                                                 </div>
                                             </div>
@@ -206,9 +246,10 @@
                             <div class="col-md-8">
                                 <div class="card border-0 shadow-sm mb-3">
                                     <div class="card-body">
-                                        <div
-                                            class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                                            <h6 class="fw-bold text-success mb-0">Seleccionar Asignaturas</h6>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
+                                            style="border-color: rgba(244, 179, 36, 0.5) !important;">
+                                            <h6 class="fw-bold mb-0" style="color: #1D2A68;">Seleccionar Asignaturas
+                                            </h6>
                                             <input type="text" class="form-control form-control-sm w-50"
                                                 placeholder="Buscar asignatura..." v-model="busquedaAsignatura">
                                         </div>
@@ -243,26 +284,30 @@
                                                 </table>
                                             </div>
                                             <div class="text-end mt-2">
-                                                <button class="btn btn-sm btn-secondary" @click="agregarAlResumen"
+                                                <button class="btn btn-sm text-white" style="background-color: #1D2A68;"
+                                                    @click="agregarAlResumen"
                                                     :disabled="asignaturasTemporales.length === 0">
-                                                    Añadir a la lista <i class="fas fa-arrow-down"></i>
+                                                    Añadir a la lista <i class="fas fa-arrow-down"
+                                                        style="color: #F4B324;"></i>
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="card border-0 shadow-sm bg-success-subtle">
+                                <div class="card border-0 shadow-sm" style="background-color: rgba(29, 42, 104, 0.05);">
                                     <div class="card-body">
-                                        <h6 class="fw-bold text-success border-bottom border-success pb-2 mb-3">Resumen
-                                            de Asignación</h6>
+                                        <h6 class="fw-bold border-bottom pb-2 mb-3"
+                                            style="color: #1D2A68; border-color: #F4B324 !important;">
+                                            Resumen de Asignación
+                                        </h6>
                                         <div class="table-responsive" style="max-height: 200px;">
                                             <table class="table table-sm table-bordered bg-white mb-0">
                                                 <thead>
                                                     <tr>
-                                                        <th>Curso</th>
-                                                        <th>Asignaturas</th>
-                                                        <th class="text-center">Quitar</th>
+                                                        <th style="color: #1D2A68;">Curso</th>
+                                                        <th style="color: #1D2A68;">Asignaturas</th>
+                                                        <th class="text-center" style="color: #1D2A68;">Quitar</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -316,9 +361,9 @@
 
                     <div class="modal-footer bg-white">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="button" class="btn btn-success" @click="guardarAsignaciones"
-                            :disabled="asignacionesResumen.length === 0">
-                            <i class="fas fa-save me-1"></i> Guardar Asignaciones
+                        <button type="button" class="btn text-white fw-bold" style="background-color: #1D2A68;"
+                            @click="guardarAsignaciones" :disabled="asignacionesResumen.length === 0">
+                            <i class="fas fa-save me-1" style="color: #F4B324;"></i> Guardar Asignaciones
                         </button>
                     </div>
                 </div>

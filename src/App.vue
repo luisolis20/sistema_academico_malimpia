@@ -60,23 +60,51 @@
                   <i class="fas fa-graduation-cap me-2 text-muted"></i> Niveles Académicos
                 </router-link>
               </li>
-            </ul>
-          </li>
-
-          <li class="nav-item dropdown" @mouseenter="hoverDropdown('estudiantes')" @mouseleave="leaveDropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('estudiantes')">
-              <i class="bi bi-people-fill me-1"></i> Estudiantes
-            </a>
-            <ul class="dropdown-menu shadow border-0 custom-dropdown"
-              :class="{ 'show': activeDropdown === 'estudiantes' }">
               <li>
-                <router-link class="dropdown-item" to="/estudiantes" @click="closeMenu">
-                  <i class="bi bi-list-ul me-2 text-muted"></i> Lista de Estudiantes
+                <router-link class="dropdown-item" to="/especialidades" @click="closeMenu">
+                  <i class="fas fa-stethoscope me-2 text-muted"></i> Especialidades
                 </router-link>
               </li>
               <li>
-                <router-link class="dropdown-item" to="/createE" @click="closeMenu">
-                  <i class="bi bi-person-plus-fill me-2 text-muted"></i> Registrar Estudiante
+                <router-link class="dropdown-item" to="/asignaturas" @click="closeMenu">
+                  <i class="fas fa-book-open me-2 text-muted"></i> Asignaturas
+                </router-link>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('cursos')" @mouseleave="leaveDropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('cursos')">
+              <i class="fas fa-chalkboard-teacher me-1"></i> Cursos
+            </a>
+
+            <ul class="dropdown-menu shadow border-0 custom-dropdown" :class="{ 'show': activeDropdown === 'cursos' }">
+              <li>
+                <router-link class="dropdown-item" to="/cursos" @click="closeMenu">
+                  <i class="fas fa-layer-group me-2 text-muted"></i> Lista de Cursos
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/cursos-asignaturas" @click="closeMenu">
+                  <i class="fas fa-book me-2 text-muted"></i> Cursos Asignaturas
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/horarios-clases" @click="closeMenu">
+                  <i class="fas fa-calendar-day me-2 text-muted"></i> Horarios Clases
+                </router-link>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('matriculas')" @mouseleave="leaveDropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('matriculas')">
+              <i class="fas fa-clipboard-list me-1"></i> Matrículas
+            </a>
+            <ul class="dropdown-menu shadow border-0 custom-dropdown"
+              :class="{ 'show': activeDropdown === 'matriculas' }">
+              <li>
+                <router-link class="dropdown-item" to="/cronograma-matriculas" @click="closeMenu">
+                  <i class="fas fa-clock me-2 text-muted"></i> Cronograma de matrículas
                 </router-link>
               </li>
             </ul>

@@ -1,27 +1,28 @@
 <template>
     <div class="container-fluid py-4">
         <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header">
-
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
+            style="border-left: 6px solid #F4B324;">
             <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div
-                    class="header-icon shadow-sm bg-success-subtle text-success rounded-circle d-flex justify-content-center align-items-center me-3">
-                    <i class="fas fa-user-edit fs-4"></i>
+                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                    <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
                 </div>
                 <div>
-                    <h2 class="fw-bold mb-0" style="color: var(--green-900); font-family: 'Fraunces', serif;">
+                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
                         Gestión Global de Cursos
                     </h2>
                     <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de cursos, aquí se asignarán los docentes tutores de cada curso..
+                        Administración de cursos, aquí se asignarán los docentes tutores de cada curso.
                     </p>
                 </div>
             </div>
+
             <div class="d-flex align-items-center gap-3">
-                <div
-                    class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border border-success bg-success-subtle text-success">
-                    <i class="fas fa-book me-2"></i>
-                    <span class="fw-medium">
+                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
+                    style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
+                    <i class="fas fa-book me-2" style="color: #F4B324;"></i>
+                    <span class="fw-bold">
                         Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
                     </span>
                 </div>
@@ -48,99 +49,135 @@
         <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: var(--green-800); color: white;">
+                    <thead style="background-color: #1D2A68 !important;">
                         <tr>
-                            <th class="ps-4">Id</th>
-                            <th class="ps-4">Docente</th>
-                            <th>Curso Asignado</th>
-                            <th>Paralelo</th>
-                            <th>Periodo</th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-center">Fecha de Creación</th>
-                            <th class="text-center">Fecha de Modificación</th>
-                            <th class="text-center">Acciones</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Id</th>
+                            <th class="ps-4 py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Docente</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Curso Asignado</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Paralelo</th>
+                            <th class="py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Periodo</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Estado
+                            </th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
+                                Creación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Fecha de
+                                Modificación</th>
+                            <th class="text-center py-3"
+                                style="background-color: #1D2A68 !important; color: white !important; border-bottom: none;">
+                                Acciones
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="user in objetoList" :key="user.personID">
                             <td class="ps-4 fw-bold text-secondary" v-if="user.CursoID">{{ user.CursoID }}</td>
                             <td class="ps-4 text-muted small" v-else>Sin asignar</td>
+
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 bg-light text-success rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
-                                        style="width: 45px; height: 45px; flex-shrink: 0;">
+                                    <div class="avatar-sm me-3 bg-light rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm border"
+                                        style="width: 45px; height: 45px; flex-shrink: 0; color: #1D2A68; border-color: rgba(29, 42, 104, 0.2) !important;">
                                         <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
                                             class="w-100 h-100" style="object-fit: cover;" />
                                     </div>
                                     <div>
-                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
-                                            user.cedula }}</div>
-                                        <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
-                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
-                                            calcularEdad(user.fecha_nacimiento) }} años</div>
-                                        <span title="Paralelo">
-                                            Rol: {{ user.nombre_rol }}
+                                        <div class="text-muted small fw-bold mb-1">
+                                            <i class="far fa-id-card me-1" style="color: #F4B324;"></i>{{ user.cedula }}
+                                        </div>
+                                        <div class="fw-bold" style="color: #1D2A68;">{{ user.nombres }} {{
+                                            user.apellidos }}</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">
+                                            Edad: {{ calcularEdad(user.fecha_nacimiento) }} años
+                                        </div>
+                                        <span title="Paralelo" class="small text-secondary">
+                                            Rol: <span style="color: #1D2A68; font-weight: 500;">{{ user.nombre_rol
+                                                }}</span>
                                         </span>
                                     </div>
                                 </div>
                             </td>
+
                             <td v-if="user.CursoID && user.EspecialidadID">
-                                <div class="fw-bold text-dark" v-if="user.nombre_nivel === '0'">
+                                <div class="fw-bold" style="color: #1D2A68;" v-if="user.nombre_nivel === '0'">
                                     {{ user.nombre_especialidad }}
                                 </div>
-                                <div class="fw-bold text-dark" v-else>
+                                <div class="fw-bold" style="color: #1D2A68;" v-else>
                                     {{ user.nombre_nivel }} {{ user.nombre_especialidad }}
                                 </div>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
-                            <td v-if="user.CursoID"><span class="badge bg-light text-dark border">{{ user.paralelo }}
-                                </span>
+
+                            <td v-if="user.CursoID">
+                                <span class="badge bg-light text-dark border shadow-sm">{{ user.paralelo }}</span>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
-                            <td v-if="user.paralelo"><span class="badge bg-light text-dark border">{{
-                                user.nombre_periodo }}
-                                </span>
+
+                            <td v-if="user.paralelo">
+                                <span class="badge bg-light text-dark border shadow-sm">{{ user.nombre_periodo }}</span>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
 
                             <td class="text-center">
                                 <span v-if="user.estado_curso == 1"
-                                    class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
+                                    class="badge bg-success-subtle text-success border border-success px-3 rounded-pill shadow-sm">Activo</span>
                                 <span v-else-if="user.CursoID"
-                                    class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
+                                    class="badge bg-danger-subtle text-danger border border-danger px-3 rounded-pill shadow-sm">Inactivo</span>
                             </td>
+
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-calendar-plus text-success me-1"></i> {{ user.created_at }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-calendar-plus me-1" style="color: #F4B324;"></i> {{ user.created_at
+                                    }}
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1">
-                                    <i class="far fa-edit text-primary me-1"></i> {{ user.updated_at }}
+                                <span class="badge bg-light text-secondary border fw-normal px-2 py-1 shadow-sm">
+                                    <i class="far fa-edit me-1" style="color: #F4B324;"></i> {{ user.updated_at }}
                                 </span>
                             </td>
+
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-light text-primary border shadow-sm"
+                                    <button class="btn btn-sm btn-light border shadow-sm" style="color: #1D2A68;"
                                         @click="abrirModalCrear(user)" v-if="!user.CursoID" title="Asignar curso">
                                         <i class="fas fa-user-plus me-1"></i> Asignar Curso
                                     </button>
-                                    <button class="btn btn-sm btn-light text-info border shadow-sm ms-1"
+
+                                    <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #1D2A68;"
                                         @click="abrirModalEditar(user)" v-if="user.CursoID"
                                         title="Editar el curso asignado">
                                         <i class="fas fa-user-edit"></i> Editar
                                     </button>
-                                    <button class="btn btn-sm btn-light text-warning border shadow-sm ms-1"
-                                        @click="quitarDocente(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)" v-if="user.CursoID"
-                                        title="Quitar docente de este curso">
+
+                                    <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #F4B324;"
+                                        @click="quitarDocente(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)"
+                                        v-if="user.CursoID" title="Quitar docente de este curso">
                                         <i class="fas fa-user-minus"></i> Quitar Docente
                                     </button>
-                                    <button class="btn btn-sm btn-light text-danger"
+
+                                    <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)"
                                         v-if="user.estado_curso == 1 && user.CursoID" title="Inhabilitar este curso">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light text-success"
+
+                                    <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
                                         @click="habilitar(user.CursoID, user.nombre_nivel + ' ' + user.nombre_especialidad + ' paralelo ' + user.paralelo)"
                                         v-if="user.estado_curso == 0 && user.CursoID" title="Habilitar este curso">
                                         <i class="fas fa-check"></i>
@@ -148,15 +185,17 @@
                                 </div>
                             </td>
                         </tr>
+
                         <tr v-if="cargando">
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fs-2 text-primary mb-2 d-block"></i> Cargando...
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="fas fa-spinner fa-spin fs-2 mb-2 d-block" style="color: #F4B324;"></i>
+                                Cargando...
                             </td>
                         </tr>
 
                         <tr v-if="!cargando && objetoList.length === 0">
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fas fa-search fs-2 text-secondary mb-2 d-block"></i>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <i class="fas fa-search fs-2 mb-2 d-block" style="color: #1D2A68; opacity: 0.3;"></i>
                                 No se encontraron registros en el sistema.
                             </td>
                         </tr>
@@ -165,21 +204,34 @@
             </div>
             <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center py-3"
                 v-if="lastPage > 1">
-                <span class="text-muted small">Página <strong>{{ currentPage }}</strong> de <strong>{{ lastPage
-                }}</strong></span>
+                <span class="text-muted small">
+                    Página <strong style="color: #1D2A68;">{{ currentPage }}</strong> de <strong
+                        style="color: #1D2A68;">{{ lastPage }}</strong>
+                </span>
+
                 <nav aria-label="Navegación de páginas">
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" :class="{ disabled: currentPage <= 1 }">
-                            <button class="page-link" @click="cambiarPagina(currentPage - 1)"
-                                :disabled="currentPage <= 1">Anterior</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage - 1)" :disabled="currentPage <= 1">
+                                Anterior
+                            </button>
                         </li>
+
                         <li class="page-item" v-for="page in paginasMostradas" :key="page"
                             :class="{ active: page === currentPage }">
-                            <button class="page-link" @click="cambiarPagina(page)">{{ page }}</button>
+                            <button class="page-link shadow-none" :style="page === currentPage
+                                ? 'background-color: #F4B324 !important; border-color: #F4B324 !important; color: #1D2A68 !important; font-weight: bold;'
+                                : 'color: #1D2A68; border-color: #dee2e6;'" @click="cambiarPagina(page)">
+                                {{ page }}
+                            </button>
                         </li>
+
                         <li class="page-item" :class="{ disabled: currentPage >= lastPage }">
-                            <button class="page-link" @click="cambiarPagina(currentPage + 1)"
-                                :disabled="currentPage >= lastPage">Siguiente</button>
+                            <button class="page-link shadow-none" style="color: #1D2A68; border-color: #dee2e6;"
+                                @click="cambiarPagina(currentPage + 1)" :disabled="currentPage >= lastPage">
+                                Siguiente
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -190,19 +242,20 @@
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-success">
-                            <i class="fas fa-user-plus me-2"></i>Asignar docente al curso
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-plus me-2" style="color: #F4B324;"></i>Asignar docente al curso
                         </h5>
                         <button type="button" class="btn-close" id="btnCloseModalCrear"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-success bg-success-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-lightbulb fs-4 text-success me-3"></i>
+                            <i class="fas fa-lightbulb fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Guía de Registro:</strong><br>
+                                <strong style="color: #1D2A68;">Guía de Registro:</strong><br>
                                 Aquí debes asignar un docente tutor a un curso específico.
                                 Asegúrate de seleccionar el nivel académico y la especialidad correctos
                                 para que el curso se configure adecuadamente.
@@ -215,8 +268,8 @@
                                 <div class="col-md-3 text-center border-end mb-4 mb-md-0">
                                     <h6 class="text-muted mb-3 fw-bold">Foto de Perfil</h6>
                                     <div class="mb-3 d-flex justify-content-center">
-                                        <div class="rounded-circle shadow-sm border overflow-hidden"
-                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                        <div class="rounded-circle shadow-sm overflow-hidden"
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa; border: 2px solid rgba(29, 42, 104, 0.1);">
                                             <img :src="personaSeleccionada.foto" class="w-100 h-100"
                                                 style="object-fit: cover;" alt="Vista previa">
                                         </div>
@@ -229,7 +282,8 @@
                                         <div class="col-md-4">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control bg-light text-secondary fw-bold"
-                                                    id="crearCedula" readonly :value="personaSeleccionada.cedula">
+                                                    id="crearCedula" readonly :value="personaSeleccionada.cedula"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <label for="crearCedula">Cédula</label>
                                             </div>
                                         </div>
@@ -238,7 +292,8 @@
                                             <div class="form-floating">
                                                 <input type="text" class="form-control bg-light text-secondary fw-bold"
                                                     id="crearNombres" readonly
-                                                    :value="personaSeleccionada.nombres + ' ' + personaSeleccionada.apellidos">
+                                                    :value="personaSeleccionada.nombres + ' ' + personaSeleccionada.apellidos"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <label for="crearNombres">Nombres y Apellidos</label>
                                             </div>
                                         </div>
@@ -246,7 +301,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="crearNivel"
-                                                    v-model="objetoData.id_nivel">
+                                                    v-model="objetoData.id_nivel"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled>Seleccione un nivel...</option>
                                                     <option v-for="nivel in objetoNivelList" :key="nivel.id_nivel"
                                                         :value="nivel.id_nivel">
@@ -260,7 +316,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="crearEspecialidad"
-                                                    v-model="objetoData.id_especialidad">
+                                                    v-model="objetoData.id_especialidad"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled>Seleccione una especialidad...</option>
                                                     <option v-for="especialidad in objetoEspecialidadList"
                                                         :key="especialidad.id_especialidad"
@@ -275,7 +332,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="crearParalelo"
-                                                    v-model="objetoData.paralelo">
+                                                    v-model="objetoData.paralelo"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled selected>Seleccione un paralelo</option>
                                                     <option value="A">A</option>
                                                     <option value="B">B</option>
@@ -290,34 +348,34 @@
                                 </div>
                             </div>
 
-                            <hr class="my-4">
-                            <button type="submit" class="btn btn-success w-100 py-3 shadow-sm rounded-3 fw-bold fs-6">
-                                <i class="fas fa-save me-2"></i>Guardar Asignación
+                            <hr class="my-4" style="border-color: rgba(29, 42, 104, 0.1);">
+                            <button type="submit" class="btn w-100 py-3 shadow-sm rounded-3 fw-bold fs-6 border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-save me-2" style="color: #F4B324;"></i>Guardar Asignación
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-
         <div class="modal fade" id="modalEditarUsuario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
                     <div class="modal-header border-0 bg-light rounded-top-4">
-                        <h5 class="modal-title fw-bold text-primary">
-                            <i class="fas fa-user-edit me-2"></i>Editar Asignación de Curso
+                        <h5 class="modal-title fw-bold" style="color: #1D2A68;">
+                            <i class="fas fa-user-edit me-2" style="color: #F4B324;"></i>Editar Asignación de Curso
                         </h5>
                         <button type="button" class="btn-close" id="btnCloseModalEditar"
                             data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
 
-                        <div class="alert alert-primary bg-primary-subtle border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                        <div class="alert border-0 d-flex align-items-center p-3 mb-4 rounded-3"
+                            style="background-color: rgba(29, 42, 104, 0.05); border-left: 4px solid #F4B324 !important;"
                             role="alert">
-                            <i class="fas fa-info-circle fs-4 text-primary me-3"></i>
+                            <i class="fas fa-info-circle fs-4 me-3" style="color: #F4B324;"></i>
                             <div class="small text-dark">
-                                <strong>Actualización de datos:</strong><br>
+                                <strong style="color: #1D2A68;">Actualización de datos:</strong><br>
                                 Actualiza al docente tutor del curso. Ten en cuenta que si cambias el estado a
                                 <em>Inactivo</em>, los usuarios podrían perder acceso.
                             </div>
@@ -329,8 +387,8 @@
                                 <div class="col-md-3 text-center border-end mb-4 mb-md-0">
                                     <h6 class="text-muted mb-3 fw-bold">Foto de Perfil</h6>
                                     <div class="mb-3 d-flex justify-content-center">
-                                        <div class="rounded-circle shadow-sm border overflow-hidden"
-                                            style="width: 150px; height: 150px; background-color: #f8f9fa;">
+                                        <div class="rounded-circle shadow-sm overflow-hidden"
+                                            style="width: 150px; height: 150px; background-color: #f8f9fa; border: 2px solid rgba(29, 42, 104, 0.1);">
                                             <img :src="personaSeleccionada.foto" class="w-100 h-100"
                                                 style="object-fit: cover;" alt="Vista previa">
                                         </div>
@@ -343,7 +401,8 @@
                                         <div class="col-md-4">
                                             <div class="form-floating">
                                                 <input type="text" class="form-control bg-light text-secondary fw-bold"
-                                                    id="editarCedula" readonly :value="personaSeleccionada.cedula">
+                                                    id="editarCedula" readonly :value="personaSeleccionada.cedula"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <label for="editarCedula">Cédula</label>
                                             </div>
                                         </div>
@@ -352,7 +411,8 @@
                                             <div class="form-floating">
                                                 <input type="text" class="form-control bg-light text-secondary fw-bold"
                                                     id="editarNombres" readonly
-                                                    :value="personaSeleccionada.nombres + ' ' + personaSeleccionada.apellidos">
+                                                    :value="personaSeleccionada.nombres + ' ' + personaSeleccionada.apellidos"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                 <label for="editarNombres">Nombres y Apellidos</label>
                                             </div>
                                         </div>
@@ -360,7 +420,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="editarNivel"
-                                                    v-model="objetoEdit.id_nivel">
+                                                    v-model="objetoEdit.id_nivel"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled>Seleccione un nivel...</option>
                                                     <option v-for="nivel in objetoNivelList" :key="nivel.id_nivel"
                                                         :value="nivel.id_nivel">
@@ -374,7 +435,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="editarEspecialidad"
-                                                    v-model="objetoEdit.id_especialidad">
+                                                    v-model="objetoEdit.id_especialidad"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled>Seleccione una especialidad...</option>
                                                     <option v-for="especialidad in objetoEspecialidadList"
                                                         :key="especialidad.id_especialidad"
@@ -389,7 +451,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="editarParalelo"
-                                                    v-model="objetoEdit.paralelo">
+                                                    v-model="objetoEdit.paralelo"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled selected>Seleccione un paralelo</option>
                                                     <option value="A">A</option>
                                                     <option value="B">B</option>
@@ -402,7 +465,8 @@
                                         <div class="col-md-6">
                                             <div class="form-floating">
                                                 <select class="form-select" id="editarEstado"
-                                                    v-model="objetoEdit.estado">
+                                                    v-model="objetoEdit.estado"
+                                                    style="border-color: rgba(29, 42, 104, 0.2);">
                                                     <option value="" disabled selected>Seleccione un estado</option>
                                                     <option value="1">Activo</option>
                                                     <option value="0">Inactivo</option>
@@ -415,9 +479,10 @@
                                 </div>
                             </div>
 
-                            <hr class="my-4">
-                            <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm rounded-3 fw-bold fs-6">
-                                <i class="fas fa-sync-alt me-2"></i>Guardar Cambios
+                            <hr class="my-4" style="border-color: rgba(29, 42, 104, 0.1);">
+                            <button type="submit" class="btn w-100 py-3 shadow-sm rounded-3 fw-bold fs-6 border-0"
+                                style="background-color: #1D2A68; color: white;">
+                                <i class="fas fa-sync-alt me-2" style="color: #F4B324;"></i>Guardar Cambios
                             </button>
                         </form>
                     </div>
