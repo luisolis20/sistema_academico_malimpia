@@ -24,7 +24,7 @@
               <i class="fas fa-home me-1"></i> Inicio
             </router-link>
           </li>
-          <li class="nav-item dropdown" @mouseenter="hoverDropdown('mantenimiento')" @mouseleave="leaveDropdown">
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('mantenimiento')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
             <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('mantenimiento')">
               <i class="fas fa-wrench me-1"></i> Mantenimiento
             </a>
@@ -79,17 +79,17 @@
             </a>
 
             <ul class="dropdown-menu shadow border-0 custom-dropdown" :class="{ 'show': activeDropdown === 'cursos' }">
-              <li>
+              <li v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
                 <router-link class="dropdown-item" to="/cursos" @click="closeMenu">
                   <i class="fas fa-layer-group me-2 text-muted"></i> Lista de Cursos
                 </router-link>
               </li>
-              <li>
+              <li v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
                 <router-link class="dropdown-item" to="/cursos-asignaturas" @click="closeMenu">
                   <i class="fas fa-book me-2 text-muted"></i> Cursos Asignaturas
                 </router-link>
               </li>
-              <li>
+              <li v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
                 <router-link class="dropdown-item" to="/horarios-clases" @click="closeMenu">
                   <i class="fas fa-calendar-day me-2 text-muted"></i> Horarios Clases
                 </router-link>
@@ -102,7 +102,7 @@
             </a>
             <ul class="dropdown-menu shadow border-0 custom-dropdown"
               :class="{ 'show': activeDropdown === 'matriculas' }">
-              <li>
+              <li v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
                 <router-link class="dropdown-item" to="/cronograma-matriculas" @click="closeMenu">
                   <i class="fas fa-clock me-2 text-muted"></i> Cronograma de matrículas
                 </router-link>

@@ -29,41 +29,41 @@ export default {
           this.url2,
           "Logueado",
         );
-        if (!response || response.error) {
-          const msg = response?.mensaje || "Credenciales incorrectas";
-          mostraralertas(msg, "warning");
-          this.error = msg;
-          return; // Detenemos la ejecución aquí
-        }
 
-        await getMe();
-        const role = response.Rol;
-        const tok = response.token;
-        if (role === "Administrador") {
-          mostraralertas(
-            "BIENVENIDO ADMIN " + (response.Nombre || ""),
-            "success",
-          );
-          this.$router.push("/principal");
-        } else if (role === "Representante") {
-          mostraralertas(
-            "BIENVENIDO REPRESENTANTE " + (response.Nombre || ""),
-            "success",
-          );
-          this.$router.push("/principal");
-        } else if (role === "Estudiante") {
-          mostraralertas(
-            "BIENVENIDO ESTUDIANTE " + (response.Nombre || ""),
-            "success",
-          );
-          this.$router.push("/principal");
-        } else if (role === "Docente") {
-          mostraralertas(
-            "BIENVENIDO DOCENTE " + (response.Nombre || ""),
-            "success",
-          );
-          this.$router.push("/principal");
+        console.log("✅ Respuesta del servidor:", response);
+        if (response.error) {
+          mostraralertas(response.mensaje, 'warning');
+        } else if (response){
+          await getMe();
+          const role = response.Rol;
+          const tok = response.token;
+          if (role === "Administrador") {
+            mostraralertas(
+              "BIENVENIDO ADMIN " + (response.Nombre || ""),
+              "success",
+            );
+            this.$router.push("/principal");
+          } else if (role === "Representante") {
+            mostraralertas(
+              "BIENVENIDO REPRESENTANTE " + (response.Nombre || ""),
+              "success",
+            );
+            this.$router.push("/principal");
+          } else if (role === "Estudiante") {
+            mostraralertas(
+              "BIENVENIDO ESTUDIANTE " + (response.Nombre || ""),
+              "success",
+            );
+            this.$router.push("/principal");
+          } else if (role === "Docente") {
+            mostraralertas(
+              "BIENVENIDO DOCENTE " + (response.Nombre || ""),
+              "success",
+            );
+            this.$router.push("/principal");
+          }
         }
+        
 
       } catch (error) {
         console.error("Error en login:", error);

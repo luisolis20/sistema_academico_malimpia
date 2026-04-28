@@ -8,21 +8,15 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
       url: url,
       data: parametros,
     });
-    // Si la API devuelve un campo "error" explícito aunque el status sea 200
-    if (response.data && response.data.error) {
-      return {
-        error: true,
-        mensaje: response.data.mensaje || "Error en las credenciales",
-      };
-    }
+    console.log("e:", response);
     if (response.data && response.data.token) {
+      store.commit("setToken_sitma", response.data.token);
+      store.commit("setTokenType_sitma", response.data.token_type || "Bearer");
       if (response.data.rol === "Administrador") {
         store.commit("setRol_sitma", response.data.rol);
         store.commit("setcorreo_sitma", response.data.correo);
         store.commit("setname_sitma", response.data.nombre + " " + response.data.apellidos);
         store.commit("setid_sitma", response.data.id_usuario);
-        store.commit("setToken_sitma", response.data.token);
-        store.commit("setTokenType_sitma", response.data.token_type || "Bearer");
         return {
           token: response.data.token,
           Rol: response.data.rol,
@@ -36,8 +30,6 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
         store.commit("setcorreo_sitma", response.data.correo);
         store.commit("setname_sitma", response.data.nombre + " " + response.data.apellidos);
         store.commit("setid_sitma", response.data.id_usuario);
-        store.commit("setToken_sitma", response.data.token);
-        store.commit("setTokenType_sitma", response.data.token_type || "Bearer");
         return {
           token: response.data.token,
           Rol: response.data.rol,
@@ -51,8 +43,6 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
         store.commit("setcorreo_sitma", response.data.correo);
         store.commit("setname_sitma", response.data.nombre + " " + response.data.apellidos);
         store.commit("setid_sitma", response.data.id_usuario);
-        store.commit("setToken_sitma", response.data.token);
-        store.commit("setTokenType_sitma", response.data.token_type || "Bearer");
         return {
           token: response.data.token,
           Rol: response.data.rol,
@@ -65,8 +55,6 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
         store.commit("setcorreo_sitma", response.data.correo);
         store.commit("setname_sitma", response.data.nombre_persona + " " + response.data.apellidos);
         store.commit("setid_sitma", response.data.id_usuario);
-        store.commit("setToken_sitma", response.data.token);
-        store.commit("setTokenType_sitma", response.data.token_type || "Bearer");
         return {
           token: response.data.token,
           Rol: response.data.rol,
@@ -75,8 +63,16 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
           token_type: response.data.token_type,
         };
       }
+    } else {
+      console.error("Respuesta inesperada:", response);
+      return {
+        error: response.data.mensaje,
+        clave: response.data.clave,
+        mensaje: response.data.mensaje,
+      };
+
     }
-    return { error: true, mensaje: "Credenciales incorrectas" };
+
   } catch (error) {
     console.error("Error:", error.response.data);
     throw error;

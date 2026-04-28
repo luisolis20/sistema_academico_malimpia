@@ -1,7 +1,8 @@
 <template>
-  <div class="login-container d-flex align-items-center justify-content-center">
+  <div class="container-fluid d-flex vh-100 align-items-center justify-content-center m-0 p-0 login-bg">
+
     <div class="card shadow-lg border-0" style="max-width: 400px; width: 100%;" data-aos="zoom-in">
-      
+
       <div class="card-header border-0 text-center py-5 custom-header">
         <div class="logo-wrapper mb-3">
           <img src="@/assets/img/mile.png" alt="milenio" class="img-fluid rounded-circle shadow logo-img">
@@ -16,29 +17,24 @@
             <label for="correo" class="form-label small fw-bold text-muted">USUARIO</label>
             <div class="input-group shadow-sm">
               <span class="input-group-text custom-icon-box"><i class="fas fa-user-circle"></i></span>
-              <input 
-                type="text" 
-                id="correo"
-                v-model="correolo" 
-                class="form-control custom-input" 
-                placeholder="ejemplo@correo.com"
-                required
-              />
+              <input type="text" id="correo" v-model="correolo" class="form-control custom-input"
+                placeholder="ejemplo@correo.com" required />
             </div>
           </div>
 
           <div class="mb-4">
             <label for="contrasena" class="form-label small fw-bold text-muted">CONTRASEÑA</label>
-            <div class="input-group shadow-sm">
+            <div class="input-group shadow-sm position-relative">
               <span class="input-group-text custom-icon-box"><i class="fas fa-lock"></i></span>
-              <input 
-                type="password" 
-                id="contrasena"
-                v-model="clave2" 
-                class="form-control custom-input" 
-                placeholder="********"
-                required
-              />
+
+              <input :type="showPassword ? 'text' : 'password'" id="contrasena" v-model="clave2"
+                class="form-control custom-input pe-5" placeholder="********" required />
+
+              <button type="button"
+                class="btn position-absolute end-0 top-50 translate-middle-y border-0 z-index-master pe-3"
+                @click="togglePassword" style="z-index: 10;">
+                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'" class="text-muted"></i>
+              </button>
             </div>
           </div>
 
@@ -69,6 +65,18 @@ import AOS from 'aos';
 export default {
   name: 'Login',
   mixins: [script3],
+  data() {
+    return {
+      // Estado para mostrar u ocultar contraseña
+      showPassword: false,
+      // Los demás campos ya vienen del mixin o del data anterior
+    }
+  },
+  methods: {
+    togglePassword() {
+      this.showPassword = !this.showPassword;
+    }
+  },
   mounted() {
     AOS.init();
   }
@@ -77,28 +85,12 @@ export default {
 
 <style scoped>
 /* Colores Institucionales */
-.text-gold { color: #F4B324 !important; }
-.text-blue { color: #1D2A68 !important; }
-
-/* Fondo con degradado institucional */
-.login-container {
-  /* Asegura que ocupe todo el ancho y alto sin dejar huecos */
-  width: 100vw; 
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #1D2A68 0%, #151e4b 100%);
-  /* Evita el scroll horizontal innecesario */
-  overflow-x: hidden; 
+.text-gold {
+  color: #F4B324 !important;
 }
 
-/* Decoración de fondo opcional (puntos o formas) */
-.login-container::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
-  opacity: 0.1;
+.text-blue {
+  color: #1D2A68 !important;
 }
 
 /* Cabecera Azul con Borde Oro */
