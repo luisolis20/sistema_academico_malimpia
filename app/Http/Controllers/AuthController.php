@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
-   public function login(Request $request){
+    public function login(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'correo' => 'required|string',
             'contrasena' => 'required|string',
@@ -25,22 +26,29 @@ class AuthController extends Controller
         }
         $correo = $request->input('correo');
         $contrasena = $request->input('contrasena');
-        $user = User::select('usuarios.*', 'roles.nombre as nombre_rol',
-        'personas.nombres as nombre_persona', 'personas.apellidos as apellidos_persona',
-        'personas.correo as correo_persona','personas.cedula as cedula_persona')
+        $user = User::select(
+            'usuarios.*',
+            'roles.nombre as nombre_rol',
+            'personas.nombres as nombre_persona',
+            'personas.apellidos as apellidos_persona',
+            'personas.correo as correo_persona',
+            'personas.cedula as cedula_persona'
+        )
             ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
             ->join('personas', 'personas.id_persona', '=', 'usuarios.id_persona')
             ->where('username', $correo)
             ->first();
-        if($user){
-            if(!Hash::check($contrasena, $user->clave)){
+        if ($user) {
+            if (!Hash::check($contrasena, $user->clave)) {
                 return response()->json([
-                    'error' => 'Contraseña incorrecta',
+                    'error' => true,
+                    'mensaje' => "Usuario correcto pero contraseña incorrecta",
                 ], Response::HTTP_UNAUTHORIZED);
             }
-            if($user->estado !== 1){
+            if ($user->estado !== 1) {
                 return response()->json([
-                    'error' => 'Usuario inactivo',
+                    'error' => true,
+                    'mensaje' => "Usuario bloqueado",
                 ], Response::HTTP_UNAUTHORIZED);
             }
             $token = auth()->login($user);
@@ -57,24 +65,22 @@ class AuthController extends Controller
                 'rol' => $user->nombre_rol,
                 'id_usuario' => $user->id_usuario,
             ]);
-            
-        }
-        else {
+        } else {
 
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Usuario: $correo no Existe",
             ], Response::HTTP_NOT_FOUND);
         }
-   }
-   public function me()
+    }
+    public function me()
     {
         return response()->json(auth()->user());
     }
     public function logout()
     {
         //auth()->logout();
-         try {
+        try {
             $token = JWTAuth::getToken();
             if (! $token) {
                 return response()->json(['error' => 'No hay token'], Response::HTTP_BAD_REQUEST);
@@ -113,5 +119,4 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ], Response::HTTP_OK);
     }
-
 }
