@@ -286,20 +286,20 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $res = User::find($id);
-        // Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
-        if (isset($res)) {
+        $res = User::select('usuarios.*','roles.nombre as nombre_rol')
+            ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
+            ->where('usuarios.id_usuario', $id)
+            ->first();
+        if ($res) { 
             return response()->json([
                 'data' => $res,
                 'mensaje' => 'Encontrado con Éxito!!',
             ]);
-        } else {
-            // Si el objeto no existe, devolver un mensaje de error en formato JSON
-            return response()->json([
-                'error' => true,
-                'mensaje' => "El Usuario con id: $id no Existe",
-            ]);
         }
+        return response()->json([
+            'error' => true,
+            'mensaje' => "El Usuario con id: $id no Existe",
+        ]);
     }
 
     /**

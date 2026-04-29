@@ -62,6 +62,7 @@ Route::prefix('sistma')->group(function () {
     Route::apiResource('familia', FamiliaController::class);
     Route::get('familiar/{ci}', [FamiliaController::class, 'show']);
     Route::post('familia/asignar', [FamiliaController::class, 'store']);
+    Route::get('familiares-de/{id_persona}', [FamiliaController::class, 'getFamiliaresByPersona']);
 
     //Definir las rutas para los niveles académicos, permitiendo crear, leer, actualizar niveles académicos
     Route::apiResource('niveles_academicos', Niveles_academicosController::class);

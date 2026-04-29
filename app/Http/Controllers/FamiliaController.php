@@ -170,6 +170,41 @@ class FamiliaController extends Controller
             ], 500);
         }
     }
+    public function getFamiliaresByPersona($id_persona)
+    {
+        // Buscamos los familiares donde el ID enviado sea el representante
+        $familiares = Familia::with(['familiapersona2']) // Cargamos la relación del familiar
+            ->where('id_representante', $id_persona)
+            ->get();
+
+        if ($familiares->isEmpty()) {
+            return response()->json([
+                'error' => false,
+                'data' => [],
+                'mensaje' => 'No posee familia asignada'
+            ]);
+        }
+
+        // Transformamos los datos para incluir la foto en base64
+        $data = $familiares->map(function ($f) {
+            $persona = $f->familiapersona2;
+            return [
+                'id_persona' => $persona->id_persona,
+                'cedula'     => $persona->cedula,
+                'nombres'    => $persona->nombres,
+                'apellidos'  => $persona->apellidos,
+                'parentesco' => $f->parentesco,
+                'telefono'   => $persona->telefono,
+                'correo'     => $persona->correo,
+                'foto'       => $persona->foto ? base64_encode($persona->foto) : null,
+            ];
+        });
+
+        return response()->json([
+            'error' => false,
+            'data' => $data
+        ]);
+    }
 
     /**
      * Display the specified resource.
