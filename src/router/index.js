@@ -24,6 +24,7 @@ import CursosView from '@/views/Mantenimiento/Cursos/CursosView.vue'
 import Cursos_AsignaturasView from '@/views/Mantenimiento/Cursos_Asignaturas/Cursos_AsignaturasView.vue'
 import Horarios_clasesView from '@/views/Mantenimiento/Horarios_clases/Horarios_clasesView.vue'
 import Cronograma_MatriculasView from '@/views/Mantenimiento/Cronograma_Matriculas/Cronograma_MatriculasView.vue'
+import PerfilView from '@/views/Perfil/PerfilView.vue'
 
 const routes = [
   {
@@ -163,6 +164,11 @@ const routes = [
     path: '/cronograma-matriculas',
     name: 'cronograma-matriculas',
     component: Cronograma_MatriculasView
+  },
+  {
+    path: '/perfil',
+    name: 'perfil',
+    component: PerfilView
   },
 ]
 const router = createRouter({

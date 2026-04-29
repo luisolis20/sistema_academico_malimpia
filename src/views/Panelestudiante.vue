@@ -11,9 +11,6 @@
             <p class="text-muted mb-0">Cédula: {{ estudiante.cedula }} | Ciclo Costa 2026</p>
           </div>
         </div>
-        <button @click="salir" class="btn btn-outline-danger">
-          <i class="fas fa-sign-out-alt me-1"></i> Salir del Sistema
-        </button>
       </div>
     </div>
 
@@ -37,57 +34,23 @@
 
     <div class="tab-content bg-white p-4 border border-top-0 shadow-sm">
       <div class="tab-pane fade show active" id="matricula">
-        </div>
       </div>
+    </div>
   </div>
 </template>
 
 <script>
-import Swal from 'sweetalert2';
+import API from "@/assets/js/axios"
+import { mostraralertas2 } from "@/assets/js/funciones/functions";
 
 export default {
   data() {
     return {
-      estudiante: { nombre: 'Josué', apellido: 'Lastra', cedula: '123456789' },
-      // ... resto de tus datos (cursos, horarios, notas)
+
     }
   },
   methods: {
-    salir() {
-      Swal.fire({
-        title: '¿Cerrar sesión?',
-        text: "Tendrás que ingresar tus credenciales nuevamente.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#198754', // Verde success
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // 1. Limpiar datos de sesión (si usas localStorage)
-          localStorage.removeItem('user_token');
-          
-          // 2. Redirigir al Login
-          this.$router.push('/login');
-          
-          // 3. Alerta de despedida rápida
-          const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000
-          });
-          Toast.fire({
-            icon: 'success',
-            title: 'Sesión cerrada correctamente'
-          });
-        }
-      });
-    },
-    procesarMatricula() {
-      // Tu lógica de Axios
-    }
+
   }
 }
 </script>

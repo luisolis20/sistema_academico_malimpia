@@ -30,7 +30,6 @@ export default {
           "Logueado",
         );
 
-        console.log("✅ Respuesta del servidor:", response);
         if (response.error) {
           mostraralertas(response.mensaje, 'warning');
         } else if (response){

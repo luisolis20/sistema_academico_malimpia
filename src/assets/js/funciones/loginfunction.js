@@ -8,7 +8,6 @@ export async function enviarsolilogin(method, parametros, url, mensaje) {
       url: url,
       data: parametros,
     });
-    console.log("e:", response);
     if (response.data && response.data.token) {
       store.commit("setToken_sitma", response.data.token);
       store.commit("setTokenType_sitma", response.data.token_type || "Bearer");

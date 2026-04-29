@@ -98,7 +98,8 @@
                                         <div class="text-muted small fw-bold mb-1">
                                             <i class="far fa-id-card me-1" style="color: #1D2A68;"></i>{{ user.cedula }}
                                         </div>
-                                        <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
+                                        <div class="fw-bold text-dark" v-if="user.id_persona === idpersonalog">Yo</div>
+                                        <div class="fw-bold text-dark" v-else>{{ user.nombres }} {{ user.apellidos }}</div>
                                         <div class="text-muted small" v-if="user.fecha_nacimiento">
                                             Edad: {{ calcularEdad(user.fecha_nacimiento) }} años
                                         </div>
@@ -145,18 +146,18 @@
                                         title="Ver información completa" style="color: #1D2A68;">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal"
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" v-if="user.id_persona !== idpersonalog"
                                         data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
                                         title="Editar detalles de esta persona" style="color: #F4B324;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger"
                                         @click="eliminar(user.id_persona, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado == 1" title="Inhabilitar esta persona">
+                                        v-if="user.estado == 1 && user.id_persona !== idpersonalog" title="Inhabilitar esta persona">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success"
-                                        @click="habilitar(user.id_persona, user.nombres + ' ' + user.apellidos)" v-else
+                                        @click="habilitar(user.id_persona, user.nombres + ' ' + user.apellidos)" v-if="user.id_persona !== idpersonalog && user.estado == 0"
                                         title="Habilitar esta persona nuevamente">
                                         <i class="fas fa-check"></i>
                                     </button>
@@ -633,6 +634,7 @@
 <script>
 import API from "@/assets/js/axios"
 import { confimar, confimarhabi, mostraralertas2 } from "@/assets/js/funciones/functions";
+import { getMe } from "@/assets/js/auth";
 
 export default {
     data() {
@@ -701,6 +703,7 @@ export default {
             currentPage: 1,
             lastPage: 1,
             refreshKey: Date.now(),
+            idpersonalog: 0,
         }
     },
     computed: {
@@ -729,6 +732,8 @@ export default {
         }
     },
     async mounted() {
+        const me = await getMe();
+        this.idpersonalog = me.id_persona;
         await this.getData();
     },
     methods: {

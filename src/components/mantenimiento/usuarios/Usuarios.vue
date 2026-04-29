@@ -164,7 +164,24 @@
                                         <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
                                             class="w-100 h-100" style="object-fit: cover;" />
                                     </div>
-                                    <div>
+                                    <div v-if="user.id_usuario === idusuariolog">
+                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
+                                            user.cedula }}</div>
+                                        <div class="fw-bold text-dark">Yo</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
+                                            calcularEdad(user.fecha_nacimiento) }} años</div>
+                                        <span v-if="user.sexo === 'M' || user.sexo === 'Masculino'" title="Masculino">
+                                            <i class="fas fa-mars fs-6" style="color: #3b82f6;"></i>
+                                        </span>
+                                        <span v-else-if="user.sexo === 'F' || user.sexo === 'Femenino'"
+                                            title="Femenino">
+                                            <i class="fas fa-venus fs-6" style="color: #ec4899;"></i>
+                                        </span>
+                                        <span v-else title="Otro">
+                                            <i class="fas fa-genderless fs-6 text-secondary"></i> {{ user.sexo }}
+                                        </span>
+                                    </div>
+                                    <div v-else>
                                         <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
                                             user.cedula }}</div>
                                         <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
@@ -209,12 +226,12 @@
                             <td class="text-center">
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-light text-primary border shadow-sm"
-                                        @click="abrirModalCrear(user)" v-if="!user.id_usuario"
+                                        @click="abrirModalCrear(user)" v-if="!user.id_usuario && user.id_usuario !== idusuariolog"
                                         title="Asignar y crear usuario">
                                         <i class="fas fa-user-plus me-1"></i> Crear Usuario
                                     </button>
                                     <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #1D2A68;"
-                                        @click="abrirModalEditar(user)" v-if="user.id_usuario"
+                                        @click="abrirModalEditar(user)" v-if="user.id_usuario && user.id_usuario !== idusuariolog"
                                         title="Editar Rol de Usuario">
                                         <i class="fas fa-user-edit"></i> Editar
                                     </button>
@@ -225,12 +242,12 @@
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.id_usuario, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado == 1 && user.id_usuario" title="Inhabilitar esta persona">
+                                        v-if="user.estado == 1 && user.id_usuario && user.id_usuario !== idusuariolog" title="Inhabilitar esta persona">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
                                         @click="habilitar(user.id_usuario, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado == 0 && user.id_usuario"
+                                        v-if="user.estado == 0 && user.id_usuario && user.id_usuario !== idusuariolog"
                                         title="Habilitar esta persona nuevamente">
                                         <i class="fas fa-check"></i>
                                     </button>
@@ -403,6 +420,7 @@
 import API from "@/assets/js/axios";
 import { confimar, confimarhabi, mostraralertas2, confimarreseteo } from "@/assets/js/funciones/functions";
 import * as bootstrap from 'bootstrap';
+import { getMe } from "@/assets/js/auth";
 
 export default {
     data() {
@@ -444,6 +462,7 @@ export default {
                 total_general: 0,
                 totales_por_rol: {}
             },
+            idusuariolog: 0,
         }
     },
     computed: {
@@ -472,8 +491,9 @@ export default {
         }
     },
     async mounted() {
-        await this.getData();
-        await this.GetObjetoList();
+        const me = await getMe();
+        this.idusuariolog = me.id_usuario;
+        await Promise.all([this.getData(), this.GetObjetoList()]);
     },
     methods: {
         cambiarPagina(page) {
