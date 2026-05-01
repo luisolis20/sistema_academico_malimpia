@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cursos;
 use App\Models\Personas;
+use App\Models\Curso_Asignaturas;
 use Illuminate\Http\Request;
 
 class CursosController extends Controller
@@ -361,5 +362,27 @@ class CursosController extends Controller
                 'mensaje' => "El Curso con id: $id no existe.",
             ], 404);
         }
+    }
+    public function getCargaAcademica($id_persona)
+    {
+        // 1. Obtener cursos donde es Tutor
+        // Cargamos relaciones para mostrar nombres de nivel, especialidad, etc.
+        $tutorias = Cursos::with(['nivel', 'especialidad', 'periodo'])
+            ->where('id_docente_tutor', $id_persona)
+            ->where('estado', 1)
+            ->get();
+
+        // 2. Obtener asignaturas que dicta (incluyendo a qué curso pertenecen)
+        $asignaturas = Curso_Asignaturas::with(['curso.nivel', 'curso.especialidad', 'asignatura'])
+            ->where('id_docente', $id_persona)
+            ->where('estado', 1)
+            ->get();
+
+        return response()->json([
+            'es_tutor' => $tutorias->isNotEmpty(),
+            'tiene_asignaturas' => $asignaturas->isNotEmpty(),
+            'tutorias' => $tutorias,
+            'asignaturas' => $asignaturas
+        ]);
     }
 }

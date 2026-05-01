@@ -243,4 +243,34 @@ class HorariosController extends Controller
      */
     public function destroy(string $id) {}
     public function habilitar(string $id) {}
+    public function getHorarioDocente($id_persona)
+    {
+        // Buscamos los horarios filtrando a través de la relación curso_asignatura
+        $horarios = Horarios_clases::with([
+            'curso_asignatura.asignatura',
+            'curso_asignatura.curso.nivel',
+            'curso_asignatura.curso.especialidad'
+        ])
+        ->whereHas('curso_asignatura', function($query) use ($id_persona) {
+            $query->where('id_docente', $id_persona)
+                  ->where('estado', 1);
+        })
+        ->orderBy('hora_inicio', 'asc')
+        ->get();
+
+        // Estructuramos la respuesta
+        $data = $horarios->map(function($h) {
+            return [
+                'id' => $h->id_horario,
+                'dia' => $h->dia_semana, // Ejemplo: 'Lunes', 'Martes'...
+                'inicio' => date('H:i', strtotime($h->hora_inicio)),
+                'fin' => date('H:i', strtotime($h->hora_fin)),
+                'asignatura' => $h->curso_asignatura->asignatura->nombre,
+                'curso' => $h->curso_asignatura->curso->nivel->nombre . ' "' . $h->curso_asignatura->curso->paralelo . '"',
+                'especialidad' => $h->curso_asignatura->curso->especialidad->nombre
+            ];
+        });
+
+        return response()->json($data);
+    }
 }

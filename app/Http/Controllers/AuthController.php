@@ -29,6 +29,7 @@ class AuthController extends Controller
         $user = User::select(
             'usuarios.*',
             'roles.nombre as nombre_rol',
+            'personas.id_persona as persona_id',
             'personas.nombres as nombre_persona',
             'personas.apellidos as apellidos_persona',
             'personas.correo as correo_persona',
@@ -64,6 +65,7 @@ class AuthController extends Controller
                 'cedula' => $user->cedula_persona,
                 'rol' => $user->nombre_rol,
                 'id_usuario' => $user->id_usuario,
+                'id_persona' => $user->persona_id,
             ]);
         } else {
 

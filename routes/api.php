@@ -63,6 +63,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('familiar/{ci}', [FamiliaController::class, 'show']);
     Route::post('familia/asignar', [FamiliaController::class, 'store']);
     Route::get('familiares-de/{id_persona}', [FamiliaController::class, 'getFamiliaresByPersona']);
+    Route::get('familiares-est-de/{id_persona}', [FamiliaController::class, 'getFamiliaresEstByPersona']);
 
     //Definir las rutas para los niveles académicos, permitiendo crear, leer, actualizar niveles académicos
     Route::apiResource('niveles_academicos', Niveles_academicosController::class);
@@ -96,6 +97,7 @@ Route::prefix('sistma')->group(function () {
     Route::delete('ihabilitar_curso/{id}', [CursosController::class, 'destroy']);
     Route::delete('habilitar_curso/{id}', [CursosController::class, 'habilitar']);
     Route::delete('desasignar_docente_curso/{id}', [CursosController::class, 'desasignarDocente']);
+    Route::get('docente/carga-academica/{id_persona}', [CursosController::class, 'getCargaAcademica']);
     //Definir las rutas para los curso_asignaturas, permitiendo crear, leer, actualizar curso_asignaturas
     Route::apiResource('curso_asignaturas', Curso_AsignaturasController::class);
     //Definir endpoints para habilitar y deshabilitar curso_asignaturas
@@ -107,8 +109,14 @@ Route::prefix('sistma')->group(function () {
     Route::put('curso_asignaturas_lote/actualizar', [Curso_AsignaturasController::class, 'procesarAsignaciones']);
     Route::apiResource('horarios_clases', HorariosController::class);
     Route::post('crearhorario', [HorariosController::class, 'guardarHorario']);
+    Route::get('horarios_docente/{id_persona}', [HorariosController::class, 'getHorarioDocente']);
     Route::apiResource('cronograma_matriculas', Cronograma_matriculasController::class);
     Route::post('crearcronograma_matriculas', [Cronograma_matriculasController::class, 'store']);
+    Route::get('cronograma_matriculas_activo', [Cronograma_matriculasController::class, 'getCronogramaActivo']);
+    Route::get('cursos_por_cronograma/{id_cronograma}', [Cronograma_matriculasController::class, 'getCursosPorCronograma']);
+    Route::post('crearmatricula', [Cronograma_matriculasController::class, 'crearmatricula']);
+    Route::get('historial/{id_representante}', [Cronograma_matriculasController::class, 'getHistorial']);
+
 
     Route::middleware('auth:api')->group(function () {
         Route::get('/logout', [AuthController::class, 'logout']);

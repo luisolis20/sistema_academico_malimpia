@@ -40,4 +40,10 @@ class Personas extends Model
     public function curso_asignaturas(){
         return $this->hasMany(Curso_Asignaturas::class, 'id_docente');
     }
+    public function matriculasestudiantes(){
+        return $this->hasMany(Matriculas::class, 'id_estudiante');
+    }
+    public function matriculasrepresentantes(){
+        return $this->hasMany(Matriculas::class, 'id_representante');
+    }
 }

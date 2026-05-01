@@ -205,6 +205,58 @@ class FamiliaController extends Controller
             'data' => $data
         ]);
     }
+    public function getFamiliaresEstByPersona($id_persona)
+    {
+        // Buscamos los familiares donde el ID enviado sea el representante
+        $familiares = Familia::with(['familiapersona1']) // Cargamos la relación del familiar
+            ->where('id_estudiante', $id_persona)
+            ->get();
+
+        if ($familiares->isEmpty()) {
+            return response()->json([
+                'error' => false,
+                'data' => [],
+                'mensaje' => 'No posee familia asignada'
+            ]);
+        }
+
+        // Transformamos los datos para incluir la foto en base64
+        $data = $familiares->map(function ($f) {
+            $persona = $f->familiapersona1;
+            if($f->parentesco == 'Hijo/a' && $persona->sexo == 'Femenino'){
+                $nuevoparentesco = 'Mamá';
+            }
+            else if($f->parentesco == 'Hijo/a' && $persona->sexo == 'Masculino'){
+                $nuevoparentesco = 'Padre';
+            }else if($f->parentesco == 'Sobrino/a' && $persona->sexo == 'Femenino'){
+                $nuevoparentesco = 'Tía';
+            }else if($f->parentesco == 'Sobrino/a' && $persona->sexo == 'Masculino'){
+                $nuevoparentesco = 'Tío';
+            }else if($f->parentesco == 'Nieto/a' && $persona->sexo == 'Femenino'){
+                $nuevoparentesco = 'Abuela';
+            }else if($f->parentesco == 'Nieto/a' && $persona->sexo == 'Masculino'){
+                $nuevoparentesco = 'Abuelo';
+            }else{
+                $nuevoparentesco = $f->parentesco;
+            }
+            return [
+                'id_persona' => $persona->id_persona,
+                'cedula'     => $persona->cedula,
+                'nombres'    => $persona->nombres,
+                'apellidos'  => $persona->apellidos,
+                'parentesco' => $nuevoparentesco,
+                'telefono'   => $persona->telefono,
+                'sexo'       => $persona->sexo,
+                'correo'     => $persona->correo,
+                'foto'       => $persona->foto ? base64_encode($persona->foto) : null,
+            ];
+        });
+
+        return response()->json([
+            'error' => false,
+            'data' => $data
+        ]);
+    }
 
     /**
      * Display the specified resource.

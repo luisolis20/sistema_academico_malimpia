@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cronograma_matriculas;
+use App\Models\Matriculas;
+use App\Models\Cursos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -239,4 +241,72 @@ class Cronograma_matriculasController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    public function getCronogramaActivo()
+    {
+        $hoy = now();
+        $data = Cronograma_matriculas::with(['periodo', 'nivel', 'especialidad'])
+            ->where('fecha_inicio', '<=', $hoy)
+            ->where('fecha_fin', '>=', $hoy)
+            ->get();
+        return response()->json($data);
+    }
+    public function getCursosPorCronograma($id_cronograma)
+    {
+        $cronograma = Cronograma_matriculas::find($id_cronograma);
+        // Buscamos cursos que coincidan con el nivel y especialidad del cronograma
+        $cursos = Cursos::where('id_nivel', $cronograma->id_nivel)
+            ->where('id_especialidad', $cronograma->id_especialidad)
+            ->where('id_periodo', $cronograma->id_periodo)
+            ->where('estado', 1)
+            ->get();
+        return response()->json($cursos);
+    }
+
+    public function crearmatricula(Request $request)
+    {
+        // Verificar si ya está matriculado en ese periodo
+        $existe = Matriculas::where('id_estudiante', $request->id_estudiante)
+            ->whereHas('curso', function ($q) use ($request) {
+                $q->where('id_periodo', $request->id_periodo);
+            })->exists();
+
+        if ($existe) return response()->json(['error' => true, 'mensaje' => 'El estudiante ya está matriculado.'], 422);
+
+        $matricula = new Matriculas();
+        $matricula->id_estudiante = $request->id_estudiante;
+        $matricula->id_curso = $request->id_curso;
+        $matricula->id_representante = $request->id_representante;
+        $matricula->fecha_matricula = now();
+        $matricula->es_nuevo = $request->es_nuevo ?? 0;
+        $matricula->estado = 1;
+        $matricula->save();
+
+        return response()->json(['mensaje' => 'Matrícula generada con éxito', 'data' => $matricula]);
+    }
+    public function getHistorial($id_representante)
+    {
+        $historial = Matriculas::where('id_representante', $id_representante)
+            ->with([
+                'estudiante:id_persona,nombres,apellidos,cedula',
+                'curso.nivel:id_nivel,nombre',
+                'curso.especialidad:id_especialidad,nombre'
+            ])
+            ->orderBy('fecha_matricula', 'desc')
+            ->get();
+
+        $data = $historial->map(function ($m) {
+            return [
+                'id_matricula' => $m->id_matricula,
+                'id_estudiante' => $m->id_estudiante,
+                'estudiante_nombre' => $m->estudiante->nombres . ' ' . $m->estudiante->apellidos,
+                'estudiante_cedula' => $m->estudiante->cedula,
+                'nivel_nombre' => $m->curso->nivel->nombre,
+                'especialidad' => $m->curso->especialidad->nombre,
+                'paralelo' => $m->curso->paralelo,
+                'fecha' => date('d/m/Y H:i', strtotime($m->fecha_matricula)),
+            ];
+        });
+
+        return response()->json($data);
+    }
 }

@@ -36,4 +36,7 @@ class Cursos extends Model
     public function curso_asignaturas(){
         return $this->hasMany(Curso_Asignaturas::class, 'id_curso', 'id_curso');
     }
+    public function matriculas(){
+        return $this->hasMany(Matriculas::class, 'id_curso', 'id_curso');
+    }
 }
