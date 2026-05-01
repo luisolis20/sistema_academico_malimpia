@@ -37,10 +37,34 @@
               <i class="fas fa-shield-alt me-2"></i>Seguridad de Cuenta
             </button>
           </li>
-          <li class="nav-item" role="presentation">
+          <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol !== 'Estudiante'">
             <button @click="getFamiliares" class="nav-link" data-bs-toggle="tab" data-bs-target="#familias"
               type="button">
               <i class="fas fa-users me-2"></i>Familias
+            </button>
+          </li>
+          <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Estudiante'">
+            <button @click="getEstFamiliares" class="nav-link" data-bs-toggle="tab" data-bs-target="#estufamilias"
+              type="button">
+              <i class="fas fa-users me-2"></i>Mi(s) Representante
+            </button>
+          </li>
+          <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <button @click="getCargaDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-tutorias"
+              type="button">
+              <i class="fas fa-chalkboard-teacher me-2"></i>Mis Tutorías
+            </button>
+          </li>
+          <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <button @click="getCargaDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-asignaturas"
+              type="button">
+              <i class="fas fa-book me-2"></i>Asignaturas Asignadas
+            </button>
+          </li>
+          <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <button @click="getHorarioDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#horario-clases"
+              type="button">
+              <i class="fas fa-calendar-alt me-2"></i>Mi Horario
             </button>
           </li>
         </ul>
@@ -168,7 +192,176 @@
               </div>
             </div>
           </div>
+          <div class="tab-pane fade" id="estufamilias" role="tabpanel">
+            <div class="info-section mb-4">
+              <h5 class="text-blue fw-bold border-bottom pb-2">Representante(s) registrado(s)</h5>
+              <p class="text-muted small">A continuación se muestra la información de los representantes registrados en
+                el sistema.</p>
+            </div>
+            <div v-if="cargandoEstFamiliares" class="text-center py-5">
+              <div class="spinner-border text-gold" role="status"></div>
+              <p class="mt-2 text-muted">Cargando representantes...</p>
+            </div>
+            <div v-else-if="estfamiliares.length === 0" class="alert alert-warning border-0 shadow-sm rounded-4 p-4">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle fa-3x me-3 text-warning"></i>
+                <div>
+                  <h6 class="fw-bold mb-1">No posee representante registrado</h6>
+                  <p class="mb-0 small">Su representante debe registrarse en el sistema para poder realizar el
+                    seguimiento de su estado de estudiante.</p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="row g-3">
+              <div v-for="familiar in estfamiliares" :key="familiar.id_persona" class="col-md-6">
+                <div class="card border shadow-sm rounded-4 h-100 hvr-light">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <img :src="familiar.foto ? 'data:image/jpeg;base64,' + familiar.foto : getPhotoUrl(null)"
+                        class="rounded-circle border border-2 border-gold shadow-sm"
+                        style="width: 70px; height: 70px; object-fit: cover;">
+                      <div class="ms-3">
+                        <h6 class="mb-0 fw-bold text-blue">{{ familiar.nombres }} {{ familiar.apellidos }}</h6>
+                        <span class="badge bg-gold text-blue small mb-1">{{ familiar.parentesco }}</span>
+                        <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i> {{ familiar.cedula }}</p>
+                        <p class="mb-0 text-muted small"><i class="fas fa-phone me-1"></i>
+                          {{ familiar.telefono || 'Sinteléfono' }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="mis-tutorias" role="tabpanel">
+            <div class="info-section mb-4">
+              <h5 class="text-blue fw-bold border-bottom pb-2">Cursos bajo mi Tutoría</h5>
+              <p class="text-muted small">Como docente tutor, usted es responsable del seguimiento integral de estos
+                paralelos.</p>
+            </div>
 
+            <div v-if="cargaDocente.tutorias.length === 0" class="alert alert-light border shadow-sm rounded-4">
+              <i class="fas fa-info-circle me-2"></i> Usted no tiene cursos asignados como tutor en este periodo.
+            </div>
+
+            <div class="row g-3">
+              <div v-for="curso in cargaDocente.tutorias" :key="curso.id_curso" class="col-md-6">
+                <div class="card border-start border-gold border-4 shadow-sm rounded-3">
+                  <div class="card-body">
+                    <h6 class="fw-bold text-blue mb-1">
+                      {{ curso.nivel.nombre }} "{{ curso.paralelo }}"
+                    </h6>
+                    <p class="mb-0 small text-muted text-uppercase fw-bold">
+                      {{ curso.especialidad.nombre }}
+                    </p>
+                    <div class="mt-2">
+                      <span class="badge bg-gold-soft text-blue">Periodo: {{ curso.periodo.nombre }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="mis-asignaturas" role="tabpanel">
+            <div class="info-section mb-4">
+              <h5 class="text-blue fw-bold border-bottom pb-2">Asignaturas que Imparto</h5>
+              <p class="text-muted small">Listado de materias asignadas y los cursos correspondientes.</p>
+            </div>
+
+            <div v-if="cargaDocente.asignaturas.length === 0" class="alert alert-light border shadow-sm rounded-4">
+              <i class="fas fa-info-circle me-2"></i> No se encontraron asignaturas asignadas a su perfil.
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle border rounded-3 overflow-hidden">
+                <thead class="table-light text-blue">
+                  <tr>
+                    <th class="small fw-bold">ASIGNATURA</th>
+                    <th class="small fw-bold">CURSO / PARALELO</th>
+                    <th class="small fw-bold text-center">H. SEMANALES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in cargaDocente.asignaturas" :key="item.id_curso_asignatura">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="icon-box bg-blue-soft text-blue me-2">
+                          <i class="fas fa-book-open"></i>
+                        </div>
+                        <span class="fw-bold">{{ item.asignatura.nombre }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="text-muted">{{ item.curso.nivel.nombre }} "{{ item.curso.paralelo }}"</span>
+                      <br>
+                      <small class="text-gold fw-bold">{{ item.curso.especialidad.nombre }}</small>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge rounded-pill bg-light text-dark border">{{ item.horas_semanales }} horas</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="horario-clases" role="tabpanel">
+            <div class="info-section mb-4">
+              <h5 class="text-blue fw-bold border-bottom pb-2">Horario Semanal de Clases</h5>
+              <p class="text-muted small">Visualice su planificación semanal. Los horarios están sujetos a cambios por
+                parte de coordinación académica.</p>
+            </div>
+
+            <div v-if="cargandoHorario" class="text-center py-5">
+              <div class="spinner-border text-gold" role="status"></div>
+              <p class="mt-2 text-muted">Generando cronograma...</p>
+            </div>
+
+            <div v-else-if="horario.length === 0" class="alert alert-light border shadow-sm rounded-4 text-center">
+              <i class="fas fa-calendar-times fa-2x mb-2 text-muted"></i>
+              <p class="mb-0">No se han registrado horas de clase para su usuario todavía.</p>
+            </div>
+
+            <div v-else class="table-responsive shadow-sm rounded-4">
+              <table class="table table-bordered align-middle mb-0 text-center custom-table-schedule">
+                <thead class="bg-blue text-white">
+                  <tr>
+                    <th class="py-3">Hora</th>
+                    <th class="py-3">Lunes</th>
+                    <th class="py-3">Martes</th>
+                    <th class="py-3">Miércoles</th>
+                    <th class="py-3">Jueves</th>
+                    <th class="py-3">Viernes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(fila, index) in horario" :key="index">
+                    <td class="fw-bold text-blue bg-light" style="width: 15%;">
+                      {{ fila.rango }}
+                    </td>
+
+                    <td v-for="dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']" :key="dia"
+                      class="p-0 position-relative" style="width: 17%; height: 80px;">
+
+                      <div v-if="fila[dia]" class="p-2 h-100 d-flex flex-column justify-content-center">
+                        <div class="fw-bold text-blue mb-1" style="font-size: 0.85rem; line-height: 1.2;">
+                          {{ fila[dia].asignatura }}
+                        </div>
+                        <div class="text-muted mb-1" style="font-size: 0.75rem;">
+                          <i class="fas fa-chalkboard text-gold me-1"></i> {{ fila[dia].curso }}
+                        </div>
+                        <div class="text-uppercase fw-bold text-blue" style="font-size: 0.65rem; opacity: 0.8;">
+                          {{ fila[dia].especialidad }}
+                        </div>
+                      </div>
+
+                      <div v-else class="h-100 bg-white"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -187,6 +380,7 @@ export default {
       Persona: {},
       Usuario: {},
       familiares: {},
+      estfamiliares: {},
       nuevaClave: "",
       confirmarClave: "",
       cargando: false,
@@ -195,6 +389,14 @@ export default {
       idusuario: 0,
       idrole: 0,
       cargandoFamilia: false,
+      cargandoEstFamiliares: false,
+      cargaDocente: {
+        tutorias: [],
+        asignaturas: []
+      },
+      cargandoCargaDocente: false,
+      horario: [],
+      cargandoHorario: false,
     }
   },
   async mounted() {
@@ -202,7 +404,7 @@ export default {
     const me = await getMe();
     this.idpersona = me.id_persona;
     this.idusuario = me.id_usuario;
-    await Promise.all([this.getPersona(), this.getUsuario(), this.getFamiliares()]);
+    await Promise.all([this.getPersona(), this.getUsuario()]);
     this.cargando = false;
   },
   methods: {
@@ -225,6 +427,71 @@ export default {
         mostraralertas("No se pudo obtener la información de familia", "error");
       } finally {
         this.cargandoFamilia = false;
+      }
+    },
+    async getEstFamiliares() {
+      if (this.estfamiliares.length > 0) return; // Evita recargar si ya hay datos
+
+      try {
+        this.cargandoEstFamiliares = true;
+        const res = await API.get(`${this.baseUrl}/familiares-est-de/${this.idpersona}`);
+        this.estfamiliares = res.data.data;
+      } catch (e) {
+        console.error("Error al traer familiares:", e);
+        mostraralertas("No se pudo obtener la información de familia", "error");
+      } finally {
+        this.cargandoEstFamiliares = false;
+      }
+    },
+    async getHorarioDocente() {
+      try {
+        this.cargandoHorario = true;
+        const res = await API.get(`${this.baseUrl}/horarios_docente/${this.idpersona}`);
+        const datosBrutos = res.data;
+
+        // Agrupamos por rango de hora para crear filas únicas
+        const grupos = {};
+
+        datosBrutos.forEach(item => {
+          const rango = `${item.inicio} - ${item.fin}`;
+          if (!grupos[rango]) {
+            grupos[rango] = {
+              rango: rango,
+              Lunes: null,
+              Martes: null,
+              Miércoles: null,
+              Jueves: null,
+              Viernes: null
+            };
+          }
+          // Asignamos la materia al día correspondiente dentro de ese rango
+          grupos[rango][item.dia] = item;
+        });
+
+        // Convertimos el objeto a un array ordenado por hora
+        this.horario = Object.values(grupos).sort((a, b) => a.rango.localeCompare(b.rango));
+
+      } catch (err) {
+        mostraralertas("Error al cargar horario", "error");
+      } finally {
+        this.cargandoHorario = false;
+      }
+    },
+    async getCargaDocente() {
+      // Evitamos peticiones repetidas si ya cargó
+      if (this.cargaDocente.tutorias.length > 0 || this.cargaDocente.asignaturas.length > 0) return;
+
+      try {
+        this.cargandoCargaDocente = true;
+        const res = await API.get(`${this.baseUrl}/docente/carga-academica/${this.idpersona}`);
+        console.log(res);
+        this.cargaDocente.tutorias = res.data.tutorias;
+        this.cargaDocente.asignaturas = res.data.asignaturas;
+      } catch (err) {
+        console.error("Error al obtener carga docente:", err);
+        mostraralertas("No se pudo cargar la información académica.", "error");
+      } finally {
+        this.cargandoCargaDocente = false;
       }
     },
     async getUsuario() {
@@ -375,5 +642,80 @@ export default {
   background-color: #1D2A68;
   color: #fff;
   border: none;
+}
+
+.bg-blue-soft {
+  background-color: rgba(29, 42, 104, 0.1);
+}
+
+.icon-box {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.table thead th {
+  border-top: none;
+  background-color: #f8f9fa;
+  padding: 15px;
+}
+
+.border-gold {
+  border-color: #F4B324 !important;
+}
+
+.bg-blue {
+  background-color: #1D2A68 !important;
+}
+
+.bg-gold-soft {
+  background-color: rgba(244, 179, 36, 0.15) !important;
+  border: 1px solid rgba(244, 179, 36, 0.3);
+}
+
+.table-responsive {
+  border: 1px solid #dee2e6;
+}
+
+/* Efecto hover para las celdas del horario */
+.table td:hover {
+  background-color: rgba(29, 42, 104, 0.05);
+  transition: 0.3s;
+}
+custom-table-schedule {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+}
+
+.custom-table-schedule thead th {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-table-schedule tbody td {
+  border: 1px solid #edf0f5;
+  transition: all 0.2s;
+}
+
+/* Hover suave para las celdas con contenido */
+.custom-table-schedule tbody td:hover {
+  background-color: #f8faff;
+}
+
+/* Badge pequeño para la especialidad */
+.specialty-tag {
+  font-size: 0.6rem;
+  background-color: rgba(29, 42, 104, 0.05);
+  color: #1D2A68;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
 }
 </style>

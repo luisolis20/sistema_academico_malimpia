@@ -107,6 +107,11 @@
                   <i class="fas fa-clock me-2 text-muted"></i> Cronograma de matrículas
                 </router-link>
               </li>
+              <li v-if="rolUsuario === 'Representante'">
+                <router-link class="dropdown-item" to="/matricula" @click="closeMenu">
+                  <i class="fas fa-file-signature me-2 text-muted"></i> Matricular estudiante
+                </router-link>
+              </li>
             </ul>
           </li>
 
@@ -175,11 +180,11 @@ export default {
 
   methods: {
     getPhotoUrl(ci) {
-      if (!ci) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+      if (!ci) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/250px-User_icon_2.svg.png";
       return `${API.defaults.baseURL}/sistma/imagenpersona/${ci}?v=${this.refreshKey}`;
     },
     handleImageError(event) {
-      event.target.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/480px-User_icon_2.svg.png";
+      event.target.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/250px-User_icon_2.svg.png";
     },
     // ABRE el menú si pasamos el mouse (Solo en pantallas grandes)
     hoverDropdown(menuName) {

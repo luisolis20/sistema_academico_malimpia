@@ -78,7 +78,12 @@ export default {
     }
   },
   mounted() {
-    AOS.init();
+    this.$nextTick(() => {
+      AOS.init({
+        once: true, // Evita que se repita la animación innecesariamente
+        duration: 800
+      });
+    });
   }
 }
 </script>

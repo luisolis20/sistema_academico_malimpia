@@ -29,7 +29,6 @@ export default {
           this.url2,
           "Logueado",
         );
-
         if (response.error) {
           mostraralertas(response.mensaje, 'warning');
         } else if (response){
