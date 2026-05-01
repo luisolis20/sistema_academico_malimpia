@@ -94,6 +94,11 @@
                   <i class="fas fa-calendar-day me-2 text-muted"></i> Horarios Clases
                 </router-link>
               </li>
+              <li v-if="rolUsuario === 'Representante' || rolUsuario === 'Docente'">
+                <router-link class="dropdown-item" to="/cursos-familiar" @click="closeMenu">
+                  <i class="fas fa-chalkboard-teacher me-2 text-muted"></i> Cursos Familiares
+                </router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown" @mouseenter="hoverDropdown('matriculas')" @mouseleave="leaveDropdown">
@@ -107,17 +112,27 @@
                   <i class="fas fa-clock me-2 text-muted"></i> Cronograma de matrículas
                 </router-link>
               </li>
-              <li v-if="rolUsuario === 'Representante'">
+              <li v-if="rolUsuario === 'Representante' || rolUsuario === 'Docente'">
                 <router-link class="dropdown-item" to="/matricula" @click="closeMenu">
                   <i class="fas fa-file-signature me-2 text-muted"></i> Matricular estudiante
                 </router-link>
               </li>
             </ul>
           </li>
-
-
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('gestiondocente')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente'">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('gestiondocente')">
+              <i class="fas fa-user-graduate me-2"></i> Gestión Docente
+            </a>
+            <ul class="dropdown-menu shadow border-0 custom-dropdown"
+              :class="{ 'show': activeDropdown === 'gestiondocente' }">
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/mis-estudiantes" @click="closeMenu">
+                  <i class="fas fa-users me-2 text-muted"></i> Mis estudiantes
+                </router-link>
+              </li>
+            </ul>
+          </li>
         </ul>
-
         <ul
           class="navbar-nav align-items-center mt-3 mt-lg-0 pb-3 pb-lg-0 border-top border-lg-0 pt-2 pt-lg-0 border-secondary custom-mobile-border">
           <li class="nav-item dropdown user-dropdown w-100 text-center text-lg-start"
@@ -150,7 +165,6 @@
             </ul>
           </li>
         </ul>
-
       </div>
     </div>
   </nav>

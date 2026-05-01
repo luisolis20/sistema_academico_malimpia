@@ -484,7 +484,7 @@ export default {
       try {
         this.cargandoCargaDocente = true;
         const res = await API.get(`${this.baseUrl}/docente/carga-academica/${this.idpersona}`);
-        console.log(res);
+        
         this.cargaDocente.tutorias = res.data.tutorias;
         this.cargaDocente.asignaturas = res.data.asignaturas;
       } catch (err) {

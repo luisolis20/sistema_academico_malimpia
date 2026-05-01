@@ -26,6 +26,8 @@ import Horarios_clasesView from '@/views/Mantenimiento/Horarios_clases/Horarios_
 import Cronograma_MatriculasView from '@/views/Mantenimiento/Cronograma_Matriculas/Cronograma_MatriculasView.vue'
 import PerfilView from '@/views/Perfil/PerfilView.vue'
 import MatriculaView from '@/views/Matricula/PanelmatriculaView.vue'
+import CursosFamiliarView from '@/views/Cursos/FamiliarCursos/CursosFamiliarView.vue'
+import MisestudiantesView from '@/views/Gestion_docente/estudiantes/MisestudiantesView.vue'
 
 const routes = [
   {
@@ -171,6 +173,16 @@ const routes = [
     path: '/matricula',
     name: 'matricula',
     component: MatriculaView
+  },
+  {
+    path: '/cursos-familiar',
+    name: 'cursosfamiliar',
+    component: CursosFamiliarView
+  },
+  {
+    path: '/gestion-docente/mis-estudiantes',
+    name: 'misestudiantes',
+    component: MisestudiantesView
   },
 ]
 const router = createRouter({

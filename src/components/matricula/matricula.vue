@@ -193,7 +193,6 @@ export default {
       try {
         const res = await API.get(`${this.baseUrl}/periodos_lectivos_activos`);
         this.periodo_activo = res.data.data[0] || res.data.data;
-        console.log(this.periodo_activo);
       } catch (err) { console.error(err); }
     },
     async getFamiliares() {
