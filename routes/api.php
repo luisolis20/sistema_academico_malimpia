@@ -15,6 +15,7 @@ use App\Http\Controllers\CursosController;
 use App\Http\Controllers\Curso_AsignaturasController;
 use App\Http\Controllers\HorariosController;
 use App\Http\Controllers\Cronograma_matriculasController;
+use App\Http\Controllers\AsistenciaController;
 
 
 /*
@@ -116,6 +117,10 @@ Route::prefix('sistma')->group(function () {
     Route::get('cursos_por_cronograma/{id_cronograma}', [Cronograma_matriculasController::class, 'getCursosPorCronograma']);
     Route::post('crearmatricula', [Cronograma_matriculasController::class, 'crearmatricula']);
     Route::get('historial/{id_representante}', [Cronograma_matriculasController::class, 'getHistorial']);
+    Route::get('matriculas-representante/{id_representante}', [Cronograma_matriculasController::class, 'getCursosMatriculados']);
+    Route::get('estudiantes-asignatura/{id_docente}', [Cronograma_matriculasController::class, 'getEstudiantesPorAsignatura']);
+    Route::post('asistencias-hoy', [AsistenciaController::class, 'storeMasivo']);
+    Route::get('asistencia-check/{id_curso_asignatura}', [AsistenciaController::class, 'checkAsistenciaHoy']);
 
 
     Route::middleware('auth:api')->group(function () {

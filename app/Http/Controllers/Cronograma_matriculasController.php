@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cronograma_matriculas;
 use App\Models\Matriculas;
 use App\Models\Cursos;
+use App\Models\Curso_Asignaturas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -304,6 +305,94 @@ class Cronograma_matriculasController extends Controller
                 'especialidad' => $m->curso->especialidad->nombre,
                 'paralelo' => $m->curso->paralelo,
                 'fecha' => date('d/m/Y H:i', strtotime($m->fecha_matricula)),
+            ];
+        });
+
+        return response()->json($data);
+    }
+    public function getCursosMatriculados($id_representante)
+    {
+        // Obtenemos las matrículas del representante con toda la información necesaria
+        $matriculas = Matriculas::where('id_representante', $id_representante)
+            ->with([
+                'estudiante',
+                'curso.nivel',
+                'curso.especialidad',
+                'curso.docentetutor',
+                'curso.curso_asignaturas.asignatura',
+                'curso.curso_asignaturas.docente',
+                'curso.curso_asignaturas.horarios_clases'
+            ])
+            ->get();
+
+        // Transformamos la colección para limpiar binarios
+        $matriculasLimpias = $matriculas->map(function ($matricula) {
+            // 1. Limpiar foto del Estudiante
+            if ($matricula->estudiante) {
+                $matricula->estudiante->foto = $matricula->estudiante->foto ? base64_encode($matricula->estudiante->foto) : null;
+            }
+
+            // 2. Limpiar foto del Docente Tutor
+            if ($matricula->curso && $matricula->curso->docentetutor) {
+                $matricula->curso->docentetutor->foto = $matricula->curso->docentetutor->foto ? base64_encode($matricula->curso->docentetutor->foto) : null;
+            }
+
+            // 3. Limpiar fotos de los Docentes de cada Asignatura
+            if ($matricula->curso && $matricula->curso->curso_asignaturas) {
+                $matricula->curso->curso_asignaturas->each(function ($item) {
+                    if ($item->docente) {
+                        $item->docente->foto = $item->docente->foto ? base64_encode($item->docente->foto) : null;
+                    }
+                });
+            }
+
+            return $matricula;
+        });
+
+        return response()->json($matriculasLimpias);
+    }
+    public function getEstudiantesPorAsignatura($id_docente)
+    {
+        $hoy = date('Y-m-d');
+
+        $asignaturas = Curso_Asignaturas::where('id_docente', $id_docente)
+            ->where('estado', 1)
+            ->with([
+                'asignatura',
+                'curso.nivel',
+                'curso.especialidad',
+                'curso.matriculas.estudiante',
+                'curso.matriculas.asistencias' // Cargamos todas las del día
+            ])
+            ->get();
+
+        $data = $asignaturas->map(function ($item) use ($hoy) {
+            // Guardamos el ID de la asignatura actual para filtrar dentro del map
+            $id_actual = $item->id_curso_asignatura;
+
+            return [
+                'id_curso_asignatura' => $id_actual,
+                'nombre_asignatura' => $item->asignatura->nombre,
+                'curso_info' => $item->curso->nivel->nombre . ' "' . $item->curso->paralelo . '"',
+                'especialidad' => $item->curso->especialidad->nombre,
+                'total_estudiantes' => $item->curso->matriculas->count(),
+                'estudiantes' => $item->curso->matriculas->map(function ($m) use ($hoy, $id_actual) {
+
+                    // CRÍTICO: Filtramos la asistencia que coincida con la FECHA Y la ASIGNATURA actual
+                    $asistenciaHoy = $m->asistencias->where('fecha', $hoy)
+                        ->where('id_curso_asignatura', $id_actual)
+                        ->first();
+
+                    return [
+                        'id_persona' => $m->estudiante->id_persona,
+                        'cedula' => $m->estudiante->cedula,
+                        'nombres' => $m->estudiante->nombres,
+                        'apellidos' => $m->estudiante->apellidos,
+                        'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
+                        'id_matricula' => $m->id_matricula,
+                        'asistencia_guardada' => $asistenciaHoy ? $asistenciaHoy->estado : null
+                    ];
+                })->sortBy('apellidos')->values()->all() // Re-aseguramos el orden alfabético aquí
             ];
         });
 

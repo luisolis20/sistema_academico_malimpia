@@ -31,4 +31,7 @@ class Curso_Asignaturas extends Model
     public function horarios_clases(){
         return $this->hasMany(Horarios_clases::class, 'id_curso_asignatura');
     }
+    public function asistencias(){
+        return $this->hasMany(Asistencia::class, 'id_curso_asignatura', 'id_curso_asignatura');
+    }
 }
