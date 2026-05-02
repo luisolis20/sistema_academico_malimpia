@@ -121,6 +121,8 @@ Route::prefix('sistma')->group(function () {
     Route::get('estudiantes-asignatura/{id_docente}', [Cronograma_matriculasController::class, 'getEstudiantesPorAsignatura']);
     Route::post('asistencias-hoy', [AsistenciaController::class, 'storeMasivo']);
     Route::get('asistencia-check/{id_curso_asignatura}', [AsistenciaController::class, 'checkAsistenciaHoy']);
+    Route::get('historial-asistencia/{id_docente}', [AsistenciaController::class, 'getHistorialAsistencia']);
+    Route::get('datos-tutor/{id_persona}', [AsistenciaController::class, 'getDatosTutor']);
 
 
     Route::middleware('auth:api')->group(function () {

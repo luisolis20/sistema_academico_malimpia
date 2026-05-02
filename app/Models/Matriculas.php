@@ -28,7 +28,7 @@ class Matriculas extends Model
         return $this->belongsTo(Cursos::class, 'id_curso', 'id_curso');
     }
     public function representante(){
-        return $this->belongsTo(Personas::class, 'id_representante', 'id_representante');
+        return $this->belongsTo(Personas::class, 'id_representante', 'id_persona');
     }
     public function asistencias(){
         return $this->hasMany(Asistencia::class, 'id_matricula', 'id_matricula');
