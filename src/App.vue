@@ -127,10 +127,16 @@
               :class="{ 'show': activeDropdown === 'gestiondocente' }">
               <li>
                 <router-link class="dropdown-item" to="/gestion-docente/mis-estudiantes" @click="closeMenu">
-                  <i class="fas fa-users me-2 text-muted"></i> Mis estudiantes
+                  <i class="fas fa-users me-2 text-muted"></i> Mis estudiantes x asignaturas
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/tutor/estudiantes" @click="closeMenu">
+                  <i class="fas fa-chalkboard-teacher me-2 text-muted"></i> Tutoria
                 </router-link>
               </li>
             </ul>
+            
           </li>
         </ul>
         <ul

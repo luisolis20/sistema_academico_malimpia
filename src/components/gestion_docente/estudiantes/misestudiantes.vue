@@ -11,12 +11,11 @@
         <div class="badge bg-gold text-blue px-3 py-2 rounded-pill shadow-sm">
           Periodo Lectivo {{ periodo_activo.nombre }}
         </div>
-      </div>
-      <div class="col-md-4 text-md-end">
         <button v-if="todoRegistrado" @click="generarPDFGeneral"
           class="btn btn-gold text-blue fw-bold rounded-pill shadow-sm animate__animated animate__pulse animate__infinite">
           <i class="fas fa-file-pdf me-2"></i> Reporte General de Hoy
         </button>
+
       </div>
     </header>
 
@@ -130,6 +129,9 @@
         </div>
       </div>
     </div>
+    <button @click="generarPDFHistorial" class="btn btn-blue text-white fw-bold rounded-pill shadow-sm me-2">
+      <i class="fas fa-history me-2"></i> Descargar Historial Completo
+    </button>
   </div>
 </template>
 
@@ -275,6 +277,74 @@ export default {
       doc.text("UNIDAD EDUCATIVA MILENIO", 105, 25, { align: "center" });
       doc.setTextColor(0, 0, 0);
     },
+    async generarPDFHistorial() {
+      try {
+        this.cargando = true;
+        const res = await API.get(`${this.baseUrl}/historial-asistencia/${this.idpersona}`);
+        const historial = res.data;
+
+        if (historial.length === 0) {
+          return mostraralertas("No hay historial de asistencia registrado aún.", "info");
+        }
+
+        const doc = new jsPDF();
+        this.disenoBasePDF(doc, "HISTORIAL COMPLETO DE ASISTENCIAS");
+
+        let finalY = 40;
+
+        historial.forEach((asig, indexAsig) => {
+          // Título de la Asignatura
+          doc.setFontSize(14);
+          doc.setTextColor(29, 42, 104);
+          doc.setFont("helvetica", "bold");
+          doc.text(`${asig.asignatura} - ${asig.curso}`, 14, finalY);
+          finalY += 10;
+
+          asig.registros.forEach((clase) => {
+            // Subtítulo: Fecha de la clase
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`Fecha de clase: ${clase.fecha}`, 14, finalY);
+
+            autoTable(doc, {
+              startY: finalY + 2,
+              head: [['Estudiante', 'Estado']],
+              body: clase.detalle.map(d => [d.estudiante, d.estado]),
+              headStyles: { fillColor: [44, 62, 80] },
+              theme: 'striped',
+              margin: { left: 14, right: 14 },
+              didDrawPage: (data) => {
+                // Si la tabla salta de página, mantenemos el margen
+                finalY = data.cursor.y;
+              }
+            });
+
+            finalY = doc.lastAutoTable.finalY + 15;
+
+            // Verificar espacio para la siguiente tabla de fecha
+            if (finalY > 260) {
+              doc.addPage();
+              finalY = 20;
+            }
+          });
+
+          // Espacio mayor entre diferentes asignaturas
+          finalY += 10;
+          if (finalY > 260 && indexAsig < historial.length - 1) {
+            doc.addPage();
+            finalY = 20;
+          }
+        });
+
+        doc.save(`Historial_Asistencia_${new Date().getTime()}.pdf`);
+      } catch (e) {
+        console.error(e);
+        mostraralertas("Error al generar el historial", "error");
+      } finally {
+        this.cargando = false;
+      }
+    },
+
     async guardarAsistencia(item) {
       // 1. Validar que todos tengan selección
       const incompletos = item.estudiantes.some(e => !e.asistencia_actual);
