@@ -29,6 +29,8 @@ import MatriculaView from '@/views/Matricula/PanelmatriculaView.vue'
 import CursosFamiliarView from '@/views/Cursos/FamiliarCursos/CursosFamiliarView.vue'
 import MisestudiantesView from '@/views/Gestion_docente/estudiantes/MisestudiantesView.vue'
 import Tutor_estudianteView from '@/views/Gestion_docente/tutor/Tutor_estudianteView.vue'
+import Historial_matriculaView from '@/views/Matricula/Historial_Matricula/Historial_matriculaView.vue'
+import Control_Subida_NotasView from '@/views/Notas/Control_Subida_Notas/Control_Subida_NotasView.vue'
 
 const routes = [
   {
@@ -189,6 +191,16 @@ const routes = [
     path: '/gestion-docente/tutor/estudiantes',
     name: 'tutorestidiantes',
     component: Tutor_estudianteView
+  },
+  {
+    path: '/matricula/historial-matricula',
+    name: 'historialmatricula',
+    component: Historial_matriculaView
+  },
+  {
+    path: '/control-subida-notas',
+    name: 'control-subida-notas',
+    component: Control_Subida_NotasView
   },
 ]
 const router = createRouter({

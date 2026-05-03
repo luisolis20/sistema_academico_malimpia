@@ -117,6 +117,11 @@
                   <i class="fas fa-file-signature me-2 text-muted"></i> Matricular estudiante
                 </router-link>
               </li>
+              <li v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
+                <router-link class="dropdown-item" to="/matricula/historial-matricula" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Historial de matrículas
+                </router-link>
+              </li>
             </ul>
           </li>
           <li class="nav-item dropdown" @mouseenter="hoverDropdown('gestiondocente')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente'">
@@ -137,6 +142,19 @@
               </li>
             </ul>
             
+          </li>
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('notas')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('notas')">
+              <i class="fas fa-file-signature me-2"></i> Notas
+            </a>
+            <ul class="dropdown-menu shadow border-0 custom-dropdown"
+              :class="{ 'show': activeDropdown === 'notas' }">
+              <li>
+                <router-link class="dropdown-item" to="/control-subida-notas" @click="closeMenu">
+                  <i class="fas fa-file-signature me-2 text-muted"></i> Control de la subida de calificaciones
+                </router-link>
+              </li>
+            </ul>
           </li>
         </ul>
         <ul
