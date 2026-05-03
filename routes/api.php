@@ -16,6 +16,7 @@ use App\Http\Controllers\Curso_AsignaturasController;
 use App\Http\Controllers\HorariosController;
 use App\Http\Controllers\Cronograma_matriculasController;
 use App\Http\Controllers\AsistenciaController;
+use App\Http\Controllers\Control_SubidaNotasController;
 
 
 /*
@@ -119,10 +120,14 @@ Route::prefix('sistma')->group(function () {
     Route::get('historial/{id_representante}', [Cronograma_matriculasController::class, 'getHistorial']);
     Route::get('matriculas-representante/{id_representante}', [Cronograma_matriculasController::class, 'getCursosMatriculados']);
     Route::get('estudiantes-asignatura/{id_docente}', [Cronograma_matriculasController::class, 'getEstudiantesPorAsignatura']);
+    Route::get('buscar-historial-matriculas/{cedula}', [Cronograma_matriculasController::class, 'buscarHistorialMatriculas']);
     Route::post('asistencias-hoy', [AsistenciaController::class, 'storeMasivo']);
     Route::get('asistencia-check/{id_curso_asignatura}', [AsistenciaController::class, 'checkAsistenciaHoy']);
     Route::get('historial-asistencia/{id_docente}', [AsistenciaController::class, 'getHistorialAsistencia']);
     Route::get('datos-tutor/{id_persona}', [AsistenciaController::class, 'getDatosTutor']);
+    Route::apiResource('control_subida_notas', Control_SubidaNotasController::class);
+    //Definir endpoints para habilitar y deshabilitar control_subida_notas
+    Route::delete('habilitar_control_subida_notas/{id}', [Control_SubidaNotasController::class, 'habilitar']);
 
 
     Route::middleware('auth:api')->group(function () {

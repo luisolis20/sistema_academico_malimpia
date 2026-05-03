@@ -26,4 +26,7 @@ class Periodos_lectivos extends Model
     public function cronograma_matriculas(){
         return $this->hasMany(Cronograma_matriculas::class, 'id_periodo', 'id_periodo');
     }
+    public function control_subida_notas(){
+        return $this->hasMany(Control_subida_notas::class, 'id_periodo', 'id_periodo');
+    }
 }

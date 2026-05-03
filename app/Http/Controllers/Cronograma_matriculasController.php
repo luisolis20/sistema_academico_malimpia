@@ -6,6 +6,7 @@ use App\Models\Cronograma_matriculas;
 use App\Models\Matriculas;
 use App\Models\Cursos;
 use App\Models\Curso_Asignaturas;
+use App\Models\Personas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -397,5 +398,61 @@ class Cronograma_matriculasController extends Controller
         });
 
         return response()->json($data);
+    }
+    public function buscarHistorialMatriculas(Request $request)
+    {
+        $cedula = $request->cedula;
+
+        // Buscamos a la persona (estudiante) por su cédula
+        $estudiante = Personas::where('cedula', $cedula)
+            ->with([
+                'matriculasestudiantes' => function ($query) {
+                    // Unimos con cursos y periodos para poder ordenar
+                    $query->join('cursos', 'matriculas.id_curso', '=', 'cursos.id_curso')
+                        ->join('periodos_lectivos', 'cursos.id_periodo', '=', 'periodos_lectivos.id_periodo')
+                        ->orderBy('periodos_lectivos.estado_activo', 'desc')
+                        ->orderBy('periodos_lectivos.fecha_inicio', 'desc')
+                        ->select('matriculas.*');
+                },
+                'matriculasestudiantes.curso.periodo',
+                'matriculasestudiantes.curso.nivel',
+                'matriculasestudiantes.curso.especialidad',
+                'matriculasestudiantes.curso.docentetutor',
+                'matriculasestudiantes.curso.curso_asignaturas.asignatura',
+                'matriculasestudiantes.curso.curso_asignaturas.docente'
+            ])->first();
+
+        if (!$estudiante) {
+            return response()->json(['success' => false, 'message' => 'No se encontró un estudiante con esa cédula.'], 404);
+        }
+
+        if ($estudiante->matriculasestudiantes->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'El estudiante no posee historial de matrículas.'], 404);
+        }
+
+        // 1. Convertir la foto del estudiante a Base64
+        if ($estudiante->foto) {
+            $estudiante->foto = base64_encode($estudiante->foto);
+        }
+
+        // 2. PREVENCIÓN: Ocultar el campo 'foto' de los docentes. 
+        // Como también son de la tabla 'Personas', si tienen datos BLOB romperán el JSON igual que el estudiante.
+        foreach ($estudiante->matriculasestudiantes as $matricula) {
+            if ($matricula->curso && $matricula->curso->docentetutor) {
+                $matricula->curso->docentetutor->makeHidden('foto');
+            }
+            if ($matricula->curso && $matricula->curso->curso_asignaturas) {
+                foreach ($matricula->curso->curso_asignaturas as $curso_asignatura) {
+                    if ($curso_asignatura->docente) {
+                        $curso_asignatura->docente->makeHidden('foto');
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'estudiante' => $estudiante
+        ]);
     }
 }
