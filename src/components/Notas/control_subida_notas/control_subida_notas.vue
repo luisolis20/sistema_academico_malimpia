@@ -275,7 +275,7 @@ export default {
 
     async cambiarEstado(id, accion) {
       try {
-        // En tu backend, 'destroy' es para inhabilitar y 'habilitar' es para habilitar
+        //'destroy' es para inhabilitar y 'habilitar' es para habilitar
         const ruta = accion === 'habilitar' ? `${this.baesUrl}/habilitar_control_subida_notas/${id}` : `${this.baesUrl}/control_subida_notas/${id}`;
         const metodo = accion === 'habilitar' ? API.get : API.delete; // Ajusta según tu routes/api.php
 

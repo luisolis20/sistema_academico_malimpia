@@ -140,6 +140,11 @@
                   <i class="fas fa-chalkboard-teacher me-2 text-muted"></i> Tutoria
                 </router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/notas/registro-calificaciones" @click="closeMenu">
+                  <i class="fas fa-file-signature me-2 text-muted"></i> Registro de calificaciones
+                </router-link>
+              </li>
             </ul>
             
           </li>

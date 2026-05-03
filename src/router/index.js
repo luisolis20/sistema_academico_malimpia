@@ -31,6 +31,7 @@ import MisestudiantesView from '@/views/Gestion_docente/estudiantes/Misestudiant
 import Tutor_estudianteView from '@/views/Gestion_docente/tutor/Tutor_estudianteView.vue'
 import Historial_matriculaView from '@/views/Matricula/Historial_Matricula/Historial_matriculaView.vue'
 import Control_Subida_NotasView from '@/views/Notas/Control_Subida_Notas/Control_Subida_NotasView.vue'
+import RegistroCalificacionesView from '@/views/Gestion_docente/notas/registro_calificaciones/RegistroCalificacionesView.vue'
 
 const routes = [
   {
@@ -201,6 +202,11 @@ const routes = [
     path: '/control-subida-notas',
     name: 'control-subida-notas',
     component: Control_Subida_NotasView
+  },
+  {
+    path: '/gestion-docente/notas/registro-calificaciones',
+    name: 'registro-calificaciones',
+    component: RegistroCalificacionesView
   },
 ]
 const router = createRouter({
