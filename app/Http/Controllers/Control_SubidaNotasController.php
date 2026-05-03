@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Control_subida_notas;
 use App\Models\Periodos_lectivos;
+use App\Models\Curso_Asignaturas;
+use App\Models\Matriculas;
+use App\Models\Calificaciones;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -210,5 +213,112 @@ class Control_SubidaNotasController extends Controller
         }
 
         return null; // Sin conflictos
+    }
+    // 1. Obtener las asignaturas que da un docente específico
+    public function getAsignaturasDocente($id_docente)
+    {
+        // Asumiendo que quieres las del periodo activo (si tienes el modelo Periodos_lectivos úsalo para filtrar)
+        $asignaturas = Curso_Asignaturas::with(['curso.nivel', 'curso.especialidad', 'asignatura'])
+            ->where('id_docente', $id_docente)
+            ->where('estado', 1)
+            ->get();
+
+        return response()->json($asignaturas, 200);
+    }
+
+    // 2. Obtener estudiantes, sus calificaciones y fases activas para una asignatura
+    public function getEstudiantesAsignatura($id_curso_asignatura)
+    {
+        // 1. Buscamos la asignatura y usamos tus relaciones anidadas que ya sabemos que funcionan
+        $asignatura = Curso_Asignaturas::with([
+            'curso.matriculas.estudiante',
+            'curso.matriculas.calificaciones' => function($q) use ($id_curso_asignatura) {
+                // Importante: Solo traer las calificaciones de esta materia específica
+                $q->where('id_curso_asignatura', $id_curso_asignatura);
+            }
+        ])->find($id_curso_asignatura);
+
+        if (!$asignatura) {
+            return response()->json(['mensaje' => 'Asignatura no encontrada'], 404);
+        }
+
+        // Fases habilitadas
+        $fasesActivas = Control_subida_notas::where('habilitado', 1)->pluck('fase_evaluacion');
+
+        // 2. Mapeamos las matrículas del curso igual que en tu método de asistencia
+        $estudiantes = $asignatura->curso->matriculas->map(function($m) use ($id_curso_asignatura) {
+            $calificacion = $m->calificaciones->first();
+            
+            // Si no tiene registro, armamos el esqueleto en ceros
+            if (!$calificacion) {
+                $calificacion = [
+                    'id_matricula' => $m->id_matricula,
+                    'id_curso_asignatura' => $id_curso_asignatura,
+                    'q1_p1' => '0.00', 'q1_p2' => '0.00', 'q1_p3' => '0.00', 'q1_examen' => '0.00', 'q1_promedio' => '0.00',
+                    'q2_p1' => '0.00', 'q2_p2' => '0.00', 'q2_p3' => '0.00', 'q2_examen' => '0.00', 'q2_promedio' => '0.00',
+                    'promedio_anual' => '0.00', 'nota_supletorio' => null, 'nota_remedial' => null,
+                    'nota_gracia' => null, 'nota_final_definitiva' => '0.00',
+                    'estado_asignatura' => 'Reprobado'
+                ];
+            }
+
+            return [
+                'id_matricula' => $m->id_matricula,
+                'estudiante' => [
+                    'id_persona' => $m->estudiante->id_persona,
+                    'cedula' => $m->estudiante->cedula,
+                    'nombres' => $m->estudiante->nombres,
+                    'apellidos' => $m->estudiante->apellidos,
+                    // Codificamos la foto igual que en tu código
+                    'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null, 
+                ],
+                'calificaciones' => $calificacion
+            ];
+        })->sortBy(function($item) {
+            // Ordenamos alfabéticamente por apellido
+            return $item['estudiante']['apellidos'];
+        })->values(); // Garantiza que sea un array puro para Vue
+
+        return response()->json([
+            'estudiantes' => $estudiantes,
+            'fases_activas' => $fasesActivas
+        ], 200);
+    }
+
+    // 3. Guardar las calificaciones
+    public function guardarCalificaciones(Request $request)
+    {
+        $estudiantes = $request->estudiantes; // Array de estudiantes con sus notas
+        
+        foreach ($estudiantes as $est) {
+            $datosNota = $est['calificaciones'];
+            
+            Calificaciones::updateOrCreate(
+                [
+                    'id_matricula' => $datosNota['id_matricula'],
+                    'id_curso_asignatura' => $datosNota['id_curso_asignatura']
+                ],
+                [
+                    'q1_p1' => $datosNota['q1_p1'],
+                    'q1_p2' => $datosNota['q1_p2'],
+                    'q1_p3' => $datosNota['q1_p3'],
+                    'q1_examen' => $datosNota['q1_examen'],
+                    'q1_promedio' => $datosNota['q1_promedio'],
+                    'q2_p1' => $datosNota['q2_p1'],
+                    'q2_p2' => $datosNota['q2_p2'],
+                    'q2_p3' => $datosNota['q2_p3'],
+                    'q2_examen' => $datosNota['q2_examen'],
+                    'q2_promedio' => $datosNota['q2_promedio'],
+                    'promedio_anual' => $datosNota['promedio_anual'],
+                    'nota_supletorio' => $datosNota['nota_supletorio'],
+                    'nota_remedial' => $datosNota['nota_remedial'],
+                    'nota_gracia' => $datosNota['nota_gracia'],
+                    'nota_final_definitiva' => $datosNota['nota_final_definitiva'],
+                    'estado_asignatura' => $datosNota['estado_asignatura']
+                ]
+            );
+        }
+
+        return response()->json(['mensaje' => 'Calificaciones guardadas exitosamente'], 200);
     }
 }

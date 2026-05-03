@@ -128,6 +128,9 @@ Route::prefix('sistma')->group(function () {
     Route::apiResource('control_subida_notas', Control_SubidaNotasController::class);
     //Definir endpoints para habilitar y deshabilitar control_subida_notas
     Route::delete('habilitar_control_subida_notas/{id}', [Control_SubidaNotasController::class, 'habilitar']);
+    Route::get('asignaturas-docente/{id_docente}', [Control_SubidaNotasController::class, 'getAsignaturasDocente']);
+    Route::get('estudiantes-asigna/{id_curso_asignatura}', [Control_SubidaNotasController::class, 'getEstudiantesAsignatura']);
+    Route::post('calificaciones-guardar', [Control_SubidaNotasController::class, 'guardarCalificaciones']);
 
 
     Route::middleware('auth:api')->group(function () {

@@ -34,4 +34,7 @@ class Curso_Asignaturas extends Model
     public function asistencias(){
         return $this->hasMany(Asistencia::class, 'id_curso_asignatura', 'id_curso_asignatura');
     }
+    public function calificaciones(){
+        return $this->hasMany(Calificaciones::class, 'id_curso_asignatura', 'id_curso_asignatura');
+    }
 }

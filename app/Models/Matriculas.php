@@ -33,4 +33,7 @@ class Matriculas extends Model
     public function asistencias(){
         return $this->hasMany(Asistencia::class, 'id_matricula', 'id_matricula');
     }
+    public function calificaciones(){
+        return $this->hasMany(Calificaciones::class, 'id_matricula', 'id_matricula');
+    }
 }
