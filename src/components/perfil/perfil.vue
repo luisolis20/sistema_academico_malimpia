@@ -186,6 +186,12 @@
                         <p class="mb-0 text-muted small"><i class="fas fa-phone me-1"></i>
                           {{ familiar.telefono || 'Sinteléfono' }}</p>
                       </div>
+                      <div class="mt-3 border-top pt-3 text-end">
+                        <button @click="verCalificaciones(familiar)"
+                          class="btn btn-sm btn-gold text-blue fw-bold rounded-pill px-3 shadow-sm">
+                          <i class="fas fa-chart-bar me-1"></i> Ver Calificaciones
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -366,12 +372,144 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="modalCalificaciones" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        <div class="modal-header bg-blue text-white rounded-top-4">
+          <h5 class="modal-title fw-bold">
+            <i class="fas fa-user-graduate me-2"></i> Reporte de Calificaciones
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body p-4" style="background-color: #f8f9fa;">
+          <div v-if="cargandoCalificaciones" class="text-center py-5">
+            <div class="spinner-border text-gold" role="status"></div>
+            <p class="mt-2 text-muted">Consultando registro académico...</p>
+          </div>
+
+          <div v-else-if="datosAcademicos">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-gold border-5">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <h5 class="fw-bold text-blue mb-1">
+                      {{ datosAcademicos.curso.nivel }} "{{ datosAcademicos.curso.paralelo }}"
+                    </h5>
+                    <p class="text-muted mb-0 small">
+                      <span v-if="datosAcademicos.curso.especialidad">{{ datosAcademicos.curso.especialidad }} |</span>
+                      Periodo Lectivo: <span class="fw-bold">{{ datosAcademicos.curso.periodo }}</span>
+                    </p>
+                  </div>
+                  <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="badge bg-gold text-blue fs-6 px-3 py-2">
+                      {{ estudianteSeleccionado?.nombres }} {{ estudianteSeleccionado?.apellidos }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4" role="alert">
+              <h6 class="fw-bold mb-2"><i class="fas fa-calculator me-2"></i> ¿Cómo se calculan las notas?</h6>
+              <ul class="mb-0 small">
+                <li><strong>Parciales (P1, P2, P3):</strong> Se promedian 4 insumos: Tareas, A. Individuales, A.
+                  Grupales y
+                  Lecciones.</li>
+                <li><strong>Promedio Anual:</strong> Requiere mínimo 7/10 para aprobación directa.</li>
+                <li><strong>Supletorio:</strong> Se habilita si el anual está entre 5 y 6.99. Aprueba con 7.</li>
+                <li><strong>Remedial:</strong> Se habilita si el anual es < 5 o reprobó supletorio.</li>
+                <li><strong>Gracia:</strong> Se habilita si reprobó remedial en una sola asignatura.</li>
+                <li><strong>Nota Final:</strong> Si aprueba en recuperación, la nota final será siempre 7.00.</li>
+                <li><strong>Restricciones:</strong> El sistema no permitirá ingresar valores menores a 0 ni mayores a
+                  10.</li>
+              </ul>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0 text-center text-nowrap">
+
+                  <thead class="bg-blue text-white">
+                    <tr>
+                      <th rowspan="2" class="text-start ps-4 align-middle">Asignatura</th>
+                      <th colspan="4" class="text-center">Quimestre 1</th>
+                      <th v-if="mostrarColumnas.q2" colspan="4" class="text-center border-start border-light">Quimestre
+                        2</th>
+                      <th v-if="mostrarColumnas.q2" rowspan="2"
+                        class="align-middle bg-secondary bg-opacity-25 border-start text-white border-light">Prom. Anual
+                      </th>
+                      <th v-if="mostrarColumnas.supletorio" rowspan="2" class="align-middle bg-warning text-dark">
+                        Supletorio</th>
+                      <th v-if="mostrarColumnas.remedial" rowspan="2" class="align-middle bg-info text-dark">Remedial
+                      </th>
+                      <th v-if="mostrarColumnas.gracia" rowspan="2" class="align-middle bg-primary text-white">Gracia
+                      </th>
+                      <th v-if="mostrarColumnas.q2" rowspan="2" class="align-middle bg-gold text-blue">Nota Final</th>
+                      <th v-if="mostrarColumnas.q2" rowspan="2" class="align-middle">Estado</th>
+                    </tr>
+                    <tr class="bg-blue-light text-white" style="background-color: #2a3d8f;">
+                      <th class="small fw-normal">P1</th>
+                      <th class="small fw-normal">P2</th>
+                      <th class="small fw-normal">P3</th>
+                      <th class="small fw-bold">Prom</th>
+                      <th v-if="mostrarColumnas.q2" class="small fw-normal border-start border-light">P1</th>
+                      <th v-if="mostrarColumnas.q2" class="small fw-normal">P2</th>
+                      <th v-if="mostrarColumnas.q2" class="small fw-normal">P3</th>
+                      <th v-if="mostrarColumnas.q2" class="small fw-bold">Prom</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="cal in datosAcademicos.calificaciones" :key="cal.asignatura">
+                      <td class="text-start ps-4 fw-bold text-blue">{{ cal.asignatura }}</td>
+
+                      <td>{{ cal.q1_p1 || '-' }}</td>
+                      <td>{{ cal.q1_p2 || '-' }}</td>
+                      <td>{{ cal.q1_p3 || '-' }}</td>
+                      <td class="fw-bold bg-light">{{ cal.q1_promedio || '-' }}</td>
+
+                      <td v-if="mostrarColumnas.q2" class="border-start">{{ cal.q2_p1 || '-' }}</td>
+                      <td v-if="mostrarColumnas.q2">{{ cal.q2_p2 || '-' }}</td>
+                      <td v-if="mostrarColumnas.q2">{{ cal.q2_p3 || '-' }}</td>
+                      <td v-if="mostrarColumnas.q2" class="fw-bold bg-light">{{ cal.q2_promedio || '-' }}</td>
+
+                      <td v-if="mostrarColumnas.q2" class="fw-bold bg-light border-start">{{ cal.promedio_anual || '-'
+                      }}</td>
+                      <td v-if="mostrarColumnas.supletorio">{{ cal.nota_supletorio || '-' }}</td>
+                      <td v-if="mostrarColumnas.remedial">{{ cal.nota_remedial || '-' }}</td>
+                      <td v-if="mostrarColumnas.gracia">{{ cal.nota_gracia || '-' }}</td>
+
+                      <td v-if="mostrarColumnas.q2" class="fw-bold fs-6"
+                        :class="Number(cal.nota_final_definitiva) < 7 ? 'text-danger' : 'text-success'">
+                        {{ cal.nota_final_definitiva || '-' }}
+                      </td>
+                      <td v-if="mostrarColumnas.q2">
+                        <span v-if="cal.estado_asignatura" class="badge" :class="badgeEstado(cal.estado_asignatura)">
+                          {{ cal.estado_asignatura }}
+                        </span>
+                        <span v-else>-</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="alert alert-warning border-0 shadow-sm rounded-4">
+            No se encontró información académica para este estudiante en el periodo actual.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import API from "@/assets/js/axios"
 import { mostraralertas } from "@/assets/js/funciones/functions";
 import { getMe } from "@/assets/js/auth";
+import * as bootstrap from 'bootstrap';
 
 export default {
   data() {
@@ -397,6 +535,31 @@ export default {
       cargandoCargaDocente: false,
       horario: [],
       cargandoHorario: false,
+      estudianteSeleccionado: null,
+      datosAcademicos: null,
+      cargandoCalificaciones: false,
+      modalCalificaciones: null,
+    }
+  },
+  computed: {
+    mostrarColumnas() {
+      // Retorna true/false por cada columna dependiendo si hay datos en alguna asignatura
+      const cal = this.datosAcademicos?.calificaciones || [];
+
+      return {
+        // Se muestra Q2 si algún parcial o el promedio de Q2 es mayor a 0
+        q2: cal.some(c =>
+          (c.q2_p1 !== null && c.q2_p1 !== undefined && Number(c.q2_p1) > 0) ||
+          (c.q2_p2 !== null && c.q2_p2 !== undefined && Number(c.q2_p2) > 0) ||
+          (c.q2_p3 !== null && c.q2_p3 !== undefined && Number(c.q2_p3) > 0) ||
+          (c.q2_promedio !== null && c.q2_promedio !== undefined && Number(c.q2_promedio) > 0)
+        ),
+
+        // Aplicamos la misma lógica para los exámenes de recuperación para evitar que se muestren si traen "0.00" por defecto de la BD
+        supletorio: cal.some(c => c.nota_supletorio !== null && c.nota_supletorio !== undefined && Number(c.nota_supletorio) > 0),
+        remedial: cal.some(c => c.nota_remedial !== null && c.nota_remedial !== undefined && Number(c.nota_remedial) > 0),
+        gracia: cal.some(c => c.nota_gracia !== null && c.nota_gracia !== undefined && Number(c.nota_gracia) > 0),
+      };
     }
   },
   async mounted() {
@@ -408,6 +571,44 @@ export default {
     this.cargando = false;
   },
   methods: {
+    async verCalificaciones(familiar) {
+      this.estudianteSeleccionado = familiar;
+      this.datosAcademicos = null;
+      this.cargandoCalificaciones = true;
+
+      // Inicializar y mostrar modal de Bootstrap
+      if (!this.modalCalificaciones) {
+        this.modalCalificaciones = new bootstrap.Modal(document.getElementById('modalCalificaciones'));
+      }
+      this.modalCalificaciones.show();
+
+      try {
+        // Ajusta la URL según cómo la hayas registrado en Laravel (api.php)
+        const res = await API.get(`${this.baseUrl}/calificaciones-actuales/${familiar.id_persona}`);
+        this.datosAcademicos = res.data;
+      } catch (e) {
+        console.error(e);
+        if (e.response && e.response.status === 404) {
+          // Ignoramos el toast si es 404 porque ya mostramos el mensaje en el modal
+        } else {
+          mostraralertas("Error al conectar con el servidor", "error");
+        }
+      } finally {
+        this.cargandoCalificaciones = false;
+      }
+    },
+
+    badgeEstado(estado) {
+      if (!estado) return 'bg-secondary';
+      switch (estado.toLowerCase()) {
+        case 'aprobado': return 'bg-success';
+        case 'supletorio': return 'bg-warning text-dark';
+        case 'remedial': return 'bg-info text-dark';
+        case 'gracia': return 'bg-primary';
+        case 'reprobado': return 'bg-danger';
+        default: return 'bg-secondary';
+      }
+    },
     async getPersona() {
       try {
         const res = await API.get(`${this.baseUrl}/personas/${this.idpersona}`);
@@ -484,7 +685,7 @@ export default {
       try {
         this.cargandoCargaDocente = true;
         const res = await API.get(`${this.baseUrl}/docente/carga-academica/${this.idpersona}`);
-        
+
         this.cargaDocente.tutorias = res.data.tutorias;
         this.cargaDocente.asignaturas = res.data.asignaturas;
       } catch (err) {
@@ -685,6 +886,7 @@ export default {
   background-color: rgba(29, 42, 104, 0.05);
   transition: 0.3s;
 }
+
 custom-table-schedule {
   border-collapse: separate;
   border-spacing: 0;
