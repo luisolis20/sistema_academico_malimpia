@@ -44,19 +44,18 @@ class Control_SubidaNotasController extends Controller
                 'data' => $data,
                 'periodo_activo' => $periodoActivo
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
         }
     }
-   
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $inputs = $request->input();
-        
+
         // Validación Q1 vs Q2 si se intenta guardar como habilitado
         if (isset($inputs['habilitado']) && $inputs['habilitado'] == 1) {
             $conflicto = $this->validarConflictoFases($inputs['id_periodo'], $inputs['fase_evaluacion']);
@@ -93,14 +92,14 @@ class Control_SubidaNotasController extends Controller
             ]);
         }
     }
-    
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
         $res = Control_subida_notas::find($id);
-        
+
         if (isset($res)) {
             $habilitado = $request->habilitado;
             $fecha_fin = $request->fecha_fin;
@@ -126,7 +125,7 @@ class Control_SubidaNotasController extends Controller
             $res->fecha_inicio = $request->fecha_inicio;
             $res->fecha_fin = $fecha_fin;
             $res->habilitado = $habilitado;
-            
+
             if ($res->save()) {
                 return response()->json([
                     'data' => $res,
@@ -164,7 +163,7 @@ class Control_SubidaNotasController extends Controller
                     'mensaje' => "El Control de Subida de Notas no existe (puede que ya lo haya eliminado)",
                 ]);
             }
-        } else {     
+        } else {
             //Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
@@ -185,7 +184,7 @@ class Control_SubidaNotasController extends Controller
 
             $res->habilitado = 1;
             $res->save();
-            
+
             return response()->json([
                 'data' => $res->toArray(),
                 'mensaje' => "Fase habilitada con Éxito!!",
@@ -194,7 +193,8 @@ class Control_SubidaNotasController extends Controller
             return response()->json(['error' => true, 'mensaje' => "El Control no Existe"], 404);
         }
     }
-    private function validarConflictoFases($id_periodo, $fase_evaluacion) {
+    private function validarConflictoFases($id_periodo, $fase_evaluacion)
+    {
         $isQ1 = str_starts_with($fase_evaluacion, 'Q1');
         $isQ2 = str_starts_with($fase_evaluacion, 'Q2');
 
@@ -232,7 +232,7 @@ class Control_SubidaNotasController extends Controller
         // 1. Buscamos la asignatura y usamos tus relaciones anidadas que ya sabemos que funcionan
         $asignatura = Curso_Asignaturas::with([
             'curso.matriculas.estudiante',
-            'curso.matriculas.calificaciones' => function($q) use ($id_curso_asignatura) {
+            'curso.matriculas.calificaciones' => function ($q) use ($id_curso_asignatura) {
                 // Importante: Solo traer las calificaciones de esta materia específica
                 $q->where('id_curso_asignatura', $id_curso_asignatura);
             }
@@ -246,18 +246,29 @@ class Control_SubidaNotasController extends Controller
         $fasesActivas = Control_subida_notas::where('habilitado', 1)->pluck('fase_evaluacion');
 
         // 2. Mapeamos las matrículas del curso igual que en tu método de asistencia
-        $estudiantes = $asignatura->curso->matriculas->map(function($m) use ($id_curso_asignatura) {
+        $estudiantes = $asignatura->curso->matriculas->map(function ($m) use ($id_curso_asignatura) {
             $calificacion = $m->calificaciones->first();
-            
+
             // Si no tiene registro, armamos el esqueleto en ceros
             if (!$calificacion) {
                 $calificacion = [
                     'id_matricula' => $m->id_matricula,
                     'id_curso_asignatura' => $id_curso_asignatura,
-                    'q1_p1' => '0.00', 'q1_p2' => '0.00', 'q1_p3' => '0.00', 'q1_examen' => '0.00', 'q1_promedio' => '0.00',
-                    'q2_p1' => '0.00', 'q2_p2' => '0.00', 'q2_p3' => '0.00', 'q2_examen' => '0.00', 'q2_promedio' => '0.00',
-                    'promedio_anual' => '0.00', 'nota_supletorio' => null, 'nota_remedial' => null,
-                    'nota_gracia' => null, 'nota_final_definitiva' => '0.00',
+                    'q1_p1' => '0.00',
+                    'q1_p2' => '0.00',
+                    'q1_p3' => '0.00',
+                    'q1_examen' => '0.00',
+                    'q1_promedio' => '0.00',
+                    'q2_p1' => '0.00',
+                    'q2_p2' => '0.00',
+                    'q2_p3' => '0.00',
+                    'q2_examen' => '0.00',
+                    'q2_promedio' => '0.00',
+                    'promedio_anual' => '0.00',
+                    'nota_supletorio' => null,
+                    'nota_remedial' => null,
+                    'nota_gracia' => null,
+                    'nota_final_definitiva' => '0.00',
                     'estado_asignatura' => 'Reprobado'
                 ];
             }
@@ -270,11 +281,11 @@ class Control_SubidaNotasController extends Controller
                     'nombres' => $m->estudiante->nombres,
                     'apellidos' => $m->estudiante->apellidos,
                     // Codificamos la foto igual que en tu código
-                    'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null, 
+                    'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
                 ],
                 'calificaciones' => $calificacion
             ];
-        })->sortBy(function($item) {
+        })->sortBy(function ($item) {
             // Ordenamos alfabéticamente por apellido
             return $item['estudiante']['apellidos'];
         })->values(); // Garantiza que sea un array puro para Vue
@@ -289,10 +300,10 @@ class Control_SubidaNotasController extends Controller
     public function guardarCalificaciones(Request $request)
     {
         $estudiantes = $request->estudiantes; // Array de estudiantes con sus notas
-        
+
         foreach ($estudiantes as $est) {
             $datosNota = $est['calificaciones'];
-            
+
             Calificaciones::updateOrCreate(
                 [
                     'id_matricula' => $datosNota['id_matricula'],
@@ -320,5 +331,65 @@ class Control_SubidaNotasController extends Controller
         }
 
         return response()->json(['mensaje' => 'Calificaciones guardadas exitosamente'], 200);
+    }
+    public function getCalificacionesActuales($id_estudiante)
+    {
+        // Buscamos la matrícula del estudiante en el periodo activo
+        $matricula = Matriculas::with([
+            'curso.periodo',
+            'curso.nivel',
+            'curso.especialidad',
+            'calificaciones.curso_asignatura.asignatura'
+        ])
+            ->where('id_estudiante', $id_estudiante)
+            ->whereHas('curso.periodo', function ($query) {
+                $query->where('estado_activo', 1); // Solo el periodo activo
+            })
+            ->first();
+
+        if (!$matricula) {
+            return response()->json([
+                'status' => 'error',
+                'mensaje' => 'El estudiante no tiene una matrícula activa en el periodo actual.'
+            ], 404);
+        }
+
+        // Estructuramos la información del curso y periodo
+        $cursoInfo = [
+            'periodo' => $matricula->curso->periodo->nombre,
+            'nivel' => $matricula->curso->nivel->nombre,
+            'especialidad' => $matricula->curso->especialidad ? $matricula->curso->especialidad->nombre : '',
+            'paralelo' => $matricula->curso->paralelo
+        ];
+
+        // Mapeamos las calificaciones
+        $calificaciones = $matricula->calificaciones->map(function ($calificacion) {
+            return [
+                'asignatura' => $calificacion->curso_asignatura->asignatura->nombre,
+                // Quimestre 1
+                'q1_p1' => $calificacion->q1_p1,
+                'q1_p2' => $calificacion->q1_p2,
+                'q1_p3' => $calificacion->q1_p3,
+                'q1_promedio' => $calificacion->q1_promedio,
+
+                // Quimestre 2
+                'q2_p1' => $calificacion->q2_p1,
+                'q2_p2' => $calificacion->q2_p2,
+                'q2_p3' => $calificacion->q2_p3,
+                'q2_promedio' => $calificacion->q2_promedio,
+                'promedio_anual' => $calificacion->promedio_anual,
+                'nota_supletorio' => $calificacion->nota_supletorio,
+                'nota_remedial' => $calificacion->nota_remedial,
+                'nota_gracia' => $calificacion->nota_gracia,
+                'nota_final_definitiva' => $calificacion->nota_final_definitiva,
+                'estado_asignatura' => $calificacion->estado_asignatura,
+            ];
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'curso' => $cursoInfo,
+            'calificaciones' => $calificaciones
+        ], 200);
     }
 }

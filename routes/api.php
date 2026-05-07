@@ -131,6 +131,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('asignaturas-docente/{id_docente}', [Control_SubidaNotasController::class, 'getAsignaturasDocente']);
     Route::get('estudiantes-asigna/{id_curso_asignatura}', [Control_SubidaNotasController::class, 'getEstudiantesAsignatura']);
     Route::post('calificaciones-guardar', [Control_SubidaNotasController::class, 'guardarCalificaciones']);
+    Route::get('calificaciones-actuales/{id_estudiante}', [Control_SubidaNotasController::class, 'getCalificacionesActuales']);
 
 
     Route::middleware('auth:api')->group(function () {
