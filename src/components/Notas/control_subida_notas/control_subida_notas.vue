@@ -277,7 +277,7 @@ export default {
       try {
         //'destroy' es para inhabilitar y 'habilitar' es para habilitar
         const ruta = accion === 'habilitar' ? `${this.baesUrl}/habilitar_control_subida_notas/${id}` : `${this.baesUrl}/control_subida_notas/${id}`;
-        const metodo = accion === 'habilitar' ? API.get : API.delete; // Ajusta según tu routes/api.php
+        const metodo = accion === 'habilitar' ? API.delete : API.get; // Ajusta según tu routes/api.php
 
         const response = await metodo(ruta);
         
