@@ -125,6 +125,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('asistencia-check/{id_curso_asignatura}', [AsistenciaController::class, 'checkAsistenciaHoy']);
     Route::get('historial-asistencia/{id_docente}', [AsistenciaController::class, 'getHistorialAsistencia']);
     Route::get('datos-tutor/{id_persona}', [AsistenciaController::class, 'getDatosTutor']);
+    Route::get('datos-notas-alumno-tutor/{id_persona}', [AsistenciaController::class, 'getDatosNotasAlumnoTutor']);
     Route::apiResource('control_subida_notas', Control_SubidaNotasController::class);
     //Definir endpoints para habilitar y deshabilitar control_subida_notas
     Route::delete('habilitar_control_subida_notas/{id}', [Control_SubidaNotasController::class, 'habilitar']);
@@ -132,6 +133,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('estudiantes-asigna/{id_curso_asignatura}', [Control_SubidaNotasController::class, 'getEstudiantesAsignatura']);
     Route::post('calificaciones-guardar', [Control_SubidaNotasController::class, 'guardarCalificaciones']);
     Route::get('calificaciones-actuales/{id_estudiante}', [Control_SubidaNotasController::class, 'getCalificacionesActuales']);
+    Route::get('historico_notas/{cedula}', [Control_SubidaNotasController::class, 'buscarPorCedula']);
 
 
     Route::middleware('auth:api')->group(function () {

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Calificaciones;
 use App\Models\Control_subida_notas;
-use App\Models\Periodos_lectivos;
 use App\Models\Curso_Asignaturas;
 use App\Models\Matriculas;
-use App\Models\Calificaciones;
+use App\Models\Niveles_academicos;
+use App\Models\Periodos_lectivos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
 
 class Control_SubidaNotasController extends Controller
 {
@@ -21,7 +21,7 @@ class Control_SubidaNotasController extends Controller
         try {
             $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
-            if (!$periodoActivo) {
+            if (! $periodoActivo) {
                 return response()->json(['data' => [], 'message' => 'No hay un periodo lectivo activo'], 404);
             }
 
@@ -42,10 +42,10 @@ class Control_SubidaNotasController extends Controller
 
             return response()->json([
                 'data' => $data,
-                'periodo_activo' => $periodoActivo
+                'periodo_activo' => $periodoActivo,
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error: '.$e->getMessage()], 500);
         }
     }
 
@@ -68,24 +68,25 @@ class Control_SubidaNotasController extends Controller
 
         return response()->json([
             'data' => $res,
-            'mensaje' => "Fase configurada con Éxito!!",
+            'mensaje' => 'Fase configurada con Éxito!!',
         ]);
     }
+
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //Obtener el objeto Control_subida_notas con el id proporcionado
+        // Obtener el objeto Control_subida_notas con el id proporcionado
         $res = Control_subida_notas::find($id);
-        //Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
+        // Si el objeto existe, devolver los datos en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             return response()->json([
                 'data' => $res,
-                'mensaje' => "Encontrado con Éxito!!",
+                'mensaje' => 'Encontrado con Éxito!!',
             ]);
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Control de Subida de Notas con id: $id no Existe",
@@ -129,48 +130,50 @@ class Control_SubidaNotasController extends Controller
             if ($res->save()) {
                 return response()->json([
                     'data' => $res,
-                    'mensaje' => "Actualizado con Éxito!! " . ($habilitado == 0 && $request->habilitado == 1 ? "(Se inhabilitó automáticamente porque la fecha fin es pasada o actual)" : ""),
+                    'mensaje' => 'Actualizado con Éxito!! '.($habilitado == 0 && $request->habilitado == 1 ? '(Se inhabilitó automáticamente porque la fecha fin es pasada o actual)' : ''),
                 ]);
             } else {
-                return response()->json(['error' => true, 'mensaje' => "Error al Actualizar"], 500);
+                return response()->json(['error' => true, 'mensaje' => 'Error al Actualizar'], 500);
             }
         } else {
             return response()->json(['error' => true, 'mensaje' => "El Control con id: $id no Existe"], 404);
         }
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //Obtener el objeto Control_subida_notas con el id proporcionado
+        // Obtener el objeto Control_subida_notas con el id proporcionado
         $res = Control_subida_notas::find($id);
-        //Si el objeto existe, inhabilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+        // Si el objeto existe, inhabilitar el nivel académico y guardar los cambios, luego devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
         if (isset($res)) {
             $res->habilitado = 0;
             $res->save();
             $data = $res->toArray();
             if ($data) {
-                //Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
+                // Devolver los datos actualizados en formato JSON, incluyendo un mensaje de éxito
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "Inhabilitado con Éxito!!",
+                    'mensaje' => 'Inhabilitado con Éxito!!',
                 ]);
             } else {
-                //Si ocurre algún error, devolver un mensaje de error en formato JSON
+                // Si ocurre algún error, devolver un mensaje de error en formato JSON
                 return response()->json([
                     'data' => $data,
-                    'mensaje' => "El Control de Subida de Notas no existe (puede que ya lo haya eliminado)",
+                    'mensaje' => 'El Control de Subida de Notas no existe (puede que ya lo haya eliminado)',
                 ]);
             }
         } else {
-            //Si el objeto no existe, devolver un mensaje de error en formato JSON
+            // Si el objeto no existe, devolver un mensaje de error en formato JSON
             return response()->json([
                 'error' => true,
                 'mensaje' => "El Control de Subida de Notas con id: $id no Existe",
             ]);
         }
     }
+
     public function habilitar(string $id)
     {
         $res = Control_subida_notas::find($id);
@@ -187,12 +190,13 @@ class Control_SubidaNotasController extends Controller
 
             return response()->json([
                 'data' => $res->toArray(),
-                'mensaje' => "Fase habilitada con Éxito!!",
+                'mensaje' => 'Fase habilitada con Éxito!!',
             ]);
         } else {
-            return response()->json(['error' => true, 'mensaje' => "El Control no Existe"], 404);
+            return response()->json(['error' => true, 'mensaje' => 'El Control no Existe'], 404);
         }
     }
+
     private function validarConflictoFases($id_periodo, $fase_evaluacion)
     {
         $isQ1 = str_starts_with($fase_evaluacion, 'Q1');
@@ -202,18 +206,23 @@ class Control_SubidaNotasController extends Controller
             $q2Activos = Control_subida_notas::where('id_periodo', $id_periodo)
                 ->where('fase_evaluacion', 'LIKE', 'Q2%')
                 ->where('habilitado', 1)->count();
-            if ($q2Activos > 0) return 'No se puede habilitar una fase Q1 porque existen fases del Q2 habilitadas.';
+            if ($q2Activos > 0) {
+                return 'No se puede habilitar una fase Q1 porque existen fases del Q2 habilitadas.';
+            }
         }
 
         if ($isQ2) {
             $q1Activos = Control_subida_notas::where('id_periodo', $id_periodo)
                 ->where('fase_evaluacion', 'LIKE', 'Q1%')
                 ->where('habilitado', 1)->count();
-            if ($q1Activos > 0) return 'No se puede habilitar una fase Q2 porque existen fases del Q1 habilitadas.';
+            if ($q1Activos > 0) {
+                return 'No se puede habilitar una fase Q2 porque existen fases del Q1 habilitadas.';
+            }
         }
 
         return null; // Sin conflictos
     }
+
     // 1. Obtener las asignaturas que da un docente específico
     public function getAsignaturasDocente($id_docente)
     {
@@ -235,10 +244,10 @@ class Control_SubidaNotasController extends Controller
             'curso.matriculas.calificaciones' => function ($q) use ($id_curso_asignatura) {
                 // Importante: Solo traer las calificaciones de esta materia específica
                 $q->where('id_curso_asignatura', $id_curso_asignatura);
-            }
+            },
         ])->find($id_curso_asignatura);
 
-        if (!$asignatura) {
+        if (! $asignatura) {
             return response()->json(['mensaje' => 'Asignatura no encontrada'], 404);
         }
 
@@ -250,7 +259,7 @@ class Control_SubidaNotasController extends Controller
             $calificacion = $m->calificaciones->first();
 
             // Si no tiene registro, armamos el esqueleto en ceros
-            if (!$calificacion) {
+            if (! $calificacion) {
                 $calificacion = [
                     'id_matricula' => $m->id_matricula,
                     'id_curso_asignatura' => $id_curso_asignatura,
@@ -269,7 +278,7 @@ class Control_SubidaNotasController extends Controller
                     'nota_remedial' => null,
                     'nota_gracia' => null,
                     'nota_final_definitiva' => '0.00',
-                    'estado_asignatura' => 'Reprobado'
+                    'estado_asignatura' => 'Reprobado',
                 ];
             }
 
@@ -283,7 +292,7 @@ class Control_SubidaNotasController extends Controller
                     // Codificamos la foto igual que en tu código
                     'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
                 ],
-                'calificaciones' => $calificacion
+                'calificaciones' => $calificacion,
             ];
         })->sortBy(function ($item) {
             // Ordenamos alfabéticamente por apellido
@@ -292,7 +301,7 @@ class Control_SubidaNotasController extends Controller
 
         return response()->json([
             'estudiantes' => $estudiantes,
-            'fases_activas' => $fasesActivas
+            'fases_activas' => $fasesActivas,
         ], 200);
     }
 
@@ -307,7 +316,7 @@ class Control_SubidaNotasController extends Controller
             Calificaciones::updateOrCreate(
                 [
                     'id_matricula' => $datosNota['id_matricula'],
-                    'id_curso_asignatura' => $datosNota['id_curso_asignatura']
+                    'id_curso_asignatura' => $datosNota['id_curso_asignatura'],
                 ],
                 [
                     'q1_p1' => $datosNota['q1_p1'],
@@ -325,13 +334,14 @@ class Control_SubidaNotasController extends Controller
                     'nota_remedial' => $datosNota['nota_remedial'],
                     'nota_gracia' => $datosNota['nota_gracia'],
                     'nota_final_definitiva' => $datosNota['nota_final_definitiva'],
-                    'estado_asignatura' => $datosNota['estado_asignatura']
+                    'estado_asignatura' => $datosNota['estado_asignatura'],
                 ]
             );
         }
 
         return response()->json(['mensaje' => 'Calificaciones guardadas exitosamente'], 200);
     }
+
     public function getCalificacionesActuales($id_estudiante)
     {
         // Buscamos la matrícula del estudiante en el periodo activo
@@ -339,7 +349,7 @@ class Control_SubidaNotasController extends Controller
             'curso.periodo',
             'curso.nivel',
             'curso.especialidad',
-            'calificaciones.curso_asignatura.asignatura'
+            'calificaciones.curso_asignatura.asignatura',
         ])
             ->where('id_estudiante', $id_estudiante)
             ->whereHas('curso.periodo', function ($query) {
@@ -347,10 +357,10 @@ class Control_SubidaNotasController extends Controller
             })
             ->first();
 
-        if (!$matricula) {
+        if (! $matricula) {
             return response()->json([
                 'status' => 'error',
-                'mensaje' => 'El estudiante no tiene una matrícula activa en el periodo actual.'
+                'mensaje' => 'El estudiante no tiene una matrícula activa en el periodo actual.',
             ], 404);
         }
 
@@ -359,7 +369,7 @@ class Control_SubidaNotasController extends Controller
             'periodo' => $matricula->curso->periodo->nombre,
             'nivel' => $matricula->curso->nivel->nombre,
             'especialidad' => $matricula->curso->especialidad ? $matricula->curso->especialidad->nombre : '',
-            'paralelo' => $matricula->curso->paralelo
+            'paralelo' => $matricula->curso->paralelo,
         ];
 
         // Mapeamos las calificaciones
@@ -389,7 +399,119 @@ class Control_SubidaNotasController extends Controller
         return response()->json([
             'status' => 'success',
             'curso' => $cursoInfo,
-            'calificaciones' => $calificaciones
+            'calificaciones' => $calificaciones,
         ], 200);
+    }
+
+    public function buscarPorCedula($cedula)
+    {
+        try {
+            // Buscamos todas las matrículas asociadas a la cédula del estudiante
+            $matriculas = Matriculas::whereHas('estudiante', function ($query) use ($cedula) {
+                $query->where('cedula', $cedula);
+            })
+                ->with([
+                    'estudiante',
+                    'curso.periodo',
+                    'curso.nivel',
+                    'curso.especialidad',
+                    'calificaciones.curso_asignatura.asignatura',
+                    'asistencias', // <-- Relación agregada para poder calcular el porcentaje
+                ])
+                ->get();
+
+            if ($matriculas->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No se encontró ningún estudiante o historial con el número de cédula proporcionado.',
+                ], 404);
+            }
+
+            // Extraemos los datos del estudiante del primer registro de matrícula
+            $estudiante = $matriculas->first()->estudiante;
+
+            // Procesamos el historial de calificaciones y asistencia agrupando por cada matrícula/periodo
+            $historial = $matriculas->map(function ($matricula) {
+                $subpromedios = 0;
+                $materiasContadas = 0;
+                $reprobadas = 0;
+
+                // --- 1. PROCESAMIENTO DE CALIFICACIONES ---
+                $calificacionesProcesadas = $matricula->calificaciones->map(function ($cal) use (&$subpromedios, &$materiasContadas, &$reprobadas) {
+                    $notaFinal = floatval($cal->nota_final_definitiva ?? 0);
+                    $subpromedios += $notaFinal;
+                    $materiasContadas++;
+
+                    // Determinar estado de la asignatura
+                    $estado = $cal->estado_asignatura;
+                    if (! $estado) {
+                        $estado = $notaFinal >= 7 ? 'APROBADO' : 'REPROBADO';
+                    }
+                    if (strtoupper($estado) === 'REPROBADO') {
+                        $reprobadas++;
+                    }
+
+                    return [
+                        'asignatura' => $cal->curso_asignatura->asignatura->nombre ?? 'N/A',
+                        'nota_final' => $notaFinal,
+                        'estado' => $estado,
+                    ];
+                });
+
+                $promedioPeriodo = $materiasContadas > 0 ? round($subpromedios / $materiasContadas, 2) : 0;
+                // El curso completo se aprueba si el promedio es >= 7 y no tiene materias reprobadas
+                $estadoCurso = ($promedioPeriodo >= 7 && $reprobadas === 0) ? 'APROBADO' : 'REPROBADO';
+
+                // --- 2. CÁLCULO DE ASISTENCIA ---
+                $totalAsistencias = $matricula->asistencias->count();
+
+                // Filtramos solo las que no penalizan (Presente y Justificado)
+                $asistenciasValidas = $matricula->asistencias->filter(function ($a) {
+                    return in_array(strtolower($a->estado), ['presente', 'justificado']);
+                })->count();
+
+                // Calculamos el porcentaje
+                $porcentajeAsistencia = $totalAsistencias > 0
+                    ? round(($asistenciasValidas / $totalAsistencias) * 100, 2)
+                    : 100.00;
+
+                return [
+                    'id_matricula' => $matricula->id_matricula,
+                    'periodo' => $matricula->curso->periodo->nombre ?? 'N/A',
+                    'nivel_id' => $matricula->curso->id_nivel,
+                    'nivel_nombre' => $matricula->curso->nivel->nombre ?? 'N/A',
+                    'paralelo' => $matricula->curso->paralelo ?? '',
+                    'especialidad' => $matricula->curso->especialidad->nombre ?? null,
+                    'promedio_general' => $promedioPeriodo,
+                    'estado_curso' => $estadoCurso,
+                    'porcentaje_asistencia' => $porcentajeAsistencia, // <-- Nuevo dato integrado
+                    'calificaciones' => $calificacionesProcesadas,
+                ];
+            });
+
+            // Traemos todos los niveles académicos registrados en el sistema ordenados por jerarquía
+            $nivelesSistema = Niveles_academicos::where('estado', 1)
+                ->orderBy('orden_jerarquia', 'asc')
+                ->get(['id_nivel', 'nombre', 'orden_jerarquia']);
+
+            return response()->json([
+                'status' => 'success',
+                'estudiante' => [
+                    'nombres' => $estudiante->nombres,
+                    'apellidos' => $estudiante->apellidos,
+                    'cedula' => $estudiante->cedula,
+                    'foto' => $estudiante->foto ? base64_encode($estudiante->foto) : null,
+                    'telefono' => $estudiante->telefono,
+                ],
+                'historial' => $historial,
+                'niveles_sistema' => $nivelesSistema,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ocurrió un error al procesar la solicitud: '.$e->getMessage(),
+            ], 500);
+        }
     }
 }
