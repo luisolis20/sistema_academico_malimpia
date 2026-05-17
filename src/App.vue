@@ -132,12 +132,7 @@
               :class="{ 'show': activeDropdown === 'gestiondocente' }">
               <li>
                 <router-link class="dropdown-item" to="/gestion-docente/mis-estudiantes" @click="closeMenu">
-                  <i class="fas fa-users me-2 text-muted"></i> Mis estudiantes x asignaturas
-                </router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/gestion-docente/tutor/estudiantes" @click="closeMenu">
-                  <i class="fas fa-chalkboard-teacher me-2 text-muted"></i> Tutoria
+                  <i class="fas fa-users me-2 text-muted"></i> Registrar Asistencia
                 </router-link>
               </li>
               <li>
@@ -148,6 +143,26 @@
             </ul>
             
           </li>
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('turias')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente'">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('turias')">
+              <i class="fas fa-user-graduate me-2"></i> Tutorías
+            </a>
+            <ul class="dropdown-menu shadow border-0 custom-dropdown"
+              :class="{ 'show': activeDropdown === 'turias' }">
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/tutor/estudiantes" @click="closeMenu">
+                  <i class="fas fa-chalkboard-teacher me-2 text-muted"></i> Reporte asistencia
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/tutor/reporte-asistencia/consolidado" @click="closeMenu">
+                  <i class="fas fa-file-alt me-2 text-muted"></i> Reporte de notas
+                </router-link>
+              </li>
+            </ul>
+            
+          </li>
+
           <li class="nav-item dropdown" @mouseenter="hoverDropdown('notas')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Administrador' || rolUsuario === 'Secretaria'">
             <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('notas')">
               <i class="fas fa-file-signature me-2"></i> Notas
@@ -157,6 +172,11 @@
               <li>
                 <router-link class="dropdown-item" to="/control-subida-notas" @click="closeMenu">
                   <i class="fas fa-file-signature me-2 text-muted"></i> Control de la subida de calificaciones
+                </router-link>
+              </li>
+              <li>
+                <router-link class="dropdown-item" to="/gestion-administrativa/notas/historico-notas" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Historico de Notas
                 </router-link>
               </li>
             </ul>

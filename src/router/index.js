@@ -32,6 +32,8 @@ import Tutor_estudianteView from '@/views/Gestion_docente/tutor/Tutor_estudiante
 import Historial_matriculaView from '@/views/Matricula/Historial_Matricula/Historial_matriculaView.vue'
 import Control_Subida_NotasView from '@/views/Notas/Control_Subida_Notas/Control_Subida_NotasView.vue'
 import RegistroCalificacionesView from '@/views/Gestion_docente/notas/registro_calificaciones/RegistroCalificacionesView.vue'
+import HistoricoNotasView from '@/views/Gestion_docente/notas/historico_notas/HistoricoNotasView.vue'
+import Tutor_Notas_estudianteView from '@/views/Gestion_docente/tutor/Tutor_Notas_estudianteView.vue'
 
 const routes = [
   {
@@ -207,6 +209,16 @@ const routes = [
     path: '/gestion-docente/notas/registro-calificaciones',
     name: 'registro-calificaciones',
     component: RegistroCalificacionesView
+  },
+  {
+    path: '/gestion-administrativa/notas/historico-notas',
+    name: 'historico-notas',
+    component: HistoricoNotasView
+  },
+  {
+    path: '/gestion-docente/tutor/reporte-asistencia/consolidado',
+    name: 'tutor-notas-estudiante',
+    component: Tutor_Notas_estudianteView
   },
 ]
 const router = createRouter({

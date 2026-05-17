@@ -6,8 +6,8 @@
           <div
             class="col-md-4 bg-blue text-white p-4 d-flex flex-column justify-content-center rounded-start-4 position-relative overflow-hidden">
             <div class="position-relative z-1">
-              <h3 class="fw-bold mb-1" style="font-family: 'Fraunces';">Panel del docente</h3>
-              <h1 class="fw-extrabold text-gold mb-3" style="font-family: 'Fraunces';">Tutor</h1>
+              <h3 class="fw-bold mb-1" style="font-family: 'Fraunces';">Panel del docente tutor</h3>
+              <h1 class="fw-extrabold text-gold mb-3" style="font-family: 'Fraunces';">Reporte de Asistencia</h1>
               <span class="badge bg-gold text-blue px-3 py-2 rounded-pill fw-bold shadow-sm">
                 Periodo: {{ infoTutor.periodo }}
               </span>

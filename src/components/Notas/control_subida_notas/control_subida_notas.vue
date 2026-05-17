@@ -130,7 +130,7 @@ import * as bootstrap from 'bootstrap'; // Asegúrate de tener bootstrap importa
 export default {
   data() {
     return {
-      fasesPermitidas: ['Q1_P1','Q1_P2','Q1_P3','Q1_EXAMEN','Q2_P1','Q2_P2','Q2_P3','Q2_EXAMEN','SUPLETORIO','REMEDIAL'],
+      fasesPermitidas: ['Q1_P1','Q1_P2','Q1_P3','Q1_EXAMEN','Q2_P1','Q2_P2','Q2_P3','Q2_EXAMEN','SUPLETORIO','REMEDIAL','GRACIA'],
       controlesCreados: [],
       periodoActivo: null,
       cargando: false,
@@ -199,7 +199,8 @@ export default {
         'Q2_P3': 'Quimestre 2 - Parcial 3',
         'Q2_EXAMEN': 'Quimestre 2 - Examen',
         'SUPLETORIO': 'Supletorio',
-        'REMEDIAL': 'Remedial'
+        'REMEDIAL': 'Remedial',
+        'GRACIA': 'Gracia'
       };
       return nombres[fase] || fase;
     },
