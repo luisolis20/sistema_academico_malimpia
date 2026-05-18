@@ -70,7 +70,7 @@ class LandingController extends Controller
                     'nivel' => $nivel->nombre,
                     // Si el curso tiene especialidad la mostramos, sino 'Tronco Común' o 'General'
                     'especialidad' => optional(optional($mejorMatricula->curso)->especialidad)->nombre ?? 'Tronco Común',
-                    // Ajusta 'paralelo' si el nombre de la columna en tu tabla Cursos es diferente
+                    
                     'paralelo' => optional($mejorMatricula->curso)->paralelo ?? 'A', 
                     'estudiante' => $mejorMatricula->estudiante->nombres . ' ' . $mejorMatricula->estudiante->apellidos,
                     'promedio' => round($mejorMatricula->promedio, 2),
