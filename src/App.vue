@@ -143,7 +143,7 @@
             </ul>
             
           </li>
-          <li class="nav-item dropdown" @mouseenter="hoverDropdown('turias')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente'">
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('turias')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente' && esTutor">
             <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('turias')">
               <i class="fas fa-user-graduate me-2"></i> Tutorías
             </a>
@@ -226,22 +226,53 @@
 <script>
 import script2 from '@/store/custom.js';
 import API from "@/assets/js/axios";
-
-
+import { getMe } from "@/assets/js/auth";
 export default {
   mixins: [script2],
   data() {
     return {
       isMenuOpen: false,
       activeDropdown: null,
+      esTutor: false,
     };
   },
   async mounted() {
-
+    if (this.$route.path !== '/login') {
+      await this.verificarSiEsTutor();
+    }
   },
-
-
+  watch: {
+    rolUsuario: {
+      immediate: true,
+      handler(newRol) {
+        if (newRol === 'Docente') {
+          this.verificarSiEsTutor();
+        }
+      }
+    }
+  },
   methods: {
+    async verificarSiEsTutor() {
+      // Si no es docente, no tiene sentido hacer la petición
+      if (this.rolUsuario !== 'Docente') return;
+
+      const token = localStorage.getItem("token_sitma");
+      if (!token) return;
+
+      try {
+        const response = await API.get("/sistma/verificar-tutor", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        // Asignamos el valor que nos devuelve el backend
+        this.esTutor = response.data.es_tutor;
+      } catch (error) {
+        console.error("❌ Error al verificar si el docente es tutor:", error);
+        this.esTutor = false;
+      }
+    },
     getPhotoUrl(ci) {
       if (!ci) return "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/250px-User_icon_2.svg.png";
       return `${API.defaults.baseURL}/sistma/imagenpersona/${ci}?v=${this.refreshKey}`;
