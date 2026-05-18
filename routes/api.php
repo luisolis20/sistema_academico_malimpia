@@ -17,6 +17,7 @@ use App\Http\Controllers\HorariosController;
 use App\Http\Controllers\Cronograma_matriculasController;
 use App\Http\Controllers\AsistenciaController;
 use App\Http\Controllers\Control_SubidaNotasController;
+use App\Http\Controllers\LandingController;
 
 
 /*
@@ -100,6 +101,7 @@ Route::prefix('sistma')->group(function () {
     Route::delete('habilitar_curso/{id}', [CursosController::class, 'habilitar']);
     Route::delete('desasignar_docente_curso/{id}', [CursosController::class, 'desasignarDocente']);
     Route::get('docente/carga-academica/{id_persona}', [CursosController::class, 'getCargaAcademica']);
+    Route::get('verificar-tutor', [CursosController::class, 'verificarTutor']);
     //Definir las rutas para los curso_asignaturas, permitiendo crear, leer, actualizar curso_asignaturas
     Route::apiResource('curso_asignaturas', Curso_AsignaturasController::class);
     //Definir endpoints para habilitar y deshabilitar curso_asignaturas
@@ -134,6 +136,7 @@ Route::prefix('sistma')->group(function () {
     Route::post('calificaciones-guardar', [Control_SubidaNotasController::class, 'guardarCalificaciones']);
     Route::get('calificaciones-actuales/{id_estudiante}', [Control_SubidaNotasController::class, 'getCalificacionesActuales']);
     Route::get('historico_notas/{cedula}', [Control_SubidaNotasController::class, 'buscarPorCedula']);
+    Route::get('informacion-inicio', [LandingController::class, 'getInformacionInicio']);
 
 
     Route::middleware('auth:api')->group(function () {

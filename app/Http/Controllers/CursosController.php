@@ -385,4 +385,26 @@ class CursosController extends Controller
             'asignaturas' => $asignaturas
         ]);
     }
+    public function verificarTutor(Request $request)
+    {
+        // Obtenemos el usuario autenticado (ajusta según cómo uses Sanctum o JWT)
+        $usuario = auth()->user();
+
+        // Si no hay usuario o no tiene una persona asociada, devolvemos false
+        if (!$usuario || !$usuario->id_persona) {
+            return response()->json(['es_tutor' => false], 200);
+        }
+
+        // Buscamos si existe al menos un curso donde este usuario sea el tutor
+        // Y donde el periodo lectivo asociado esté activo
+        $esTutor = Cursos::where('id_docente_tutor', $usuario->id_persona)
+            ->whereHas('periodo', function($query) {
+                $query->where('estado_activo', 1); // o true, dependiendo de tu base de datos
+            })
+            ->exists();
+
+        return response()->json([
+            'es_tutor' => $esTutor
+        ], 200);
+    }
 }
