@@ -96,7 +96,7 @@
             <i class="fas fa-trophy text-gold me-2"></i> Cuadro de Honor Estudiantil
           </h2>
 
-          <div id="honorCarousel" ref="honorCarousel" class="carousel slide" data-bs-ride="carousel" data-aos="zoom-in">
+          <div id="honorCarousel" ref="honorCarousel" class="carousel slide" data-aos="zoom-in">
             <div class="carousel-indicators diploma-indicators">
               <button v-for="(estudiante, index) in cuadroHonor" :key="'ind-' + index" type="button"
                 data-bs-target="#honorCarousel" :data-bs-slide-to="index" :class="{ active: index === 0 }"
@@ -246,8 +246,6 @@ export default {
   name: 'home',
   data() {
     return {
-      carouselInstance: null,
-      honorCarouselInstance: null,
       stats: {
         docentes: 0,
         estudiantes: 0,
@@ -264,24 +262,36 @@ export default {
       easing: 'ease-in-out'
     });
     const myCarousel = this.$refs.heroCarousel;
-    this.carouselInstance = new Carousel(myCarousel, {
-      interval: 5000,
-      ride: 'carousel',
-      pause: false
-    });
+    if (myCarousel) {
+      this._carouselInstance = new Carousel(myCarousel, {
+        interval: 5000,
+        ride: 'carousel',
+        pause: false
+      });
+    }
 
     // Cargar los datos dinámicos al montar el componente
     await this.cargarDatosLanding();
   },
   beforeUnmount() {
-    if (this.carouselInstance) {
-      this.carouselInstance.pause();
-      this.carouselInstance.dispose();
-      this.carouselInstance = null;
+    // 1. Forzar la remoción de clases de animación para cancelar cualquier evento 'transitionend' pendiente
+    if (this.$refs.heroCarousel) {
+      this.$refs.heroCarousel.classList.remove('slide', 'carousel-fade');
     }
-    if (this.honorCarouselInstance) {
-      this.honorCarouselInstance.pause();
-      this.honorCarouselInstance.dispose();
+    if (this.$refs.honorCarousel) {
+      this.$refs.honorCarousel.classList.remove('slide');
+    }
+
+    // 2. Desvincular y destruir las instancias de Bootstrap limpiamente
+    if (this._carouselInstance) {
+      this._carouselInstance.pause();
+      this._carouselInstance.dispose();
+      this._carouselInstance = null;
+    }
+    if (this._honorCarouselInstance) {
+      this._honorCarouselInstance.pause();
+      this._honorCarouselInstance.dispose();
+      this._honorCarouselInstance = null;
     }
   },
   methods: {
@@ -297,11 +307,10 @@ export default {
         this.matriculasAbiertas = data.matriculas_abiertas;
         this.cronogramas = data.cronogramas;
         this.cuadroHonor = data.cuadro_honor;
-        console.log(data);
         this.$nextTick(() => {
-          if (this.cuadroHonor.length > 0) {
-            const honorCarouselEl = this.$refs.honorCarousel;
-            this.honorCarouselInstance = new Carousel(honorCarouselEl, {
+          const honorCarouselEl = this.$refs.honorCarousel;
+          if (this.cuadroHonor.length > 0 && honorCarouselEl) {
+            this._honorCarouselInstance = new Carousel(honorCarouselEl, {
               interval: 5000,
               ride: 'carousel',
               pause: 'hover'

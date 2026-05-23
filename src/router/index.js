@@ -34,6 +34,11 @@ import Control_Subida_NotasView from '@/views/Notas/Control_Subida_Notas/Control
 import RegistroCalificacionesView from '@/views/Gestion_docente/notas/registro_calificaciones/RegistroCalificacionesView.vue'
 import HistoricoNotasView from '@/views/Gestion_docente/notas/historico_notas/HistoricoNotasView.vue'
 import Tutor_Notas_estudianteView from '@/views/Gestion_docente/tutor/Tutor_Notas_estudianteView.vue'
+import Mis_NotasView from '@/views/Notas/Mis_Notas/Mis_NotasView.vue'
+import Mis_Notas_HistorialView from '@/views/Notas/Mis_Notas/Mis_Notas_HistorialView.vue'
+import Notas_Historial_RepresentadoView from '@/views/Notas/Representante/Notas_Historial_RepresentadoView.vue'
+import Mis_Historial_matriculaView from '@/views/Matricula/Mis_Matriculas/Mis_Historial_matriculaView.vue'
+import Historial_matricula_RepreseView from '@/views/Matricula/Representante/Historial_matricula_RepreseView.vue'
 
 const routes = [
   {
@@ -219,6 +224,31 @@ const routes = [
     path: '/gestion-docente/tutor/reporte-asistencia/consolidado',
     name: 'tutor-notas-estudiante',
     component: Tutor_Notas_estudianteView
+  },
+  {
+    path: '/notas/mis-notas',
+    name: 'mis-notas',
+    component: Mis_NotasView
+  },
+  {
+    path: '/notas/mis-notas-historico',
+    name: 'mis-notas-historico',
+    component: Mis_Notas_HistorialView
+  },
+  {
+    path: '/notas/representante/historial-notas',
+    name: 'notas-historial-representado',
+    component: Notas_Historial_RepresentadoView
+  },
+  {
+    path: '/matricula/mis-historial-matricula',
+    name: 'mis-historial-matricula',
+    component: Mis_Historial_matriculaView
+  },
+  {
+    path: '/matricula/representante/historial-matricula',
+    name: 'historial-matricula-representado',
+    component: Historial_matricula_RepreseView
   },
 ]
 const router = createRouter({

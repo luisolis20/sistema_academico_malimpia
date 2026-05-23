@@ -112,7 +112,7 @@
                   <i class="fas fa-clock me-2 text-muted"></i> Cronograma de matrículas
                 </router-link>
               </li>
-              <li v-if="rolUsuario === 'Representante' || rolUsuario === 'Docente'">
+              <li v-if="rolUsuario === 'Representante' || esFamiliar">
                 <router-link class="dropdown-item" to="/matricula" @click="closeMenu">
                   <i class="fas fa-file-signature me-2 text-muted"></i> Matricular estudiante
                 </router-link>
@@ -122,6 +122,16 @@
                   <i class="fas fa-history me-2 text-muted"></i> Historial de matrículas
                 </router-link>
               </li>
+              <li v-if="rolUsuario === 'Estudiante'">
+                <router-link class="dropdown-item" to="/matricula/mis-historial-matricula" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Mis matrículas
+                </router-link>
+              </li>
+              <li v-if="esFamiliar">
+                <router-link class="dropdown-item" to="/matricula/representante/historial-matricula" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Historial de matrículas
+                </router-link>
+              </li> 
             </ul>
           </li>
           <li class="nav-item dropdown" @mouseenter="hoverDropdown('gestiondocente')" @mouseleave="leaveDropdown" v-if="rolUsuario === 'Docente'">
@@ -181,6 +191,29 @@
               </li>
             </ul>
           </li>
+          <li class="nav-item dropdown" @mouseenter="hoverDropdown('notasE')" @mouseleave="leaveDropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('notasE')">
+              <i class="fas fa-file-signature me-2"></i> Notas
+            </a>
+            <ul class="dropdown-menu shadow border-0 custom-dropdown"
+              :class="{ 'show': activeDropdown === 'notasE' }">
+              <li v-if="rolUsuario === 'Estudiante'">
+                <router-link class="dropdown-item" to="/notas/mis-notas" @click="closeMenu">
+                  <i class="fas fa-file-signature me-2 text-muted"></i> Mis Notas
+                </router-link>
+              </li>
+              <li v-if="rolUsuario === 'Estudiante'">
+                <router-link class="dropdown-item" to="/notas/mis-notas-historico" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Historico de Notas
+                </router-link>
+              </li>
+              <li v-if="esFamiliar">
+                <router-link class="dropdown-item" to="/notas/representante/historial-notas" @click="closeMenu">
+                  <i class="fas fa-history me-2 text-muted"></i> Historial de Notas
+                </router-link>                
+              </li>
+            </ul>
+          </li>
         </ul>
         <ul
           class="navbar-nav align-items-center mt-3 mt-lg-0 pb-3 pb-lg-0 border-top border-lg-0 pt-2 pt-lg-0 border-secondary custom-mobile-border">
@@ -234,11 +267,12 @@ export default {
       isMenuOpen: false,
       activeDropdown: null,
       esTutor: false,
+      esFamiliar: false,
     };
   },
   async mounted() {
     if (this.$route.path !== '/login') {
-      await this.verificarSiEsTutor();
+      await Promise.all([this.verificarSiEsTutor(), this.VerificarFamilia()]);
     }
   },
   watch: {
@@ -247,6 +281,7 @@ export default {
       handler(newRol) {
         if (newRol === 'Docente') {
           this.verificarSiEsTutor();
+          this.VerificarFamilia();
         }
       }
     }
@@ -271,6 +306,22 @@ export default {
       } catch (error) {
         console.error("❌ Error al verificar si el docente es tutor:", error);
         this.esTutor = false;
+      }
+    },
+    async VerificarFamilia(){
+      try {
+        const token = localStorage.getItem("token_sitma");
+        const response = await API.get("/sistma/tiene-familia", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Asignamos el valor que nos devuelve el backend
+        this.esFamiliar = response.data.tiene_familia;
+      } catch (error) { 
+        console.error("❌ Error al verificar si el usuario es familiar:", error);
+        this.esFamiliar = false;
       }
     },
     getPhotoUrl(ci) {
