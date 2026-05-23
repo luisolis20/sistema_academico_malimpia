@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cursos;
 use App\Models\Personas;
+use App\Models\Familia;
 use App\Models\Curso_Asignaturas;
 use Illuminate\Http\Request;
 
@@ -407,4 +408,22 @@ class CursosController extends Controller
             'es_tutor' => $esTutor
         ], 200);
     }
+    public function TieneFamilia(Request $request)
+    {
+        // Obtenemos el usuario autenticado (ajusta según cómo uses Sanctum o JWT)
+        $usuario = auth()->user();
+
+        // Si no hay usuario o no tiene una persona asociada, devolvemos false
+        if (!$usuario || !$usuario->id_persona) {
+            return response()->json(['tiene_familia' => false], 200);
+        }
+
+        // Buscamos si existe al menos un familiar asociado a esta persona
+        $tieneFamilia = Familia::where('id_representante', $usuario->id_persona)
+            ->exists();
+
+        return response()->json([
+            'tiene_familia' => $tieneFamilia
+        ], 200);    
+    }   
 }

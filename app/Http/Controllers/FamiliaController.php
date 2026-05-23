@@ -170,7 +170,7 @@ class FamiliaController extends Controller
             ], 500);
         }
     }
-    public function getFamiliaresByPersona($id_persona)
+    public function getFamiliaresByPersona(string $id_persona)
     {
         // Buscamos los familiares donde el ID enviado sea el representante
         $familiares = Familia::with(['familiapersona2']) // Cargamos la relación del familiar
