@@ -177,7 +177,7 @@ export default {
   async mounted() {
     const me = await getMe();
     this.idpersona = me.id_persona;
-    await Promise.all([this.getFamiliares(), this.getCronogramas(),
+    await Promise.all([this.getFamiliares(),
     this.getHistorial(), this.getPersona(), this.getPeriodo()]);
 
   },
@@ -203,10 +203,13 @@ export default {
       } catch (e) { console.error(e); }
       finally { this.cargandoFamilia = false; }
     },
-    async getCronogramas() {
-      const res = await API.get(`${this.baseUrl}/cronograma_matriculas_activo`);
-
-      this.cronogramas = res.data;
+    async getCronogramas(id_estudiante) {
+      try {
+        const res = await API.get(`${this.baseUrl}/cronograma_matriculas_activo/${id_estudiante}`);
+        this.cronogramas = res.data;
+      } catch (err) {
+        console.error(err);
+      }
     },
     async getHistorial() {
       const res = await API.get(`${this.baseUrl}/historial/${this.idpersona}`);
@@ -216,6 +219,14 @@ export default {
       this.familiarSel = f;
       this.cursoSel = null;
       this.cronogramaSel = null;
+
+      // Si NO está matriculado, le buscamos sus cronogramas disponibles
+      if (!this.estaMatriculado(f.id_persona)) {
+        this.getCronogramas(f.id_persona);
+      } else {
+        // Si ya está matriculado, limpiamos la lista para que no vea ofertas
+        this.cronogramas = [];
+      }
     },
     async cargarCursos(cronograma) {
       this.cronogramaSel = cronograma.id_cronograma;

@@ -193,7 +193,7 @@
           </li>
           <li class="nav-item dropdown" @mouseenter="hoverDropdown('notasE')" @mouseleave="leaveDropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" @click.prevent="toggleDropdown('notasE')">
-              <i class="fas fa-file-signature me-2"></i> Notas
+              <i class="fas fa-file-signature me-2"></i> Notas Estudiante
             </a>
             <ul class="dropdown-menu shadow border-0 custom-dropdown"
               :class="{ 'show': activeDropdown === 'notasE' }">

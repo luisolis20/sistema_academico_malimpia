@@ -18,7 +18,14 @@
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-3">
+                <button v-if="peridoactivo" @click="confirmarReasignacionMasiva"
+                    class="btn text-white fw-bold shadow-sm d-flex align-items-center gap-2 px-3 py-2"
+                    style="background-color: #1D2A68; border-radius: 50px;">
+                    <i class="fas fa-users-cog text-warning"></i> 
+                    Reasignar mismos docentes a mismos cursos del periodo actual
+                </button>
+
                 <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
                     style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
                     <i class="fas fa-book me-2" style="color: #F4B324;"></i>
@@ -107,7 +114,7 @@
                                         </div>
                                         <span title="Paralelo" class="small text-secondary">
                                             Rol: <span style="color: #1D2A68; font-weight: 500;">{{ user.nombre_rol
-                                                }}</span>
+                                            }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -130,6 +137,15 @@
 
                             <td v-if="user.paralelo">
                                 <span class="badge bg-light text-dark border shadow-sm">{{ user.nombre_periodo }}</span>
+                                <div v-if="user.requiere_actualizacion" class="mt-2">
+                                    <button
+                                        class="btn btn-sm text-white px-2 py-1 shadow-sm d-flex align-items-center gap-1"
+                                        style="background-color: #F4B324; border: none; font-size: 0.75rem;"
+                                        @click="preguntarReasignacion(user)"
+                                        title="El periodo ya no está activo. Clic para reasignar">
+                                        <i class="fas fa-exclamation-triangle text-danger"></i> Reasignar
+                                    </button>
+                                </div>
                             </td>
                             <td class="text-muted small" v-else>Sin Curso Asignado</td>
 
@@ -497,6 +513,7 @@
 import API from "@/assets/js/axios";
 import { confimar, confimarhabi, mostraralertas2, confimardesasignar } from "@/assets/js/funciones/functions";
 import * as bootstrap from 'bootstrap';
+import Swal from 'sweetalert2';
 
 export default {
     data() {
@@ -787,6 +804,136 @@ export default {
                 setTimeout(() => { this.getData(); }, 1000);
             } catch (error) {
                 console.error("Error al desasignar:", error);
+            }
+        },
+        preguntarReasignacion(user) {
+            Swal.fire({
+                title: '¿Reasignar docente?',
+                html: user.mensaje_periodo, // Usamos 'html' en lugar de 'text' para que renderice las negritas
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#1D2A68', // Tus colores corporativos
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, reasignar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Si acepta, armamos el modal como si fuera a "Crear" pero le precargamos 
+                    // el mismo nivel, especialidad y paralelo, pero usando el PERIODO ACTIVO.
+                    this.personaSeleccionada = {
+                        nombres: user.nombres,
+                        apellidos: user.apellidos,
+                        cedula: user.cedula,
+                        foto: this.getPhotoUrl(user.personID)
+                    };
+
+                    this.objetoData = {
+                        id_docente_tutor: user.personID,
+                        id_periodo: user.nuevo_periodo_id, // Asignamos el periodo activo detectado
+                        id_nivel: user.NivelID,
+                        id_especialidad: user.EspecialidadID,
+                        paralelo: user.paralelo,
+                        estado: 1, // Lo mandamos activo por defecto
+                    };
+
+                    // Abrimos tu modal de asignación (Crear)
+                    const modal = new bootstrap.Modal(document.getElementById('modalCrearUsuario'));
+                    modal.show();
+                }
+            });
+        },
+        confirmarReasignacionMasiva() {
+            Swal.fire({
+                title: '¿Reasignar docentes masivamente?',
+                html: '¿Desea reasignar de manera automática a <b>todos los docentes</b> a los mismos cursos que tenían en el periodo anterior, pero dentro del <b>periodo lectivo actual</b>?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1D2A68',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, reasignar a todos',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.ejecutarReasignacionMasiva();
+                }
+            });
+        },
+        async ejecutarReasignacionMasiva() {
+            this.cargando = true;
+            let progressInterval;
+            
+            // 1. Levantamos un SweetAlert que no se pueda cerrar con la barra de progreso
+            Swal.fire({
+                title: 'Procesando Reasignación...',
+                html: `
+                    <div class="mb-3 text-secondary" style="font-size: 0.9rem;">
+                        Validando cursos, niveles y especialidades activas. Por favor espere...
+                    </div>
+                    <div class="progress shadow-sm" style="height: 22px; border-radius: 12px;">
+                        <div id="swal-progress-bar" 
+                             class="progress-bar progress-bar-striped progress-bar-animated" 
+                             style="background-color: #F4B324; width: 0%; color: #1D2A68; font-weight: bold;" 
+                             role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                `,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    // 2. Simulamos el progreso mientras la petición HTTP se resuelve
+                    const progressBar = document.getElementById('swal-progress-bar');
+                    let width = 0;
+                    progressInterval = setInterval(() => {
+                        if (width >= 90) {
+                            clearInterval(progressInterval); // Pausar al 90% hasta que responda el server
+                        } else {
+                            width += Math.floor(Math.random() * 10) + 2; // Incremento aleatorio
+                            if(width > 90) width = 90;
+                            progressBar.style.width = width + '%';
+                            progressBar.innerHTML = width + '%';
+                        }
+                    }, 300);
+                }
+            });
+
+            try {
+                // 3. Ejecutamos la petición al backend
+                const response = await API.post(`${this.baseUrl}/reasignacion_masiva`);
+                
+                // 4. Petición exitosa: forzar la barra al 100%
+                clearInterval(progressInterval);
+                const progressBar = document.getElementById('swal-progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    progressBar.innerHTML = '100%';
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.style.backgroundColor = '#198754'; // Cambia a verde éxito
+                    progressBar.style.color = '#ffffff';
+                }
+
+                // 5. Retraso mínimo para que el usuario alcance a ver el 100% y cerramos modal
+                setTimeout(async () => {
+                    Swal.close();
+                    // Usamos warning/info si hubo omitidos, success si fue perfecto
+                    const tipoAlerta = response.data.omitidos > 0 ? "warning" : "success";
+                    mostraralertas2(response.data.mensaje, tipoAlerta);
+                    
+                    await this.getData(); // Refresca la tabla automáticamente
+                }, 800);
+
+            } catch (error) {
+                // Manejo de errores
+                clearInterval(progressInterval);
+                Swal.close();
+                
+                if (error.response && error.response.status === 404) {
+                    mostraralertas2(error.response.data.mensaje, "info"); 
+                } else {
+                    mostraralertas2("Error al ejecutar la reasignación masiva. Verifique la conexión o contacte soporte.", "error");
+                }
+            } finally {
+                this.cargando = false;
             }
         }
     }
