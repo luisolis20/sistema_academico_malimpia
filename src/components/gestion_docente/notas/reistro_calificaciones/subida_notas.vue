@@ -356,7 +356,7 @@ export default {
     async cargarAsignaturas() {
       try {
         const response = await API.get(`${this.baseUrl}/asignaturas-docente/${this.idpersona}`);
-        console.log("Response asignaturas", response);
+        
         this.asignaturas = response.data;
       } catch (error) {
         mostraralertas("Error al cargar las asignaturas", "error");
@@ -368,8 +368,6 @@ export default {
       try {
         const response = await API.get(`${this.baseUrl}/estudiantes-asigna/${this.asignaturaSeleccionada}`);
         this.estudiantes = response.data.estudiantes;
-        console.log("Response estudiantes", response);
-
         this.fasesActivas = response.data.fases_activas; // ej: ["Q1_P1", "Q1_EXAMEN"]
         this.paginaActual = 1;
       } catch (error) {

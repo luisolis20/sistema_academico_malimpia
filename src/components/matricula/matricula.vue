@@ -70,46 +70,106 @@
               <h5 class="mb-0 fw-bold">{{ familiarSel.nombres }} {{ familiarSel.apellidos }}</h5>
             </div>
           </div>
-
-          <div v-if="cronogramas.length === 0" class="alert alert-warning rounded-4">
-            No hay cronogramas de matrícula activos para este periodo.
+          <div v-if="!tieneHistorial && !tipoEstudiante"
+            class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4">
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+              <div>
+                <h6 class="fw-bold mb-1 text-dark">El estudiante no posee historial de matrícula</h6>
+                <p class="mb-0 small text-muted">Defina la situación inicial del estudiante para determinar los cupos
+                  disponibles:</p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 mt-2">
+              <button @click="seleccionarCasoInicial('inicial')" class="btn btn-blue rounded-pill fw-bold btn-sm px-4">
+                <i class="fas fa-baby me-2"></i>El recién va a Inicial
+              </button>
+              <button @click="seleccionarCasoInicial('nuevo')"
+                class="btn btn-outline-blue rounded-pill fw-bold btn-sm px-4">
+                <i class="fas fa-user-plus me-2"></i>Es un estudiante nuevo
+              </button>
+            </div>
+          </div>
+          <div v-if="!tieneHistorial && tipoEstudiante === 'nuevo'"
+            class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+            <div class="card-header bg-blue text-white fw-bold py-3">
+              <i class="fas fa-file-invoice me-2"></i> Formulario de Historial Académico Externo
+            </div>
+            <div class="card-body p-4 bg-white">
+              <form @submit.prevent="guardarHistorialExterno" enctype="multipart/form-data">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-blue">Institución de Origen</label>
+                    <input v-model="formHistorial.institucion_origen" type="text" class="form-control rounded-3"
+                      required placeholder="Ej: Unidad Educativa Alfa">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-blue">Último Nivel Aprobado (En otra Inst.)</label>
+                    <select v-model="formHistorial.ultimo_nivel_aprobado" class="form-select rounded-3" required>
+                      <option :value="null" disabled>Seleccione el nivel anterior...</option>
+                      <option v-for="n in nivelesListado" :key="n.id_nivel" :value="n.id_nivel">{{ n.nombre }}</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-blue">Promedio Final Obtenido</label>
+                    <input v-model="formHistorial.promedio_final" type="number" step="0.01" min="0" max="10"
+                      class="form-control rounded-3" required placeholder="0.00">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold text-blue">Archivo de Notas Promocionales (Opcional)</label>
+                    <input @change="subirArchivoNotas" type="file" class="form-control rounded-3" accept=".pdf,image/*">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                  <button type="button" @click="tipoEstudiante = null"
+                    class="btn btn-light rounded-pill px-3">Atrás</button>
+                  <button type="submit" class="btn btn-gold text-blue fw-bold rounded-pill px-4" :disabled="cargando">
+                    <span v-if="cargando" class="spinner-border spinner-border-sm me-2"></span> Guardar Historial y
+                    Continuar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
 
-          <div class="row g-3">
-            <div v-for="c in cronogramas" :key="c.id_cronograma" class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                <div class="card-header bg-gold text-blue fw-bold border-0 py-3">
-                  <i class="fas fa-calendar-check me-2"></i> {{ c.nivel.nombre }}
-                </div>
-                <div class="card-body">
-                  <p class="small text-muted mb-2"><strong>Especialidad:</strong> {{ c.especialidad.nombre }}</p>
-                  <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3 mb-3">
-                    <span class="small fw-bold">Finaliza en:</span>
-                    <span class="badge bg-danger">{{ calcularDias(c.fecha_fin) }} días</span>
+          <div v-if="tieneHistorial || tipoEstudiante === 'inicial'">
+            <div v-if="cronogramas.length === 0" class="alert alert-warning rounded-4">
+              No hay cronogramas de matrícula activos para este periodo.
+            </div>
+            <div class="row g-3">
+              <div v-for="c in cronogramas" :key="c.id_cronograma" class="col-md-6">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                  <div class="card-header bg-gold text-blue fw-bold border-0 py-3">
+                    <i class="fas fa-calendar-check me-2"></i> {{ c.nivel.nombre }}
                   </div>
+                  <div class="card-body">
+                    <p class="small text-muted mb-2"><strong>Especialidad:</strong> {{ c.especialidad.nombre }}</p>
+                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3 mb-3">
+                      <span class="small fw-bold">Finaliza en:</span>
+                      <span class="badge bg-danger">{{ calcularDias(c.fecha_fin) }} días</span>
+                    </div>
 
-                  <button @click="cargarCursos(c)" class="btn btn-outline-blue w-100 fw-bold rounded-pill">
-                    Ver Paralelos Disponibles
-                  </button>
-
-                  <div v-if="cronogramaSel === c.id_cronograma" class="mt-3 animate__animated animate__slideInDown">
-                    <select v-model="cursoSel" class="form-select border-gold rounded-3 mb-2">
-                      <option :value="null" disabled>Seleccione un paralelo</option>
-                      <option v-for="curso in cursos" :key="curso.id_curso" :value="curso">
-                        Paralelo "{{ curso.paralelo }}"
-                      </option>
-                    </select>
-                    <button v-if="cursoSel" @click="confirmarMatricula"
-                      class="btn btn-gold w-100 fw-bold text-blue shadow-sm">
-                      <i class="fas fa-save me-2"></i> FINALIZAR MATRÍCULA
+                    <button @click="cargarCursos(c)" class="btn btn-outline-blue w-100 fw-bold rounded-pill">
+                      Ver Paralelos Disponibles
                     </button>
+
+                    <div v-if="cronogramaSel === c.id_cronograma" class="mt-3 animate__animated animate__slideInDown">
+                      <select v-model="cursoSel" class="form-select border-gold rounded-3 mb-2">
+                        <option :value="null" disabled>Seleccione un paralelo</option>
+                        <option v-for="curso in cursos" :key="curso.id_curso" :value="curso">
+                          Paralelo "{{ curso.paralelo }}"
+                        </option>
+                      </select>
+                      <button v-if="cursoSel" @click="confirmarMatricula"
+                        class="btn btn-gold w-100 fw-bold text-blue shadow-sm">
+                        <i class="fas fa-save me-2"></i> FINALIZAR MATRÍCULA
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
       <div class="mt-5">
@@ -171,7 +231,16 @@ export default {
       cargandoFamilia: false,
       cargando: false,
       Persona: {},
-      periodo_activo: {}
+      periodo_activo: {},
+      tieneHistorial: true, 
+      tipoEstudiante: null, // 'inicial' o 'nuevo'
+      nivelesListado: [],   // Lista de niveles para el dropdown externo
+      formHistorial: {
+        institucion_origen: '',
+        ultimo_nivel_aprobado: null,
+        promedio_final: '',
+        archivo_notas: null
+      }
     }
   },
   async mounted() {
@@ -203,10 +272,15 @@ export default {
       } catch (e) { console.error(e); }
       finally { this.cargandoFamilia = false; }
     },
-    async getCronogramas(id_estudiante) {
+    async getCronogramas(id_estudiante,tipo = null) {
       try {
-        const res = await API.get(`${this.baseUrl}/cronograma_matriculas_activo/${id_estudiante}`);
-        this.cronogramas = res.data;
+        let url = `${this.baseUrl}/cronograma_matriculas_activo/${id_estudiante}`;
+        if (tipo) url += `?tipo=${tipo}`;
+        
+        const res = await API.get(url);
+        
+        this.tieneHistorial = res.data.tiene_historial;
+        this.cronogramas = res.data.cronogramas;
       } catch (err) {
         console.error(err);
       }
@@ -219,13 +293,67 @@ export default {
       this.familiarSel = f;
       this.cursoSel = null;
       this.cronogramaSel = null;
+      this.tipoEstudiante = null;
+      this.tieneHistorial = true; 
 
-      // Si NO está matriculado, le buscamos sus cronogramas disponibles
       if (!this.estaMatriculado(f.id_persona)) {
         this.getCronogramas(f.id_persona);
       } else {
-        // Si ya está matriculado, limpiamos la lista para que no vea ofertas
-        this.cronogramas = [];
+        this.cronograms = [];
+      }
+    },
+    async seleccionarCasoInicial(caso) {
+      this.tipoEstudiante = caso;
+      if (caso === 'inicial') {
+        // Ejecuta el query directo inyectando el filtro de inicial
+        await this.getCronogramas(this.familiarSel.id_persona, '0');
+      } else if (caso === 'nuevo') {
+        // Carga la tabla de niveles académicos para rellenar el formulario
+        try {
+          const res = await API.get(`${this.baseUrl}/niveles_exteriores`);
+          this.nivelesListado = res.data;
+        } catch (e) {
+          console.error("Error cargando los niveles", e);
+        }
+      }
+    },
+
+    // NUEVO MÉTODO: Vincula el archivo binario al modelo temporal
+    subirArchivoNotas(event) {
+      this.formHistorial.archivo_notas = event.target.files[0];
+    },
+
+    // NUEVO MÉTODO: Guarda los datos externos y recalcula automáticamente la oferta siguiente
+    async guardarHistorialExterno() {
+      this.cargando = true;
+      try {
+        const formData = new FormData();
+        formData.append('id_estudiante', this.familiarSel.id_persona);
+        formData.append('institucion_origen', this.formHistorial.institucion_origen);
+        formData.append('ultimo_nivel_aprobado', this.formHistorial.ultimo_nivel_aprobado);
+        formData.append('promedio_final', this.formHistorial.promedio_final);
+        if (this.formHistorial.archivo_notas) {
+          formData.append('archivo_notas', this.formHistorial.archivo_notas);
+        }
+
+        await API.post(`${this.baseUrl}/historial_externo`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        mostraralertas("Historial externo registrado. Ahora se listará el nivel inmediato superior disponible.", "success");
+        
+        // Reset de campos de control
+        this.tipoEstudiante = null;
+        this.formHistorial = { institucion_origen: '', ultimo_nivel_aprobado: null, promedio_final: '', archivo_notas: null };
+        
+        // Volver a consultar: Como ahora el Backend detectará un historial externo, calculará automáticamente el nivel jerárquico siguiente.
+        await this.getCronogramas(this.familiarSel.id_persona);
+
+      } catch (err) {
+        console.error(err);
+        mostraralertas(err.response?.data?.error || "Error al registrar historial externo", "error");
+      } finally {
+        this.cargando = false;
       }
     },
     async cargarCursos(cronograma) {

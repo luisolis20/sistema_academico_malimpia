@@ -89,6 +89,51 @@
           </router-link>
         </div>
       </section>
+      <section v-if="cronogramaNotas.length > 0" class="py-5 bg-white border-bottom">
+        <div class="container">
+          <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold text-blue">
+              <i class="fas fa-calendar-alt text-gold me-2"></i> Cronograma Escolar de Calificaciones
+            </h2>
+            <p class="lead text-muted">Fechas límites y periodos establecidos para el registro de evaluaciones.</p>
+          </div>
+
+          <div class="row justify-content-center">
+            <div class="col-md-10" data-aos="fade-up" data-aos-delay="150">
+              <div class="table-responsive shadow-sm rounded-4 border">
+                <table class="table table-hover align-middle mb-0 bg-white">
+                  <thead class="bg-blue text-white">
+                    <tr>
+                      <th class="ps-4 py-3">Fase de Evaluación</th>
+                      <th class="py-3 text-center">Fecha Inicio</th>
+                      <th class="py-3 text-center">Fecha Cierre</th>
+                      <th class="pe-4 py-3 text-end">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, idx) in cronogramaNotas" :key="idx" :class="{'table-success-light': item.habilitado}">
+                      <td class="ps-4 fw-bold text-blue">
+                        <i class="fas fa-chevron-right text-gold me-2 small"></i>
+                        {{ getNombreFase(item.fase) }}
+                      </td>
+                      <td class="text-center text-muted">{{ formatoFecha(item.fecha_inicio) }}</td>
+                      <td class="text-center text-muted fw-semibold">{{ formatoFecha(item.fecha_fin) }}</td>
+                      <td class="pe-4 text-end">
+                        <span v-if="item.habilitado" class="badge bg-success rounded-pill px-3 py-2 shadow-sm animate-pulse">
+                          <i class="fas fa-lock-open me-1"></i> Habilitado
+                        </span>
+                        <span v-else class="badge bg-secondary rounded-pill px-3 py-2 text-wrap">
+                          <i class="fas fa-lock me-1"></i> Cerrado
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section v-if="cuadroHonor.length > 0" class="py-5 bg-light-blue">
         <div class="container text-center">
@@ -252,7 +297,8 @@ export default {
       },
       matriculasAbiertas: false,
       cronogramas: [],
-      cuadroHonor: []
+      cuadroHonor: [],
+      cronogramaNotas: [],
     }
   },
   async mounted() {
@@ -306,6 +352,7 @@ export default {
 
         this.matriculasAbiertas = data.matriculas_abiertas;
         this.cronogramas = data.cronogramas;
+        this.cronogramaNotas = data.cronograma_notas || [];
         this.cuadroHonor = data.cuadro_honor;
         this.$nextTick(() => {
           const honorCarouselEl = this.$refs.honorCarousel;
@@ -342,41 +389,49 @@ export default {
     },
     getFoto(fotoBase64) {
       return fotoBase64 ? `data:image/jpeg;base64,${fotoBase64}` : 'https://ui-avatars.com/api/?name=Estudiante&background=1D2A68&color=fff';
+    },
+    getNombreFase(fase) {
+      const mapaFases = {
+        'Q1_P1': 'Primer Quimestre / Parcial 1',
+        'Q1_P2': 'Primer Quimestre / Parcial 2',
+        'Q1_P3': 'Primer Quimestre / Parcial 3',
+        'Q1_EXAMEN': 'Primer Quimestre / Examen',
+        'Q2_P1': 'Segundo Quimestre / Parcial 1',
+        'Q2_P2': 'Segundo Quimestre / Parcial 2',
+        'Q2_P3': 'Segundo Quimestre / Parcial 3',
+        'Q2_EXAMEN': 'Segundo Quimestre / Examen',
+        'SUPLETORIO': 'Examen Supletorio',
+        'REMEDIAL': 'Examen Remedial'
+      };
+      return mapaFases[fase] || fase;
     }
   }
 }
 </script>
 
 <style scoped>
-/* PALETA INSTITUCIONAL */
+/* (Tus estilos CSS se mantienen idénticos) */
 .text-blue {
   color: #1D2A68;
 }
-
 .text-gold {
   color: #F4B324;
 }
-
 .bg-light-blue {
   background-color: rgba(29, 42, 104, 0.03);
 }
-
 .border-gold {
   border-color: #F4B324 !important;
 }
-
-/* HERO SECTION */
 .hero-section {
   height: 90vh;
   min-height: 500px;
 }
-
 .hero-img {
   height: 90vh;
   width: 100%;
   object-fit: cover;
 }
-
 .overlay {
   position: absolute;
   top: 0;
@@ -386,116 +441,101 @@ export default {
   background: linear-gradient(rgba(29, 42, 104, 0.7), rgba(0, 0, 0, 0.4));
   z-index: 1;
 }
-
 .hero-content {
   z-index: 2;
   width: 80%;
 }
-
 .shadow-text {
   text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.5);
 }
-
-/* BOTÓN ORO */
 .btn-gold {
   background-color: #F4B324;
   color: #1D2A68;
   border: none;
   transition: all 0.3s ease;
 }
-
 .btn-gold:hover {
   background-color: #e0a31f;
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
 }
-
-/* STAT CARDS */
 .stat-card {
   transition: transform 0.3s ease;
   background: #fff;
 }
-
 .stat-card:hover {
   transform: translateY(-10px);
 }
-
-/* ACCORDION PERSONALIZADO */
 .accordion-button:not(.collapsed) {
   background-color: #1D2A68;
   color: white;
 }
-
 .accordion-button:focus {
   border-color: #F4B324;
   box-shadow: 0 0 0 0.25rem rgba(244, 179, 36, 0.25);
 }
-
 .accordion-button::after {
   filter: brightness(0) saturate(100%) invert(80%) sepia(50%) saturate(3000%) hue-rotate(350deg);
 }
 
-@media (max-width: 768px) {
-  .hero-section {
-    height: 70vh;
-  }
-
-  .display-2 {
-    font-size: 2.5rem;
-  }
+/* ESTILOS DE LA NUEVA TABLA */
+.bg-blue {
+  background-color: #1D2A68 !important;
+}
+.table-success-light {
+  background-color: rgba(40, 167, 69, 0.06);
 }
 
-/* ESTILOS DEL CUADRO DE HONOR TIPO DIPLOMA */
+/* Efecto sutil de pulso para la fase que esté activa */
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+  70% { transform: scale(1.03); box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@media (max-width: 768px) {
+  .hero-section { height: 70vh; }
+  .display-2 { font-size: 2.5rem; }
+}
+
 .diploma-card {
   background: #ffffff;
   background-image: radial-gradient(#F4B324 0.5px, transparent 0.5px), radial-gradient(#F4B324 0.5px, #ffffff 0.5px);
   background-size: 20px 20px;
   background-position: 0 0, 10px 10px;
-  background-blend-mode: multiply; /* Textura muy sutil de fondo */
+  background-blend-mode: multiply;
   padding: 10px;
   border: 1px solid #e0e0e0 !important;
 }
-
 .diploma-border {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  right: 15px;
-  bottom: 15px;
+  top: 15px; left: 15px; right: 15px; bottom: 15px;
   border: 2px solid #1D2A68;
   outline: 4px double #F4B324;
   outline-offset: -8px;
   pointer-events: none;
   z-index: 0;
 }
-
 .card-body {
-  background-color: rgba(255, 255, 255, 0.95); /* Para tapar la textura en el texto */
+  background-color: rgba(255, 255, 255, 0.95);
   z-index: 1;
 }
-
 .diploma-name {
-  font-family: 'Georgia', serif; /* Fuente elegante para el nombre */
+  font-family: 'Georgia', serif;
   font-size: 2.2rem;
   letter-spacing: 1px;
 }
-
 .tracking-widest {
   letter-spacing: 0.15em;
 }
-
-.bg-blue {
-  background-color: #1D2A68 !important;
-}
-
-/* Modificar las flechas del carrusel para que se vean bien en fondo claro */
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
   width: 2.5rem;
   height: 2.5rem;
 }
-
-/* Ajuste de los indicadores del carrusel para que estén abajo del diploma */
 .diploma-indicators {
   bottom: -40px;
 }
