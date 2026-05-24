@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curso_Asignaturas;
 use App\Models\Personas;
+use App\Models\Periodos_lectivos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -234,14 +235,25 @@ class Curso_AsignaturasController extends Controller
     }
 
     // Endpoint para cargar las asignaturas actuales del docente (para el botón Ver/Editar)
-    public function getPorDocente($id_docente)
+    public function getPorDocente(string $id_docente)
     {
         try {
-            // Nota: Asegúrate de usar DB::table('curso_asignatura') o el modelo correcto si te da error el nombre.
+            // 1. Obtener el periodo lectivo activo
+            $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+            // Si no hay un periodo activo, cortamos la ejecución de forma segura
+            if (!$periodoActivo) {
+                return response()->json([
+                    'status' => false,
+                    'error' => 'No hay un periodo lectivo activo configurado.'
+                ], 404);
+            }
+
+            // 2. Consultar asignaciones cruzando con el periodo activo
             $asignacionesDB = DB::table('curso_asignatura')->select(
                 'curso_asignatura.id_curso',
                 'curso_asignatura.id_asignatura',
-                'curso_asignatura.horas_semanales', // La base de datos sí lo trae
+                'curso_asignatura.horas_semanales',
                 'cursos.paralelo',
                 'niveles_academicos.nombre as nombre_nivel',
                 'especialidades.nombre as nombre_especialidad',
@@ -252,9 +264,10 @@ class Curso_AsignaturasController extends Controller
                 ->join('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
                 ->join('asignaturas', 'asignaturas.id_asignatura', '=', 'curso_asignatura.id_asignatura')
                 ->where('curso_asignatura.id_docente', $id_docente)
+                ->where('cursos.id_periodo', $periodoActivo->id_periodo) // <-- ¡FILTRO CLAVE AQUÍ!
                 ->get();
 
-            // Transformamos los datos para que coincidan con la estructura `asignacionesResumen` del Frontend
+            // 3. Transformamos los datos para la estructura que espera tu Frontend en Vue
             $resultado = [];
             foreach ($asignacionesDB->groupBy('id_curso') as $curso_id => $materias) {
                 $primera = $materias->first();
@@ -264,7 +277,7 @@ class Curso_AsignaturasController extends Controller
                     return [
                         'id_asignatura' => $m->id_asignatura,
                         'nombre' => $m->nombre_asignatura,
-                        'horas_semanales' => $m->horas_semanales // <-- ¡AQUÍ ESTABA EL DETALLE!
+                        'horas_semanales' => $m->horas_semanales
                     ];
                 })->values();
 
@@ -277,7 +290,7 @@ class Curso_AsignaturasController extends Controller
 
             return response()->json(['status' => true, 'data' => $resultado]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al obtener datos: ' . $e->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => 'Error al obtener datos: ' . $e->getMessage()], 500);
         }
     }
 

@@ -6,6 +6,7 @@ use App\Models\Asistencia;
 use App\Models\Curso_Asignaturas;
 use App\Models\Cursos;
 use App\Models\Matriculas;
+use App\Models\Periodos_lectivos;
 use Illuminate\Http\Request;
 
 class AsistenciaController extends Controller
@@ -91,14 +92,14 @@ class AsistenciaController extends Controller
         $data = $historial->map(function ($asig) {
             return [
                 'asignatura' => $asig->asignatura->nombre,
-                'curso' => $asig->curso->nivel->nombre.' "'.$asig->curso->paralelo.'"',
+                'curso' => $asig->curso->nivel->nombre . ' "' . $asig->curso->paralelo . '"',
                 // Agrupamos las asistencias por fecha
                 'registros' => $asig->asistencias->groupBy('fecha')->map(function ($items, $fecha) {
                     return [
                         'fecha' => $fecha,
                         'detalle' => $items->map(function ($asist) {
                             return [
-                                'estudiante' => $asist->matricula->estudiante->apellidos.' '.$asist->matricula->estudiante->nombres,
+                                'estudiante' => $asist->matricula->estudiante->apellidos . ' ' . $asist->matricula->estudiante->nombres,
                                 'estado' => $asist->estado,
                             ];
                         }),
@@ -110,19 +111,27 @@ class AsistenciaController extends Controller
         return response()->json($data);
     }
 
-    public function getDatosTutor($id_persona)
+    public function getDatosTutor(string $id_persona)
     {
-        // 1. Buscamos el curso donde el docente es tutor
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        if (!$periodoActivo) {
+            return response()->json(['error' => 'No existe un periodo lectivo activo actualmente.'], 404);
+        }
+
+        // 2. Buscamos el curso donde el docente es tutor estrictamente en el periodo activo
         $curso = Cursos::where('id_docente_tutor', $id_persona)
             ->where('estado', 1)
+            ->where('id_periodo', $periodoActivo->id_periodo) // <-- Filtro clave de periodo
             ->with(['nivel', 'especialidad', 'periodo'])
             ->first();
 
         if (! $curso) {
-            return response()->json(['error' => 'No tienes un curso asignado como tutor'], 404);
+            return response()->json(['error' => 'No tienes un curso asignado como tutor para el periodo actual'], 404);
         }
 
-        // 2. Obtenemos los estudiantes matriculados en ese curso
+        // 3. Obtenemos los estudiantes matriculados en ese curso (Tu lógica original intacta)
         $alumnos = Matriculas::where('id_curso', $curso->id_curso)
             ->where('estado', 1)
             ->with([
@@ -160,26 +169,34 @@ class AsistenciaController extends Controller
             });
 
         return response()->json([
-            'curso' => $curso->nivel->nombre.' '.$curso->paralelo,
+            'curso' => $curso->nivel->nombre . ' ' . $curso->paralelo,
             'especialidad' => $curso->especialidad->nombre,
             'periodo' => $curso->periodo->nombre,
             'alumnos' => $alumnos,
         ]);
     }
 
-    public function getDatosNotasAlumnoTutor($id_persona)
+    public function getDatosNotasAlumnoTutor(string $id_persona)
     {
-        // 1. Buscamos el curso donde el docente es tutor
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        if (!$periodoActivo) {
+            return response()->json(['error' => 'No existe un periodo lectivo activo actualmente.'], 404);
+        }
+
+        // 2. Buscamos el curso donde el docente es tutor estrictamente en el periodo activo
         $curso = Cursos::where('id_docente_tutor', $id_persona)
             ->where('estado', 1)
+            ->where('id_periodo', $periodoActivo->id_periodo) // <-- Filtro clave de periodo
             ->with(['nivel', 'especialidad', 'periodo'])
             ->first();
 
         if (! $curso) {
-            return response()->json(['error' => 'No tienes un curso asignado como tutor'], 404);
+            return response()->json(['error' => 'No tienes un curso asignado como tutor para el periodo actual'], 404);
         }
 
-        // 2. Obtenemos los estudiantes matriculados incluyendo sus calificaciones y asistencias
+        // 3. Obtenemos los estudiantes matriculados incluyendo sus calificaciones y asistencias
         $alumnos = Matriculas::where('id_curso', $curso->id_curso)
             ->where('estado', 1)
             ->with([
@@ -210,7 +227,6 @@ class AsistenciaController extends Controller
 
                 // Filtramos las asistencias que NO son penalizadas (Presentes y Justificadas)
                 $asistenciasValidas = $m->asistencias->filter(function ($a) {
-                    // Ajusta los strings según cómo los guardes exactamente en tu BD (ej: 'Presente', 'Justificado')
                     return in_array(strtolower($a->estado), ['presente', 'justificado']);
                 })->count();
 
@@ -223,7 +239,7 @@ class AsistenciaController extends Controller
                     'id_matricula' => $m->id_matricula,
                     'nota_final' => $promedioGeneral,
                     'estado' => $estadoCurso,
-                    'porcentaje_asistencia' => $porcentajeAsistencia, // <-- Nuevo campo devuelto
+                    'porcentaje_asistencia' => $porcentajeAsistencia,
                     'calificaciones' => $detallesNotas,
                     'estudiante' => [
                         'cedula' => $m->estudiante->cedula,
@@ -251,7 +267,7 @@ class AsistenciaController extends Controller
             });
 
         return response()->json([
-            'curso' => $curso->nivel->nombre.' '.$curso->paralelo,
+            'curso' => $curso->nivel->nombre . ' ' . $curso->paralelo,
             'especialidad' => $curso->especialidad->nombre,
             'periodo' => $curso->periodo->nombre,
             'alumnos' => $alumnos,

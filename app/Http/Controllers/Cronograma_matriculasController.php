@@ -245,7 +245,7 @@ class Cronograma_matriculasController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function getCronogramaActivo(string $id_estudiante)
+    public function getCronogramaActivo(Request $request, string $id_estudiante)
     {
         $hoy = now();
 
@@ -253,15 +253,27 @@ class Cronograma_matriculasController extends Controller
         $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
         if (!$periodoActivo) {
-            return response()->json([]);
+            return response()->json(['tiene_historial' => true, 'cronogramas' => []]);
         }
 
-        // 2. Consulta base: Cronogramas activos por fecha
+        // 2. Consulta base de cronogramas vigentes por fecha
         $querySchedules = Cronograma_matriculas::with(['periodo', 'nivel', 'especialidad'])
             ->where('fecha_inicio', '<=', $hoy)
             ->where('fecha_fin', '>=', $hoy);
 
-        // 3. Buscar la última matrícula histórica
+        // CONTROL EXPLICITO DESDE FRONTEND: Si el alumno va a Inicial por primera vez
+        if ($request->query('tipo') === '0') {
+            $querySchedules->whereHas('nivel', function ($q) {
+                $q->where('nombre', 'LIKE', '0'); // Filtra únicamente cursos de nivel Inicial
+            });
+
+            return response()->json([
+                'tiene_historial' => false,
+                'cronogramas' => $querySchedules->get()
+            ]);
+        }
+
+        // 3. Buscar la última matrícula histórica interna
         $ultimaMatricula = Matriculas::with(['curso.nivel', 'calificaciones'])
             ->where('id_estudiante', $id_estudiante)
             ->whereHas('curso', function ($q) use ($periodoActivo) {
@@ -270,66 +282,142 @@ class Cronograma_matriculasController extends Controller
             ->orderBy('fecha_matricula', 'desc')
             ->first();
 
+        $nivelAnterior = null;
+        $reprobo = false;
+
         if ($ultimaMatricula) {
             $nivelAnterior = $ultimaMatricula->curso->nivel;
-            $jerarquiaAnterior = $nivelAnterior->orden_jerarquia;
-
-            // Determinar si reprobó
             $reprobo = $ultimaMatricula->calificaciones->contains(function ($calificacion) {
                 $estado = strtolower($calificacion->estado_asignatura);
                 return $estado === 'reprobado' || $estado === 'pierde' || $calificacion->nota_final_definitiva < 7;
             });
+        } else {
+            // 4. Si no tiene historial interno, validamos si ya tiene registrado un historial externo
+            $historialExterno = DB::table('historial_externo')
+                ->where('id_estudiante', $id_estudiante)
+                ->first();
 
-            // =========================================================
-            // ORDENAMIENTO DINÁMICO DESDE LA BASE DE DATOS
-            // =========================================================
+            if ($historialExterno) {
+                $nivelAnterior = Niveles_academicos::find($historialExterno->ultimo_nivel_aprobado);
+                $reprobo = false; // Al ser un registro externo aprobado, se asume promoción directa
+            }
+        }
+
+        // 5. Si encontramos un punto de partida previo (Interno o Externo), calculamos el siguiente nivel
+        if ($nivelAnterior) {
+            $jerarquiaAnterior = $nivelAnterior->orden_jerarquia;
             $jerarquiasDB = Niveles_academicos::pluck('orden_jerarquia')->unique()->toArray();
 
             usort($jerarquiasDB, function ($a, $b) {
                 $getPeso = function ($str) {
                     $strLower = strtolower($str);
-                    if (strpos($strLower, 'graduado') !== false) return 999; // Graduado siempre al final
-
+                    if (strpos($strLower, 'graduado') !== false) return 999;
                     preg_match('/\d+/', $str, $matches);
                     $num = isset($matches[0]) ? (int)$matches[0] : 0;
-
-                    if (strpos($strLower, 'bachillerato') !== false) return $num + 10; // Bachillerato va después de 10mo
-
-                    return $num; // Educación básica normal (1 a 10)
+                    if (strpos($strLower, 'bachillerato') !== false) return $num + 10;
+                    return $num;
                 };
                 return $getPeso($a) <=> $getPeso($b);
             });
 
             $ordenProgreso = array_values($jerarquiasDB);
-            // =========================================================
-
             $indiceActual = array_search($jerarquiaAnterior, $ordenProgreso);
 
             if ($indiceActual !== false) {
                 $indiceEsperado = $reprobo ? $indiceActual : ($indiceActual + 1);
-
-                // Si llega al final del arreglo, lo dejamos como Graduado
                 $jerarquiaEsperada = $ordenProgreso[$indiceEsperado] ?? 'Graduado';
 
                 $querySchedules->whereHas('nivel', function ($q) use ($jerarquiaEsperada) {
                     $q->where('orden_jerarquia', $jerarquiaEsperada);
                 });
             }
+
+            return response()->json([
+                'tiene_historial' => true,
+                'cronogramas' => $querySchedules->get()
+            ]);
         }
 
-        $data = $querySchedules->get();
-        return response()->json($data);
+        // 6. Si llegó aquí, es un caso virgen (No tiene matrículas previas ni historial externo)
+        return response()->json([
+            'tiene_historial' => false,
+            'cronogramas' => []
+        ]);
+    }
+    // NUEVO ENDPOINT: Para registrar el historial externo desde el modal/formulario
+    public function storeHistorialExterno(Request $request)
+    {
+        try {
+            $request->validate([
+                'id_estudiante'          => 'required|integer',
+                'institucion_origen'     => 'required|string|max:200',
+                'ultimo_nivel_aprobado'  => 'required|integer',
+                'promedio_final'         => 'required|numeric',
+                'archivo_notas'          => 'nullable|file|mimes:pdf,jpg,png|max:2048'
+            ]);
+
+            $urlArchivo = null;
+            if ($request->hasFile('archivo_notas')) {
+                $path = $request->file('archivo_notas')->store('historiales_externos', 'public');
+                $urlArchivo = asset('storage/' . $path);
+            }
+
+            DB::table('historial_externo')->insert([
+                'id_estudiante'          => $request->id_estudiante,
+                'institucion_origen'     => $request->institucion_origen,
+                'ultimo_nivel_aprobado'  => $request->ultimo_nivel_aprobado,
+                'promedio_final'         => $request->promedio_final,
+                'archivo_notas_url'      => $urlArchivo,
+            ]);
+
+            return response()->json(['status' => true, 'mensaje' => 'Historial académico externo registrado correctamente.']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+    public function listadoNivelesExteriores()
+    {
+        $niveles = DB::table('niveles_academicos')->select('id_nivel', 'nombre')->get();
+        return response()->json($niveles);
     }
     public function getCursosPorCronograma(Request $request, string $id_cronograma)
     {
-        $cronograma = Cronograma_matriculas::find($id_cronograma);
-        // Buscamos cursos que coincidan con el nivel y especialidad del cronograma
-        $cursos = Cursos::where('id_nivel', $cronograma->id_nivel)
-            ->where('id_especialidad', $cronograma->id_especialidad)
-            ->where('id_periodo', $cronograma->id_periodo)
-            ->where('estado', 1)
-            ->get();
-        return response()->json($cursos);
+        try {
+            // 1. Obtener el periodo lectivo activo
+            $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+            if (!$periodoActivo) {
+                return response()->json([
+                    'status' => false,
+                    'error' => 'No hay un periodo lectivo activo configurado.'
+                ], 404);
+            }
+
+            // 2. Buscar el cronograma solicitado
+            $cronograma = Cronograma_matriculas::find($id_cronograma);
+
+            // CONTROL CLAVE: Validar que exista y que pertenezca ÚNICAMENTE al periodo activo
+            if (!$cronograma || $cronograma->id_periodo != $periodoActivo->id_periodo) {
+                return response()->json([
+                    'status' => false,
+                    'error' => 'El cronograma no existe o no corresponde al periodo lectivo activo.'
+                ], 404);
+            }
+
+            // 3. Buscar cursos que coincidan con los parámetros del cronograma en el periodo activo
+            $cursos = Cursos::where('id_nivel', $cronograma->id_nivel)
+                ->where('id_especialidad', $cronograma->id_especialidad)
+                ->where('id_periodo', $periodoActivo->id_periodo) // Forzamos el ID del periodo activo verificado
+                ->where('estado', 1)
+                ->get();
+
+            return response()->json($cursos);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'error' => 'Error al procesar la solicitud: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function crearmatricula(Request $request)
@@ -425,7 +513,7 @@ class Cronograma_matriculasController extends Controller
         $matricula->id_representante = $request->id_representante;
         $matricula->fecha_matricula = now();
         $matricula->es_nuevo = $request->es_nuevo ?? (is_null($ultimaMatricula) ? 1 : 0);
-        $matricula->estado = 1;
+        $matricula->estado = "Activa";
         $matricula->save();
 
         return response()->json(['mensaje' => 'Matrícula generada con éxito', 'data' => $matricula], 200);
@@ -470,10 +558,22 @@ class Cronograma_matriculasController extends Controller
 
         return response()->json($data);
     }
-    public function getCursosMatriculados($id_representante)
+    public function getCursosMatriculados(string $id_representante)
     {
-        // Obtenemos las matrículas del representante con toda la información necesaria
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        // Si no hay periodo activo, retornamos un arreglo vacío
+        if (!$periodoActivo) {
+            return response()->json([]);
+        }
+
+        // 2. Obtenemos las matrículas filtrando estrictamente por los cursos del periodo activo
         $matriculas = Matriculas::where('id_representante', $id_representante)
+            ->whereHas('curso', function ($query) use ($periodoActivo) {
+                // Filtro clave: Solo traer matrículas asociadas a cursos de este periodo
+                $query->where('id_periodo', $periodoActivo->id_periodo);
+            })
             ->with([
                 'estudiante',
                 'curso.nivel',
@@ -485,19 +585,19 @@ class Cronograma_matriculasController extends Controller
             ])
             ->get();
 
-        // Transformamos la colección para limpiar binarios
+        // 3. Transformamos la colección para limpiar binarios (Tu código original)
         $matriculasLimpias = $matriculas->map(function ($matricula) {
-            // 1. Limpiar foto del Estudiante
+            // Limpiar foto del Estudiante
             if ($matricula->estudiante) {
                 $matricula->estudiante->foto = $matricula->estudiante->foto ? base64_encode($matricula->estudiante->foto) : null;
             }
 
-            // 2. Limpiar foto del Docente Tutor
+            // Limpiar foto del Docente Tutor
             if ($matricula->curso && $matricula->curso->docentetutor) {
                 $matricula->curso->docentetutor->foto = $matricula->curso->docentetutor->foto ? base64_encode($matricula->curso->docentetutor->foto) : null;
             }
 
-            // 3. Limpiar fotos de los Docentes de cada Asignatura
+            // Limpiar fotos de los Docentes de cada Asignatura
             if ($matricula->curso && $matricula->curso->curso_asignaturas) {
                 $matricula->curso->curso_asignaturas->each(function ($item) {
                     if ($item->docente) {
@@ -511,12 +611,25 @@ class Cronograma_matriculasController extends Controller
 
         return response()->json($matriculasLimpias);
     }
-    public function getEstudiantesPorAsignatura($id_docente)
+    public function getEstudiantesPorAsignatura(string $id_docente)
     {
         $hoy = date('Y-m-d');
 
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        // Si no hay periodo activo, retornamos un arreglo vacío
+        if (!$periodoActivo) {
+            return response()->json([]);
+        }
+
+        // 2. Obtener las asignaturas del docente filtradas estrictamente por el periodo activo
         $asignaturas = Curso_Asignaturas::where('id_docente', $id_docente)
             ->where('estado', 1)
+            ->whereHas('curso', function ($query) use ($periodoActivo) {
+                // Filtro clave: Asegura que el curso al que pertenece la asignatura sea del periodo actual
+                $query->where('id_periodo', $periodoActivo->id_periodo);
+            })
             ->with([
                 'asignatura',
                 'curso.nivel',
@@ -526,6 +639,7 @@ class Cronograma_matriculasController extends Controller
             ])
             ->get();
 
+        // 3. Transformación de datos
         $data = $asignaturas->map(function ($item) use ($hoy) {
             // Guardamos el ID de la asignatura actual para filtrar dentro del map
             $id_actual = $item->id_curso_asignatura;

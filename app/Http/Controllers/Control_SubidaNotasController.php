@@ -45,7 +45,7 @@ class Control_SubidaNotasController extends Controller
                 'periodo_activo' => $periodoActivo,
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
         }
     }
 
@@ -130,7 +130,7 @@ class Control_SubidaNotasController extends Controller
             if ($res->save()) {
                 return response()->json([
                     'data' => $res,
-                    'mensaje' => 'Actualizado con Éxito!! '.($habilitado == 0 && $request->habilitado == 1 ? '(Se inhabilitó automáticamente porque la fecha fin es pasada o actual)' : ''),
+                    'mensaje' => 'Actualizado con Éxito!! ' . ($habilitado == 0 && $request->habilitado == 1 ? '(Se inhabilitó automáticamente porque la fecha fin es pasada o actual)' : ''),
                 ]);
             } else {
                 return response()->json(['error' => true, 'mensaje' => 'Error al Actualizar'], 500);
@@ -224,12 +224,24 @@ class Control_SubidaNotasController extends Controller
     }
 
     // 1. Obtener las asignaturas que da un docente específico
-    public function getAsignaturasDocente($id_docente)
+    public function getAsignaturasDocente(string $id_docente)
     {
-        // Asumiendo que quieres las del periodo activo (si tienes el modelo Periodos_lectivos úsalo para filtrar)
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        // Si no hay periodo activo, retornamos un arreglo vacío de inmediato
+        if (!$periodoActivo) {
+            return response()->json([], 200);
+        }
+
+        // 2. Obtener asignaturas asegurando que el curso sea del periodo vigente
         $asignaturas = Curso_Asignaturas::with(['curso.nivel', 'curso.especialidad', 'asignatura'])
             ->where('id_docente', $id_docente)
             ->where('estado', 1)
+            ->whereHas('curso', function ($query) use ($periodoActivo) {
+                // Filtro clave: Solo materias vinculadas a cursos de este periodo
+                $query->where('id_periodo', $periodoActivo->id_periodo);
+            })
             ->get();
 
         return response()->json($asignaturas, 200);
@@ -506,11 +518,10 @@ class Control_SubidaNotasController extends Controller
                 'historial' => $historial,
                 'niveles_sistema' => $nivelesSistema,
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ocurrió un error al procesar la solicitud: '.$e->getMessage(),
+                'message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage(),
             ], 500);
         }
     }

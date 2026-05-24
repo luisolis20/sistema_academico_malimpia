@@ -143,6 +143,8 @@ Route::prefix('sistma')->group(function () {
     Route::get('historial-completo-est/{id_persona}', [EstudianteNotasController::class, 'getHistorialCompleto']);
     Route::get('historial-matriculas-est/{id_persona}', [EstudianteMatriculaHistorialController::class, 'getHistorialMatriculas']);
     Route::post('reasignacion_masiva', [CursosController::class, 'reasignacionMasiva']);
+    Route::post('historial_externo', [Cronograma_matriculasController::class, 'storeHistorialExterno']);
+    Route::get('niveles_exteriores', [Cronograma_matriculasController::class, 'listadoNivelesExteriores']);
 
 
     Route::middleware('auth:api')->group(function () {

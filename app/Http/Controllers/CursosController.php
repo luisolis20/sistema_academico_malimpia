@@ -6,6 +6,7 @@ use App\Models\Cursos;
 use App\Models\Personas;
 use App\Models\Familia;
 use App\Models\Curso_Asignaturas;
+use App\Models\Periodos_lectivos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -475,19 +476,36 @@ class CursosController extends Controller
             ], 404);
         }
     }
-    public function getCargaAcademica($id_persona)
+    public function getCargaAcademica(string $id_persona)
     {
-        // 1. Obtener cursos donde es Tutor
-        // Cargamos relaciones para mostrar nombres de nivel, especialidad, etc.
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
+
+        // Si no hay periodo activo, devolvemos las estructuras vacías para que el frontend no falle
+        if (!$periodoActivo) {
+            return response()->json([
+                'es_tutor' => false,
+                'tiene_asignaturas' => false,
+                'tutorias' => [],
+                'asignaturas' => []
+            ]);
+        }
+
+        // 2. Obtener cursos donde es Tutor estrictamente en este periodo
         $tutorias = Cursos::with(['nivel', 'especialidad', 'periodo'])
             ->where('id_docente_tutor', $id_persona)
             ->where('estado', 1)
+            ->where('id_periodo', $periodoActivo->id_periodo) // <-- Filtro de periodo aplicado directo al curso
             ->get();
 
-        // 2. Obtener asignaturas que dicta (incluyendo a qué curso pertenecen)
+        // 3. Obtener asignaturas que dicta, asegurando que el curso atado sea de este periodo
         $asignaturas = Curso_Asignaturas::with(['curso.nivel', 'curso.especialidad', 'asignatura'])
             ->where('id_docente', $id_persona)
             ->where('estado', 1)
+            ->whereHas('curso', function ($query) use ($periodoActivo) {
+                // <-- Filtro de periodo aplicado a la relación del curso
+                $query->where('id_periodo', $periodoActivo->id_periodo);
+            })
             ->get();
 
         return response()->json([

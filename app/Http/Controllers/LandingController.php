@@ -50,28 +50,41 @@ class LandingController extends Controller
                 });
         }
 
-        // 5. Cuadro de Honor con Especialidad y Paralelo
+        // NUEVO: 4.5 Cronograma de Subida de Calificaciones (Fases)
+        $cronogramaNotas = \App\Models\Control_subida_notas::where('id_periodo', $periodoActivo->id_periodo)
+            ->orderBy('fecha_inicio', 'asc')
+            ->get()
+            ->map(function ($fase) {
+                return [
+                    'fase' => $fase->fase_evaluacion,
+                    'fecha_inicio' => $fase->fecha_inicio,
+                    'fecha_fin' => $fase->fecha_fin,
+                    'habilitado' => (bool)$fase->habilitado,
+                ];
+            });
+
+        // 5. Cuadro de Honor con Especialidad y Paralelo (CORREGIDO)
         $niveles = Niveles_academicos::where('estado', 1)->get();
         $cuadroHonor = [];
 
         foreach ($niveles as $nivel) {
-            // Cargamos la relación estudiante y curso.especialidad
             $mejorMatricula = Matriculas::with(['estudiante', 'curso.especialidad'])
                 ->whereHas('curso', function ($query) use ($periodoActivo, $nivel) {
                     $query->where('id_periodo', $periodoActivo->id_periodo)
-                          ->where('id_nivel', $nivel->id_nivel);
+                        ->where('id_nivel', $nivel->id_nivel);
                 })
-                ->withAvg('calificaciones as promedio', 'nota_final_definitiva') 
+                ->whereHas('calificaciones', function ($query) {
+                    $query->whereNotNull('nota_final_definitiva');
+                })
+                ->withAvg('calificaciones as promedio', 'nota_final_definitiva')
                 ->orderByDesc('promedio')
                 ->first();
 
-            if ($mejorMatricula && $mejorMatricula->estudiante) {
+            if ($mejorMatricula && $mejorMatricula->estudiante && $mejorMatricula->promedio > 0) {
                 $cuadroHonor[] = [
                     'nivel' => $nivel->nombre,
-                    // Si el curso tiene especialidad la mostramos, sino 'Tronco Común' o 'General'
                     'especialidad' => optional(optional($mejorMatricula->curso)->especialidad)->nombre ?? 'Tronco Común',
-                    
-                    'paralelo' => optional($mejorMatricula->curso)->paralelo ?? 'A', 
+                    'paralelo' => optional($mejorMatricula->curso)->paralelo ?? 'A',
                     'estudiante' => $mejorMatricula->estudiante->nombres . ' ' . $mejorMatricula->estudiante->apellidos,
                     'promedio' => round($mejorMatricula->promedio, 2),
                     'foto' => $mejorMatricula->estudiante->foto ? base64_encode($mejorMatricula->estudiante->foto) : null,
@@ -79,12 +92,13 @@ class LandingController extends Controller
             }
         }
 
-        // Retornar toda la información consolidada
+        // Retornar toda la información consolidada incluyendo las notas
         return response()->json([
             'docentes_activos' => $totalDocentes,
             'estudiantes_matriculados' => $totalEstudiantes,
             'matriculas_abiertas' => $matriculasAbiertas,
             'cronogramas' => $cronogramas,
+            'cronograma_notas' => $cronogramaNotas, // <-- Enviado al Frontend
             'cuadro_honor' => $cuadroHonor
         ], 200);
     }
