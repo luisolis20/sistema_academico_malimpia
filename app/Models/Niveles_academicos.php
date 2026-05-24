@@ -14,7 +14,7 @@ class Niveles_academicos extends Model
     //Lista de atributos que se pueden guardar en la tabla
     protected $fillable = [
         'nombre',
-        'orden_jerarquia',
+        'orden_jerarquia',//Ejemplo: 1ro, 2do, 3ro, etc. para definir el orden de los niveles
         'estado',
     ];
     public function cursos(){

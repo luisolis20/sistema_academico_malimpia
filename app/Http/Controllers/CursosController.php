@@ -7,6 +7,8 @@ use App\Models\Personas;
 use App\Models\Familia;
 use App\Models\Curso_Asignaturas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CursosController extends Controller
 {
@@ -22,7 +24,19 @@ class CursosController extends Controller
             $perPage = min($perPage, 20);
             // Obtener la consulta de búsqueda
             $searchQuery = $request->input('search_query');
-            // Crear la consulta base
+
+            // 1. Obtener el PERIODO ACTIVO
+            $periodoActivo = DB::table('periodos_lectivos')->where('estado_activo', 1)->first();
+            $idPeriodoActivo = $periodoActivo ? $periodoActivo->id_periodo : null;
+            $nombrePeriodoActivo = $periodoActivo ? $periodoActivo->nombre : 'Desconocido';
+
+            // 2. Crear una subconsulta para obtener SOLO el último curso de cada docente
+            // Esto evita que el docente salga duplicado si tiene cursos en periodos anteriores
+            $ultimosCursos = DB::table('cursos')
+                ->select('id_docente_tutor', DB::raw('MAX(id_curso) as ultimo_curso_id'))
+                ->groupBy('id_docente_tutor');
+
+            // 3. Crear la consulta base usando la subconsulta
             $query = Personas::select(
                 'personas.id_persona as personID',
                 'personas.cedula',
@@ -43,36 +57,55 @@ class CursosController extends Controller
                 'niveles_academicos.id_nivel as NivelID',
                 'niveles_academicos.nombre as nombre_nivel',
                 'especialidades.id_especialidad as EspecialidadID',
-                'especialidades.nombre as nombre_especialidad',
+                'especialidades.nombre as nombre_especialidad'
             )
                 ->join('usuarios', 'usuarios.id_persona', '=', 'personas.id_persona')
                 ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
-                ->leftJoin('cursos', 'cursos.id_docente_tutor', '=', 'personas.id_persona')
+                // Unimos con la subconsulta para aislar solo el último curso asignado al docente
+                ->leftJoinSub($ultimosCursos, 'ultimos_cursos', function ($join) {
+                    $join->on('personas.id_persona', '=', 'ultimos_cursos.id_docente_tutor');
+                })
+                // Hacemos el join real con la tabla cursos usando el ID obtenido en la subconsulta
+                ->leftJoin('cursos', 'cursos.id_curso', '=', 'ultimos_cursos.ultimo_curso_id')
                 ->leftJoin('periodos_lectivos', 'periodos_lectivos.id_periodo', '=', 'cursos.id_periodo')
                 ->leftJoin('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
                 ->leftJoin('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
                 ->where('roles.nombre', 'LIKE', '%docente%');
+
             // Si hay una consulta de búsqueda, aplicarla a los campos relevantes
             if (! empty($searchQuery)) {
-                // Crear una consulta de búsqueda para cada campo relevante
                 $query->where(function ($q) use ($searchQuery) {
-                    // Aplicar la consulta de búsqueda a cada campo relevante, en este caso, solo a nombre de nivel académico
                     $q->where('personas.cedula', 'LIKE', "%{$searchQuery}%");
                 });
             }
+
             // Obtener los datos paginados
             $data = $query->paginate($perPage);
+
             // Si no hay datos, devolver un mensaje de error
             if ($data->isEmpty()) {
                 return response()->json(['data' => [], 'message' => 'No se encontraron datos'], 200);
             }
-            // Transformar los datos a UTF-8 para evitar problemas de codificación al convertir a JSON
-            $data->getCollection()->transform(function ($item) {
+
+            // Transformar los datos a UTF-8 y evaluar lógica de los periodos
+            $data->getCollection()->transform(function ($item) use ($idPeriodoActivo, $nombrePeriodoActivo) {
                 $attributes = $item->getAttributes();
+
+                // Inicializar banderas para el Frontend
+                $attributes['requiere_actualizacion'] = false;
+                $attributes['mensaje_periodo'] = '';
+                $attributes['nuevo_periodo_id'] = $idPeriodoActivo;
+
+                // Si tiene un curso asignado y su periodo es diferente al periodo activo
+                if (!empty($attributes['PeriodoID']) && $idPeriodoActivo && $attributes['PeriodoID'] != $idPeriodoActivo) {
+                    $attributes['requiere_actualizacion'] = true;
+                    $attributes['mensaje_periodo'] = "El periodo <b>{$attributes['nombre_periodo']}</b> ya no está activo. Actualmente estamos en el periodo <b>{$nombrePeriodoActivo}</b>.<br><br>¿Desea reasignar este mismo docente al curso del nuevo periodo?";
+                }
+
                 foreach ($attributes as $key => $value) {
                     if ($key === 'foto' && ! empty($value)) {
                         $attributes[$key] = base64_encode($value);
-                    } elseif (is_string($value) && $key !== 'foto') {
+                    } elseif (is_string($value) && $key !== 'foto' && $key !== 'mensaje_periodo') {
                         $attributes[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
                     }
                 }
@@ -80,7 +113,7 @@ class CursosController extends Controller
                 return $attributes;
             });
 
-            // Devolver los datos paginados en formato JSON, incluyendo la información de paginación
+            // Devolver los datos paginados en formato JSON
             return response()->json([
                 'data' => $data->items(),
                 'pagination' => [
@@ -89,29 +122,104 @@ class CursosController extends Controller
                     'total' => $data->total(),
                     'last_page' => $data->lastPage(),
                 ],
-
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
         }
     }
     //Traer cursos habilitados
-    public function getActivados(){
+    public function getActivados()
+    {
         try {
-            $cursos = Cursos::select('cursos.*','niveles_academicos.id_nivel as NivelID',
+            $cursos = Cursos::select(
+                'cursos.*',
+                'niveles_academicos.id_nivel as NivelID',
                 'niveles_academicos.nombre as nombre_nivel',
                 'especialidades.id_especialidad as EspecialidadID',
-                'especialidades.nombre as nombre_especialidad',)
+                'especialidades.nombre as nombre_especialidad',
+            )
                 ->join('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
                 ->join('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
                 ->where('cursos.estado', 1)
-                ->get();    
+                ->get();
             return response()->json([
                 'status' => true,
                 'data' => $cursos,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: '.$e->getMessage()], 500);
+            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
+        }
+    }
+    public function reasignacionMasiva(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            // 1. Obtener el periodo activo
+            $periodoActivo = DB::table('periodos_lectivos')->where('estado_activo', 1)->first();
+
+            if (!$periodoActivo) {
+                return response()->json(['mensaje' => 'No hay un periodo activo configurado.'], 404);
+            }
+
+            $idPeriodoActivo = $periodoActivo->id_periodo;
+
+            // 2. Subconsulta para aislar el último curso asignado a cada docente
+            $ultimosCursos = DB::table('cursos')
+                ->select('id_docente_tutor', DB::raw('MAX(id_curso) as ultimo_curso_id'))
+                ->groupBy('id_docente_tutor');
+
+            // 3. Buscar a los docentes cuyo último curso NO pertenece al periodo activo
+            $cursosPendientes = DB::table('cursos')
+                ->joinSub($ultimosCursos, 'uc', function ($join) {
+                    $join->on('cursos.id_curso', '=', 'uc.ultimo_curso_id');
+                })
+                ->where('cursos.id_periodo', '!=', $idPeriodoActivo)
+                ->get();
+
+            if ($cursosPendientes->isEmpty()) {
+                return response()->json(['mensaje' => 'Todos los docentes ya están al día. No hay nada que reasignar.'], 404);
+            }
+
+            $nuevosRegistros = [];
+            $ahora = Carbon::now();
+
+            foreach ($cursosPendientes as $curso) {
+                // Validación de seguridad: Comprobar que no se haya reasignado ya accidentalmente
+                $existe = Cursos::where('id_periodo', $idPeriodoActivo)
+                    ->where('id_docente_tutor', $curso->id_docente_tutor)
+                    ->exists();
+
+                if (!$existe) {
+                    $nuevosRegistros[] = [
+                        'id_periodo'       => $idPeriodoActivo,
+                        'id_nivel'         => $curso->id_nivel,
+                        'id_especialidad'  => $curso->id_especialidad,
+                        'paralelo'         => $curso->paralelo,
+                        'id_docente_tutor' => $curso->id_docente_tutor,
+                        'estado'           => 1, // Lo dejamos activo por defecto
+                        'created_at'       => $ahora,
+                        'updated_at'       => $ahora,
+                    ];
+                }
+            }
+
+            // Si hay registros válidos, los insertamos en bloque (Mass Insert)
+            if (count($nuevosRegistros) > 0) {
+                Cursos::insert($nuevosRegistros);
+            } else {
+                return response()->json(['mensaje' => 'Los docentes ya contaban con cursos en este periodo.'], 404);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'mensaje' => 'Reasignación masiva completada con éxito. Se reasignaron ' . count($nuevosRegistros) . ' docentes.',
+                'cantidad' => count($nuevosRegistros)
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Error en la reasignación masiva: ' . $e->getMessage()], 500);
         }
     }
     /**
@@ -185,10 +293,13 @@ class CursosController extends Controller
         }
     }
     //buscar cursos por id_docente_tutor
-    public function getCursosDocente($id_docente_tutor){
+    public function getCursosDocente($id_docente_tutor)
+    {
         try {
 
-            $cursos = Cursos::select('cursos.*','niveles_academicos.id_nivel as NivelID',
+            $cursos = Cursos::select(
+                'cursos.*',
+                'niveles_academicos.id_nivel as NivelID',
                 'niveles_academicos.nombre as nombre_nivel',
                 'especialidades.id_especialidad as EspecialidadID',
                 'especialidades.nombre as nombre_especialidad',
@@ -202,7 +313,7 @@ class CursosController extends Controller
                 ->leftJoin('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
                 ->leftJoin('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
                 ->where('cursos.id_docente_tutor', $id_docente_tutor)
-                ->get();    
+                ->get();
             return response()->json([
                 'status' => true,
                 'data' => $cursos,
@@ -399,7 +510,7 @@ class CursosController extends Controller
         // Buscamos si existe al menos un curso donde este usuario sea el tutor
         // Y donde el periodo lectivo asociado esté activo
         $esTutor = Cursos::where('id_docente_tutor', $usuario->id_persona)
-            ->whereHas('periodo', function($query) {
+            ->whereHas('periodo', function ($query) {
                 $query->where('estado_activo', 1); // o true, dependiendo de tu base de datos
             })
             ->exists();
@@ -424,6 +535,6 @@ class CursosController extends Controller
 
         return response()->json([
             'tiene_familia' => $tieneFamilia
-        ], 200);    
-    }   
+        ], 200);
+    }
 }

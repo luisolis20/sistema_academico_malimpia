@@ -118,7 +118,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('horarios_docente/{id_persona}', [HorariosController::class, 'getHorarioDocente']);
     Route::apiResource('cronograma_matriculas', Cronograma_matriculasController::class);
     Route::post('crearcronograma_matriculas', [Cronograma_matriculasController::class, 'store']);
-    Route::get('cronograma_matriculas_activo', [Cronograma_matriculasController::class, 'getCronogramaActivo']);
+    Route::get('cronograma_matriculas_activo/{id_estudiante}', [Cronograma_matriculasController::class, 'getCronogramaActivo']);
     Route::get('cursos_por_cronograma/{id_cronograma}', [Cronograma_matriculasController::class, 'getCursosPorCronograma']);
     Route::post('crearmatricula', [Cronograma_matriculasController::class, 'crearmatricula']);
     Route::get('historial/{id_representante}', [Cronograma_matriculasController::class, 'getHistorial']);
@@ -142,6 +142,7 @@ Route::prefix('sistma')->group(function () {
     Route::get('mis-notas-est/{id_persona}', [EstudianteNotasController::class, 'getNotasHistorial']);
     Route::get('historial-completo-est/{id_persona}', [EstudianteNotasController::class, 'getHistorialCompleto']);
     Route::get('historial-matriculas-est/{id_persona}', [EstudianteMatriculaHistorialController::class, 'getHistorialMatriculas']);
+    Route::post('reasignacion_masiva', [CursosController::class, 'reasignacionMasiva']);
 
 
     Route::middleware('auth:api')->group(function () {

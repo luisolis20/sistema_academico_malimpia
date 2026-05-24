@@ -41,8 +41,8 @@ class HorariosController extends Controller
                 // ORDENAMIENTO REQUERIDO
                 ->orderBy('niveles_academicos.id_nivel', 'asc')
                 ->orderBy('especialidades.nombre', 'asc')
-                ->orderBy('cursos.paralelo', 'asc');
-
+                ->orderBy('cursos.paralelo', 'asc')
+                ->where('periodos_lectivos.estado_activo', 1); // Solo mostrar cursos del periodo activo
             if (!empty($searchQuery)) {
                 $query->where(function ($q) use ($searchQuery) {
                     $q->where('niveles_academicos.nombre', 'LIKE', "%{$searchQuery}%")
@@ -141,6 +141,17 @@ class HorariosController extends Controller
         $horarios = $request->input('horarios');
         $id_curso = $request->input('id_curso');
 
+        // --- 0. OBTENER EL PERIODO ACTIVO ---
+        $periodoActivo = DB::table('periodos_lectivos')->where('estado_activo', 1)->first();
+
+        if (!$periodoActivo) {
+            return response()->json([
+                'error' => 'No se encontró un periodo lectivo activo en el sistema para validar los horarios.'
+            ], 400);
+        }
+
+        $idPeriodoActivo = $periodoActivo->id_periodo;
+
         DB::beginTransaction();
         try {
             // 1. Validar cruce de docentes
@@ -149,9 +160,11 @@ class HorariosController extends Controller
                 $ca = DB::table('curso_asignatura')->where('id_curso_asignatura', $item['id_curso_asignatura'])->first();
 
                 if ($ca && $ca->id_docente) {
-                    // Verificar si el docente ya está dando clases en ese día y rango de horas en OTRO curso
+                    // Verificar si el docente ya está dando clases en ese día y rango de horas en OTRO curso DEL PERIODO ACTIVO
                     $cruce = DB::table('horarios_clases')
                         ->join('curso_asignatura', 'horarios_clases.id_curso_asignatura', '=', 'curso_asignatura.id_curso_asignatura')
+                        ->join('cursos', 'curso_asignatura.id_curso', '=', 'cursos.id_curso') // <-- NUEVO JOIN
+                        ->where('cursos.id_periodo', $idPeriodoActivo) // <-- FILTRO CLAVE: Solo el periodo actual
                         ->where('curso_asignatura.id_docente', $ca->id_docente)
                         ->where('curso_asignatura.id_curso', '!=', $id_curso) // Excluir el curso actual
                         ->where('horarios_clases.dia_semana', $item['dia_semana'])
@@ -164,15 +177,18 @@ class HorariosController extends Controller
 
                     if ($cruce) {
                         return response()->json([
-                            'error' => "El docente no puede dar la misma asignatura a la misma hora en otro curso (Día: {$item['dia_semana']}, Hora: {$item['hora_inicio']} - {$item['hora_fin']})."
+                            'error' => "El docente ya tiene asignada otra asignatura a la misma hora en otro curso de este periodo (Día: {$item['dia_semana']}, Hora: {$item['hora_inicio']} - {$item['hora_fin']})."
                         ], 422);
                     }
                 }
             }
 
-            // 2. Limpiar los horarios anteriores de este curso (para reemplazarlos por los nuevos, útil para actualizar)
+            // 2. Limpiar los horarios anteriores de ESTE curso (para reemplazarlos por los nuevos)
             $idsCursoAsignatura = DB::table('curso_asignatura')->where('id_curso', $id_curso)->pluck('id_curso_asignatura');
-            DB::table('horarios_clases')->whereIn('id_curso_asignatura', $idsCursoAsignatura)->delete();
+
+            if ($idsCursoAsignatura->isNotEmpty()) {
+                DB::table('horarios_clases')->whereIn('id_curso_asignatura', $idsCursoAsignatura)->delete();
+            }
 
             // 3. Insertar los nuevos horarios
             $insertData = [];
@@ -251,15 +267,15 @@ class HorariosController extends Controller
             'curso_asignatura.curso.nivel',
             'curso_asignatura.curso.especialidad'
         ])
-        ->whereHas('curso_asignatura', function($query) use ($id_persona) {
-            $query->where('id_docente', $id_persona)
-                  ->where('estado', 1);
-        })
-        ->orderBy('hora_inicio', 'asc')
-        ->get();
+            ->whereHas('curso_asignatura', function ($query) use ($id_persona) {
+                $query->where('id_docente', $id_persona)
+                    ->where('estado', 1);
+            })
+            ->orderBy('hora_inicio', 'asc')
+            ->get();
 
         // Estructuramos la respuesta
-        $data = $horarios->map(function($h) {
+        $data = $horarios->map(function ($h) {
             return [
                 'id' => $h->id_horario,
                 'dia' => $h->dia_semana, // Ejemplo: 'Lunes', 'Martes'...

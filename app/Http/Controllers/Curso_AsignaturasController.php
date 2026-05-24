@@ -19,6 +19,12 @@ class Curso_AsignaturasController extends Controller
             $perPage = min($perPage, 20);
             $searchQuery = $request->input('search_query');
 
+            // =========================================================
+            // 1. OBTENER EL PERIODO ACTIVO
+            // =========================================================
+            $periodoActivo = DB::table('periodos_lectivos')->where('estado_activo', 1)->first();
+            $idPeriodoActivo = $periodoActivo ? $periodoActivo->id_periodo : 0;
+
             $query = Personas::select(
                 'personas.id_persona as personID',
                 'personas.cedula',
@@ -31,13 +37,22 @@ class Curso_AsignaturasController extends Controller
                 'roles.nombre as nombre_rol',
 
                 // =========================================================
-                // VALIDACIÓN DE MATERIAS Y PERIODO
+                // VALIDACIÓN DE MATERIAS Y PERIODO (SOLO PERIODO ACTIVO)
                 // =========================================================
-                // 1. ¿Tiene materias asignadas? (Devuelve 1 o 0)
-                DB::raw('(CASE WHEN EXISTS (SELECT 1 FROM curso_asignatura WHERE curso_asignatura.id_docente = personas.id_persona) THEN 1 ELSE 0 END) as tiene_asignaturas'),
+                // 1. ¿Tiene materias asignadas en el periodo activo?
+                DB::raw("(CASE WHEN EXISTS (
+                SELECT 1 FROM curso_asignatura 
+                INNER JOIN cursos ON cursos.id_curso = curso_asignatura.id_curso 
+                WHERE curso_asignatura.id_docente = personas.id_persona 
+                AND cursos.id_periodo = {$idPeriodoActivo}
+            ) THEN 1 ELSE 0 END) as tiene_asignaturas"),
 
                 // 2. Obtener el nombre del periodo de esas materias asignadas
-                DB::raw('(SELECT periodos_lectivos.nombre FROM curso_asignatura INNER JOIN cursos ON cursos.id_curso = curso_asignatura.id_curso INNER JOIN periodos_lectivos ON periodos_lectivos.id_periodo = cursos.id_periodo WHERE curso_asignatura.id_docente = personas.id_persona LIMIT 1) as nombre_periodo'),
+                DB::raw("(SELECT periodos_lectivos.nombre FROM curso_asignatura 
+                INNER JOIN cursos ON cursos.id_curso = curso_asignatura.id_curso 
+                INNER JOIN periodos_lectivos ON periodos_lectivos.id_periodo = cursos.id_periodo 
+                WHERE curso_asignatura.id_docente = personas.id_persona 
+                AND cursos.id_periodo = {$idPeriodoActivo} LIMIT 1) as nombre_periodo"),
 
                 // =========================================================
                 // DATOS DEL CURSO DONDE ES TUTOR
@@ -51,10 +66,11 @@ class Curso_AsignaturasController extends Controller
                 ->join('usuarios', 'usuarios.id_persona', '=', 'personas.id_persona')
                 ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
 
-                // Joins exclusivos para obtener la información del curso que tutoriza
-                ->leftJoin('cursos as cursos_tutor', function ($join) {
+                // Joins exclusivos para obtener la información del curso que tutoriza en el PERIODO ACTIVO
+                ->leftJoin('cursos as cursos_tutor', function ($join) use ($idPeriodoActivo) {
                     $join->on('cursos_tutor.id_docente_tutor', '=', 'personas.id_persona')
-                        ->where('cursos_tutor.estado', '=', 1);
+                        ->where('cursos_tutor.estado', '=', 1)
+                        ->where('cursos_tutor.id_periodo', '=', $idPeriodoActivo); // Filtro clave aquí
                 })
                 ->leftJoin('niveles_academicos as niveles_tutor', 'niveles_tutor.id_nivel', '=', 'cursos_tutor.id_nivel')
                 ->leftJoin('especialidades as especialidades_tutor', 'especialidades_tutor.id_especialidad', '=', 'cursos_tutor.id_especialidad')
@@ -68,7 +84,14 @@ class Curso_AsignaturasController extends Controller
             }
 
             // Agrupamos por id_persona por si alguna otra relación intenta duplicar
-            $query->groupBy('personas.id_persona', 'roles.id_rol', 'cursos_tutor.id_curso', 'niveles_tutor.nombre', 'especialidades_tutor.nombre', 'cursos_tutor.paralelo');
+            $query->groupBy(
+                'personas.id_persona',
+                'roles.id_rol',
+                'cursos_tutor.id_curso',
+                'niveles_tutor.nombre',
+                'especialidades_tutor.nombre',
+                'cursos_tutor.paralelo'
+            );
 
             $data = $query->paginate($perPage);
 
@@ -98,7 +121,7 @@ class Curso_AsignaturasController extends Controller
                 ],
             ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error al procesar los datos: ' . $e->getMessage()], 500);
         }
     }
     public function procesarAsignaciones(Request $request)
@@ -109,6 +132,18 @@ class Curso_AsignaturasController extends Controller
         ]);
 
         $id_docente = $request->id_docente;
+
+        // --- 0. OBTENER EL PERIODO ACTIVO ---
+        $periodoActivo = DB::table('periodos_lectivos')->where('estado_activo', 1)->first();
+
+        if (!$periodoActivo) {
+            return response()->json([
+                'status' => false,
+                'mensaje' => 'No se encontró un periodo lectivo activo en el sistema.'
+            ], 400);
+        }
+
+        $idPeriodoActivo = $periodoActivo->id_periodo;
 
         // --- 1. VALIDACIÓN DE CONFLICTOS ---
         $conflictos = [];
@@ -127,7 +162,6 @@ class Curso_AsignaturasController extends Controller
                     ->exists();
 
                 if ($existe) {
-                    // Si existe, guardamos los IDs conflictivos
                     $conflictos[] = [
                         'id_curso' => $curso_id,
                         'id_asignatura' => $id_asignatura
@@ -136,23 +170,31 @@ class Curso_AsignaturasController extends Controller
             }
         }
 
-        // Si encontramos al menos un conflicto, abortamos y avisamos al frontend
         if (!empty($conflictos)) {
             return response()->json([
                 'status' => false,
                 'conflictos' => $conflictos,
                 'mensaje' => 'Conflicto de asignación detectado.'
-            ], 409); // Código HTTP 409: Conflict
+            ], 409);
         }
         // --- FIN DE VALIDACIÓN ---
 
 
-        // 2. PROCESO NORMAL DE GUARDADO
+        // --- 2. PROCESO NORMAL DE GUARDADO ---
         DB::beginTransaction();
         try {
-            DB::table('curso_asignatura')
-                ->where('id_docente', $id_docente)
-                ->delete();
+            // Obtenemos SOLO los IDs de los cursos que pertenecen al periodo activo
+            $cursosActivosIds = DB::table('cursos')
+                ->where('id_periodo', $idPeriodoActivo)
+                ->pluck('id_curso');
+
+            // Borramos SOLO las asignaciones de este docente que correspondan al periodo activo
+            if ($cursosActivosIds->isNotEmpty()) {
+                DB::table('curso_asignatura')
+                    ->where('id_docente', $id_docente)
+                    ->whereIn('id_curso', $cursosActivosIds)
+                    ->delete();
+            }
 
             $nuevasAsignaciones = [];
 
