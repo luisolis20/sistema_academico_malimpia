@@ -36,4 +36,7 @@ class Matriculas extends Model
     public function calificaciones(){
         return $this->hasMany(Calificaciones::class, 'id_matricula', 'id_matricula');
     }
+    public function conductas(){
+        return $this->hasMany(Conducta::class, 'id_matricula', 'id_matricula');
+    }
 }

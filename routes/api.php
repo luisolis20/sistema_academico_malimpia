@@ -145,6 +145,9 @@ Route::prefix('sistma')->group(function () {
     Route::post('reasignacion_masiva', [CursosController::class, 'reasignacionMasiva']);
     Route::post('historial_externo', [Cronograma_matriculasController::class, 'storeHistorialExterno']);
     Route::get('niveles_exteriores', [Cronograma_matriculasController::class, 'listadoNivelesExteriores']);
+    Route::put('anular_matricula/{id}', [Cronograma_matriculasController::class, 'anularMatricula']);
+    Route::post('guardar_conducta', [AsistenciaController::class, 'guardarConducta']);
+    Route::get('datos-tutor-conducta/{id_persona}', [AsistenciaController::class, 'getDatosConduta']);
 
 
     Route::middleware('auth:api')->group(function () {

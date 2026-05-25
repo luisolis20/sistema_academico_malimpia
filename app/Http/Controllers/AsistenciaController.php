@@ -7,6 +7,8 @@ use App\Models\Curso_Asignaturas;
 use App\Models\Cursos;
 use App\Models\Matriculas;
 use App\Models\Periodos_lectivos;
+use App\Models\Control_subida_notas;
+use App\Models\Conducta;
 use Illuminate\Http\Request;
 
 class AsistenciaController extends Controller
@@ -73,7 +75,7 @@ class AsistenciaController extends Controller
 
     public function habilitar(string $id) {}
 
-    public function getHistorialAsistencia($id_docente)
+    public function getHistorialAsistencia(string $id_docente)
     {
         // Obtenemos todas las asignaturas del docente con su historial completo
         $historial = Curso_Asignaturas::where('id_docente', $id_docente)
@@ -133,7 +135,7 @@ class AsistenciaController extends Controller
 
         // 3. Obtenemos los estudiantes matriculados en ese curso (Tu lógica original intacta)
         $alumnos = Matriculas::where('id_curso', $curso->id_curso)
-            ->where('estado', 1)
+            ->where('estado', '=', 'Activa')
             ->with([
                 'estudiante',
                 'representante',
@@ -175,7 +177,132 @@ class AsistenciaController extends Controller
             'alumnos' => $alumnos,
         ]);
     }
+    public function getDatosConduta(string $id_persona)
+    {
+        // 1. Buscamos el periodo lectivo activo
+        $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
+        if (!$periodoActivo) {
+            return response()->json(['error' => 'No existe un periodo lectivo activo actualmente.'], 404);
+        }
+
+        // 2. Buscamos el curso asignado al tutor en el periodo activo
+        $curso = Cursos::where('id_docente_tutor', $id_persona)
+            ->where('estado', 1)
+            ->where('id_periodo', $periodoActivo->id_periodo)
+            ->with(['nivel', 'especialidad', 'periodo'])
+            ->first();
+
+        if (!$curso) {
+            return response()->json(['error' => 'No tienes un curso asignado como tutor para el periodo actual.'], 404);
+        }
+
+        // 3. Verificar qué Quimestres están habilitados para subida de notas
+        $fasesHabilitadas = Control_subida_notas::where('id_periodo', $periodoActivo->id_periodo)
+            ->where('habilitado', 1)
+            ->pluck('fase_evaluacion')
+            ->toArray();
+
+        // Validamos de forma amplia si alguna fase de Q1 o Q2 está abierta
+        $q1_habilitado = false;
+        $q2_habilitado = false;
+
+        foreach ($fasesHabilitadas as $fase) {
+            if (str_contains($fase, 'Q1')) {
+                $q1_habilitado = true;
+            }
+            if (str_contains($fase, 'Q2')) {
+                $q2_habilitado = true;
+            }
+        }
+
+        // 4. Obtener estudiantes con matrículas Activas junto con sus conductas ya registradas
+        $alumnos = Matriculas::where('id_curso', $curso->id_curso)
+            ->where('estado', 'Activa')
+            ->with(['estudiante'])
+            ->get()
+            ->map(function ($m) {
+                // Buscamos las conductas registradas de esta matrícula
+                $conductas = Conducta::where('id_matricula', $m->id_matricula)->get();
+
+                return [
+                    'id_matricula' => $m->id_matricula,
+                    'estudiante' => [
+                        'cedula' => $m->estudiante->cedula,
+                        'nombres' => $m->estudiante->nombres,
+                        'apellidos' => $m->estudiante->apellidos,
+                        'sexo' => $m->estudiante->sexo,
+                        'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
+                    ],
+                    'conductas' => $conductas->map(function ($c) {
+                        return [
+                            'id_conducta' => $c->id_conducta,
+                            'quimestre' => $c->quimestre,
+                            'calificacion_letra' => $c->calificacion_letra,
+                            'observacion' => $c->observacion
+                        ];
+                    })
+                ];
+            });
+
+        return response()->json([
+            'curso' => $curso->nivel->nombre . ' "' . $curso->paralelo . '"',
+            'especialidad' => $curso->especialidad->nombre,
+            'periodo' => $curso->periodo->nombre,
+            'fases_conducta' => [
+                'Q1' => $q1_habilitado,
+                'Q2' => $q2_habilitado
+            ],
+            'alumnos' => $alumnos,
+        ]);
+    }
+    public function guardarConducta(Request $request)
+    {
+        $request->validate([
+            'id_matricula'       => 'required|integer',
+            'quimestre'          => 'required|string', // 'Quimestre 1' o 'Quimestre 2'
+            'calificacion_letra' => 'required|string|in:A,B,C,D,E',
+            'observacion'        => 'nullable|string|max:500'
+        ]);
+
+        // 1. Validar la existencia de la matrícula
+        $matricula = Matriculas::with('curso')->find($request->id_matricula);
+        if (!$matricula) {
+            return response()->json(['success' => false, 'message' => 'No se encontró la matrícula.'], 404);
+        }
+
+        // 2. Control de seguridad perimetral de fechas/fases habilitadas
+        $prefix = ($request->quimestre === 'Quimestre 1') ? 'Q1' : 'Q2';
+        $faseHabilitada = Control_subida_notas::where('id_periodo', $matricula->curso->id_periodo)
+            ->where('fase_evaluacion', 'like', $prefix . '%')
+            ->where('habilitado', 1)
+            ->exists();
+
+        if (!$faseHabilitada) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La subida de notas/conducta para este ' . $request->quimestre . ' no está habilitada en el cronograma actual.'
+            ], 400);
+        }
+
+        // 3. Guardar o actualizar de forma síncrona
+        $conducta = Conducta::updateOrCreate(
+            [
+                'id_matricula' => $request->id_matricula,
+                'quimestre'    => $request->quimestre
+            ],
+            [
+                'calificacion_letra' => $request->calificacion_letra,
+                'observacion'        => $request->observacion
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Calificación de conducta guardada correctamente.',
+            'conducta' => $conducta
+        ]);
+    }
     public function getDatosNotasAlumnoTutor(string $id_persona)
     {
         // 1. Buscamos el periodo lectivo activo
@@ -188,7 +315,7 @@ class AsistenciaController extends Controller
         // 2. Buscamos el curso donde el docente es tutor estrictamente en el periodo activo
         $curso = Cursos::where('id_docente_tutor', $id_persona)
             ->where('estado', 1)
-            ->where('id_periodo', $periodoActivo->id_periodo) // <-- Filtro clave de periodo
+            ->where('id_periodo', $periodoActivo->id_periodo)
             ->with(['nivel', 'especialidad', 'periodo'])
             ->first();
 
@@ -196,14 +323,15 @@ class AsistenciaController extends Controller
             return response()->json(['error' => 'No tienes un curso asignado como tutor para el periodo actual'], 404);
         }
 
-        // 3. Obtenemos los estudiantes matriculados incluyendo sus calificaciones y asistencias
+        // 3. Obtenemos los estudiantes matriculados
         $alumnos = Matriculas::where('id_curso', $curso->id_curso)
-            ->where('estado', 1)
+            ->where('estado', '=', 'Activa')
             ->with([
                 'estudiante',
                 'representante',
                 'asistencias.curso_asignatura.asignatura',
-                'calificaciones.curso_asignatura.asignatura', // Cargamos las calificaciones relacionales
+                'calificaciones.curso_asignatura.asignatura',
+                'conductas' // Asegúrate de que en el modelo Matriculas esté como "public function conductas()"
             ])
             ->get()
             ->map(function ($m) {
@@ -224,16 +352,30 @@ class AsistenciaController extends Controller
 
                 // --- CÁLCULO DE ASISTENCIA ---
                 $totalAsistencias = $m->asistencias->count();
-
-                // Filtramos las asistencias que NO son penalizadas (Presentes y Justificadas)
                 $asistenciasValidas = $m->asistencias->filter(function ($a) {
                     return in_array(strtolower($a->estado), ['presente', 'justificado']);
                 })->count();
 
-                // Si hay registros de asistencia, sacamos el porcentaje, caso contrario asumimos 100%
                 $porcentajeAsistencia = $totalAsistencias > 0
                     ? round(($asistenciasValidas / $totalAsistencias) * 100, 2)
                     : 100.00;
+
+                // --- EXTRACCIÓN Y CÁLCULO DE CONDUCTA ---
+                $conductaQ1Model = $m->conductas->firstWhere('quimestre', 'Quimestre 1');
+                $conductaQ2Model = $m->conductas->firstWhere('quimestre', 'Quimestre 2');
+
+                // Extraemos la letra de forma segura
+                $conductaQ1 = $conductaQ1Model ? strtoupper($conductaQ1Model->calificacion_letra) : '-';
+                $conductaQ2 = $conductaQ2Model ? strtoupper($conductaQ2Model->calificacion_letra) : '-';
+
+                // Criterio analítico de despliegue
+                if ($conductaQ2 !== '-') {
+                    $conductaFinal = $conductaQ2;
+                } elseif ($conductaQ1 !== '-') {
+                    $conductaFinal = $conductaQ1;
+                } else {
+                    $conductaFinal = '-';
+                }
 
                 return [
                     'id_matricula' => $m->id_matricula,
@@ -241,6 +383,15 @@ class AsistenciaController extends Controller
                     'estado' => $estadoCurso,
                     'porcentaje_asistencia' => $porcentajeAsistencia,
                     'calificaciones' => $detallesNotas,
+
+                    'conducta' => [
+                        'q1' => $conductaQ1,
+                        'q2' => $conductaQ2,
+                        'final' => $conductaFinal,
+                        // CORREGIDO: Añadido el operador ?-> para evitar el Server Error si el modelo es null
+                        'observacion' => $conductaQ2Model?->observacion ?? $conductaQ1Model?->observacion ?? null
+                    ],
+
                     'estudiante' => [
                         'cedula' => $m->estudiante->cedula,
                         'nombres' => $m->estudiante->nombres,

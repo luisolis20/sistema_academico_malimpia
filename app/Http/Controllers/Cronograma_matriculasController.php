@@ -728,4 +728,33 @@ class Cronograma_matriculasController extends Controller
             'estudiante' => $estudiante
         ]);
     }
+    public function anularMatricula(string $id)
+    {
+        // 1. Buscar la matrícula por su ID primario
+        $matricula = Matriculas::find($id);
+
+        if (!$matricula) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró la matrícula especificada.'
+            ], 404);
+        }
+
+        // 2. Validar si ya se encuentra anulada
+        if ($matricula->estado === 'Anulada') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta matrícula ya ha sido anulada previamente.'
+            ], 400);
+        }
+
+        // 3. Cambiar el estado de la matrícula
+        $matricula->estado = 'Anulada';
+        $matricula->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'La matrícula ha sido anulada con éxito.'
+        ]);
+    }
 }

@@ -28,10 +28,11 @@ class LandingController extends Controller
                 $query->where('nombre', 'Docente');
             })->count();
 
-        // 3. Total de Estudiantes Matriculados en el periodo activo
-        $totalEstudiantes = Matriculas::whereHas('curso', function ($query) use ($periodoActivo) {
-            $query->where('id_periodo', $periodoActivo->id_periodo);
-        })->count();
+        // 3. Total de Estudiantes Matriculados ACTIVOS en el periodo activo
+        $totalEstudiantes = Matriculas::where('estado', 'Activa') // <-- FILTRO: Solo matrículas activas
+            ->whereHas('curso', function ($query) use ($periodoActivo) {
+                $query->where('id_periodo', $periodoActivo->id_periodo);
+            })->count();
 
         // 4. Información de Matrículas (Si están abiertas en el periodo)
         $matriculasAbiertas = $periodoActivo->matriculas_abiertas == 1;
@@ -50,7 +51,7 @@ class LandingController extends Controller
                 });
         }
 
-        // NUEVO: 4.5 Cronograma de Subida de Calificaciones (Fases)
+        // 4.5 Cronograma de Subida de Calificaciones (Fases)
         $cronogramaNotas = \App\Models\Control_subida_notas::where('id_periodo', $periodoActivo->id_periodo)
             ->orderBy('fecha_inicio', 'asc')
             ->get()
@@ -63,12 +64,13 @@ class LandingController extends Controller
                 ];
             });
 
-        // 5. Cuadro de Honor con Especialidad y Paralelo (CORREGIDO)
+        // 5. Cuadro de Honor con Especialidad y Paralelo (Solo estudiantes con matrícula Activa)
         $niveles = Niveles_academicos::where('estado', 1)->get();
         $cuadroHonor = [];
 
         foreach ($niveles as $nivel) {
             $mejorMatricula = Matriculas::with(['estudiante', 'curso.especialidad'])
+                ->where('estado', 'Activa') // <-- FILTRO: Excluye alumnos anulados del cuadro de honor
                 ->whereHas('curso', function ($query) use ($periodoActivo, $nivel) {
                     $query->where('id_periodo', $periodoActivo->id_periodo)
                         ->where('id_nivel', $nivel->id_nivel);
@@ -98,7 +100,7 @@ class LandingController extends Controller
             'estudiantes_matriculados' => $totalEstudiantes,
             'matriculas_abiertas' => $matriculasAbiertas,
             'cronogramas' => $cronogramas,
-            'cronograma_notas' => $cronogramaNotas, // <-- Enviado al Frontend
+            'cronograma_notas' => $cronogramaNotas,
             'cuadro_honor' => $cuadroHonor
         ], 200);
     }
