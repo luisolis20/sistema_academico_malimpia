@@ -24,7 +24,6 @@
     <div class="row" v-if="estudiante">
 
       <div class="col-md-4 mb-4">
-
         <div class="card border-0 shadow-sm rounded-4 mb-4">
           <div class="card-body text-center p-4">
             <img :src="estudiante.foto ? 'data:image/jpeg;base64,' + estudiante.foto : '/avatar-default.png'"
@@ -53,8 +52,13 @@
                   :class="{ 'text-white': matriculaSeleccionada && matriculaSeleccionada.id_matricula === mat.id_matricula, 'text-blue': !matriculaSeleccionada || matriculaSeleccionada.id_matricula !== mat.id_matricula }">
                   {{ mat.curso.periodo.nombre }}
                 </h6>
-                <span v-if="mat.curso.periodo.estado_activo == 1" class="badge bg-success x-small">ACTIVO</span>
-                <span v-else class="badge bg-secondary x-small">CERRADO</span>
+                <div class="d-flex gap-1 align-items-center">
+                  <span :class="mat.estado === 'Anulada' ? 'badge bg-danger x-small' : 'badge bg-success x-small'">
+                    {{ mat.estado || 'Activa' }}
+                  </span>
+                  <span v-if="mat.curso.periodo.estado_activo == 1" class="badge bg-primary x-small text-white">ACTIVO</span>
+                  <span v-else class="badge bg-secondary x-small">CERRADO</span>
+                </div>
               </div>
               <p class="mb-1 small">
                 {{ mat.curso.nivel.nombre }} - {{ mat.curso.especialidad.nombre }}
@@ -74,14 +78,27 @@
 
             <div class="d-flex justify-content-between align-items-start mb-4 border-bottom pb-3">
               <div>
-                <h4 class="fw-bold text-blue mb-1">
-                  {{ matriculaSeleccionada.curso.nivel.nombre }} "{{ matriculaSeleccionada.curso.paralelo }}"
-                </h4>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <h4 class="fw-bold text-blue mb-0">
+                    {{ matriculaSeleccionada.curso.nivel.nombre }} "{{ matriculaSeleccionada.curso.paralelo }}"
+                  </h4>
+                  <span :class="matriculaSeleccionada.estado === 'Anulada' ? 'badge bg-danger fs-6' : 'badge bg-success fs-6'">
+                    <i :class="matriculaSeleccionada.estado === 'Anulada' ? 'fas fa-ban me-1' : 'fas fa-check-circle me-1'"></i>
+                    {{ matriculaSeleccionada.estado || 'Activa' }}
+                  </span>
+                </div>
                 <h6 class="text-muted">{{ matriculaSeleccionada.curso.especialidad.nombre }}</h6>
               </div>
-              <div class="text-end">
-                <span class="badge bg-blue fs-6 px-3 py-2 border border-gold">{{
-                  matriculaSeleccionada.curso.periodo.nombre }}</span>
+              <div class="text-end d-flex flex-column align-items-end gap-2">
+                <span class="badge bg-blue fs-6 px-3 py-2 border border-gold">
+                  {{ matriculaSeleccionada.curso.periodo.nombre }}
+                </span>
+                
+                <button v-if="matriculaSeleccionada.estado !== 'Anulada'" 
+                  @click="confirmarAnulacion(matriculaSeleccionada.id_matricula)"
+                  class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm mt-1 animate__animated animate__fadeIn">
+                  <i class="fas fa-times-circle me-1"></i> Anular Matrícula
+                </button>
               </div>
             </div>
 
@@ -126,8 +143,7 @@
                       <span class="badge bg-light text-dark border">{{ ca.horas_semanales }} h</span>
                     </td>
                   </tr>
-                  <tr
-                    v-if="!matriculaSeleccionada.curso.curso_asignaturas || matriculaSeleccionada.curso.curso_asignaturas.length === 0">
+                  <tr v-if="!matriculaSeleccionada.curso.curso_asignaturas || matriculaSeleccionada.curso.curso_asignaturas.length === 0">
                     <td colspan="4" class="text-center py-4 text-muted">
                       No hay asignaturas registradas para este curso en este periodo.
                     </td>
@@ -155,6 +171,7 @@
 <script>
 import API from "@/assets/js/axios";
 import { mostraralertas } from "@/assets/js/funciones/functions";
+import Swal from "sweetalert2";
 
 export default {
   data() {
@@ -198,6 +215,44 @@ export default {
 
     seleccionarMatricula(matricula) {
       this.matriculaSeleccionada = matricula;
+    },
+    async confirmarAnulacion(id_matricula) {
+      const result = await Swal.fire({
+        title: '¿Está seguro de anular esta matrícula?',
+        text: "Esta acción cambiará el estado del estudiante a 'Anulada' de manera irreversible dentro de este periodo.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33', // Color rojo descriptivo para acciones críticas
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, anular matrícula',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          // Llamada dinámica mediante axios mutando el estado en la base de datos
+          const response = await API.put(`${this.baseUrl}/anular_matricula/${id_matricula}`);
+          
+          if (response.data.success) {
+            mostraralertas(response.data.message, "success");
+            
+            // Actualización reactiva local sin recargar forzosamente la vista completa
+            this.matriculaSeleccionada.estado = 'Anulada';
+            
+            // Sincronizar el cambio dentro de la lista lateral de periodos matriculados
+            const idx = this.estudiante.matriculasestudiantes.findIndex(m => m.id_matricula === id_matricula);
+            if (idx !== -1) {
+              this.estudiante.matriculasestudiantes[idx].estado = 'Anulada';
+            }
+          }
+        } catch (error) {
+          let msj = "No se pudo anular la matrícula.";
+          if (error.response && error.response.data && error.response.data.message) {
+            msj = error.response.data.message;
+          }
+          mostraralertas(msj, "error");
+        }
+      }
     }
   }
 }

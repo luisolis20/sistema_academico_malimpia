@@ -169,6 +169,11 @@
                   <i class="fas fa-file-alt me-2 text-muted"></i> Reporte de notas
                 </router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/gestion-docente/tutor/calificar-conducta" @click="closeMenu">
+                  <i class="fas fa-pencil-ruler me-2 text-muted"></i> Calificar Conducta
+                </router-link>
+              </li>
             </ul>
             
           </li>

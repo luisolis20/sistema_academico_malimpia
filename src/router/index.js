@@ -39,6 +39,7 @@ import Mis_Notas_HistorialView from '@/views/Notas/Mis_Notas/Mis_Notas_Historial
 import Notas_Historial_RepresentadoView from '@/views/Notas/Representante/Notas_Historial_RepresentadoView.vue'
 import Mis_Historial_matriculaView from '@/views/Matricula/Mis_Matriculas/Mis_Historial_matriculaView.vue'
 import Historial_matricula_RepreseView from '@/views/Matricula/Representante/Historial_matricula_RepreseView.vue'
+import Tutor_calificar_conductaView from '@/views/Gestion_docente/tutor/Tutor_calificar_conductaView.vue'
 
 const routes = [
   {
@@ -249,6 +250,11 @@ const routes = [
     path: '/matricula/representante/historial-matricula',
     name: 'historial-matricula-representado',
     component: Historial_matricula_RepreseView
+  },
+  {
+    path: '/gestion-docente/tutor/calificar-conducta',
+    name: 'tutor-calificar-conducta',
+    component: Tutor_calificar_conductaView
   },
 ]
 const router = createRouter({
