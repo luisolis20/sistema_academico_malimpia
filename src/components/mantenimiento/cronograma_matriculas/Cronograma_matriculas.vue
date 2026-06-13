@@ -1,33 +1,51 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 5px solid #F4B324;">
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
 
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; width: 55px; height: 55px;">
-                    <i class="fas fa-layer-group fs-4" style="color: #F4B324;"></i>
+            <!-- FILA SUPERIOR: Títulos y Botón de Acción -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+
+                <!-- Título e Icono Principal -->
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; width: 55px; height: 55px;">
+                        <i class="fas fa-layer-group fs-4" style="color: #F4B324;"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión del Cronograma de Matrículas
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración y estructuración del cronograma de matrículas para cada nivel académico
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión del cronograma de matrículas
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración y estructuración del cronograma de matrículas para cada nivel académico
-                    </p>
+                <!-- Componentes de la Derecha (Botón) -->
+                <div class="d-flex align-items-center gap-3">
+                    <button
+                        class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 text-white border-0"
+                        style="background-color: #1D2A68;" data-bs-toggle="modal" data-bs-target="#modalCrear"
+                        @click="prepararCreacion">
+                        <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold fs-6">Crear Cronograma</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <button
-                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 text-white"
-                    style="background-color: #1D2A68; border: none;" data-bs-toggle="modal" data-bs-target="#modalCrear"
-                    @click="prepararCreacion">
-                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold fs-6">Crear Cronograma</span>
-                </button>
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-calendar-check fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Control de Flujos de Admisión y Concurrencia:</strong> Este módulo regula las ventanas
+                    temporales de acceso para la matriculación estudiantil. Segmentar las fechas por nivel académico no
+                    solo organiza el proceso administrativo, sino que a nivel técnico actúa como un mecanismo de
+                    <strong>prevención de sobrecarga de servidores</strong>, evitando cuellos de botella por accesos
+                    masivos simultáneos. Además, el sistema utiliza estos parámetros para abrir o cerrar automáticamente
+                    los formularios de registro, garantizando la integridad de los datos y el cumplimiento de los plazos
+                    institucionales.
+                </p>
             </div>
 
         </header>

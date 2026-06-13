@@ -1,40 +1,60 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-book-open fs-4" style="color: #F4B324;"></i>
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+            <!-- FILA SUPERIOR: Títulos, Estadísticas y Botón de Acción -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+
+                <!-- Título e Icono Principal -->
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-book-open fs-4" style="color: #F4B324;"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión de Asignaturas
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración del catálogo de materias
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión de Asignaturas
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración del catálogo de materias
-                    </p>
+
+                <!-- Componentes de la Derecha (Badge y Botón) -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
+                        style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
+                        <i class="fas fa-layer-group me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold">
+                            Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
+                        </span>
+                    </div>
+
+                    <button
+                        class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                        data-bs-toggle="modal" data-bs-target="#modalUsuario"
+                        style="background-color: #1D2A68; color: white;">
+                        <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold fs-6">Nuevo Registro</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
-                    style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
-                    <i class="fas fa-layer-group me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold">
-                        Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
-                    </span>
-                </div>
-
-                <button
-                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
-                    data-bs-toggle="modal" data-bs-target="#modalUsuario"
-                    style="background-color: #1D2A68; color: white;">
-                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold fs-6">Nuevo Registro</span>
-                </button>
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-pencil-ruler fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Estructuración del Catálogo Curricular:</strong> Desde este panel se centraliza el catálogo
+                    maestro de unidades de aprendizaje de la institución (como <em>Matemáticas</em>, <em>Lenguaje</em>,
+                    ciencias y ramos técnicos). Su correcta configuración define la matriz pedagógica que se vinculará a
+                    los diferentes cursos. Esta base de datos es indispensable, ya que de ella dependen directamente la
+                    distribución de la carga horaria de los docentes, el diseño de los horarios de clases y la
+                    generación automatizada de las sábanas de notas y boletas de calificaciones.
+                </p>
             </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">

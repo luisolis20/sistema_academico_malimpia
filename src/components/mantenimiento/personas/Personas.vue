@@ -1,41 +1,59 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
 
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-users fs-4"></i>
+            <!-- FILA SUPERIOR: Títulos, Estadísticas y Botón de Acción -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+
+                <!-- Título e Icono Principal -->
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-users fs-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión de Personas
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de personas registradas en el sistema.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión de Personas
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de personas registradas en el sistema.
-                    </p>
+
+                <!-- Componentes de la Derecha (Badge y Botón) -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border"
+                        style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68;">
+                        <i class="fas fa-users me-2" style="color: #F4B324;"></i>
+                        <span class="fw-medium">
+                            Total: <span v-if="totalPersonas > 0">{{ totalPersonas }}</span><span v-else>0</span>
+                        </span>
+                    </div>
+
+                    <button
+                        class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                        style="background-color: #1D2A68; color: white;" data-bs-toggle="modal"
+                        data-bs-target="#modalUsuario" @click="limpiar">
+                        <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold fs-6">Nuevo Registro</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border"
-                    style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68;">
-                    <i class="fas fa-users me-2" style="color: #F4B324;"></i>
-                    <span class="fw-medium">
-                        Total: <span v-if="totalPersonas > 0">{{ totalPersonas }}</span><span v-else>0</span>
-                    </span>
-                </div>
-
-                <button
-                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
-                    style="background-color: #1D2A68; color: white;" data-bs-toggle="modal"
-                    data-bs-target="#modalUsuario" @click="limpiar">
-                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold fs-6">Nuevo Registro</span>
-                </button>
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-user-shield fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Control de Integridad Referencial:</strong> Esta sección centraliza el registro maestro de
+                    la institución (docentes, estudiantes y representantes). Por resguardo de la base de datos, el
+                    sistema impide que modifiques críticamente o elimines <strong>tu propia ficha de identidad</strong>
+                    mientras te encuentres logueado. Esto asegura que tu usuario mantenga siempre sus relaciones
+                    estructurales activas y previene inconsistencias en las auditorías del sistema.
+                </p>
             </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -99,7 +117,8 @@
                                             <i class="far fa-id-card me-1" style="color: #1D2A68;"></i>{{ user.cedula }}
                                         </div>
                                         <div class="fw-bold text-dark" v-if="user.id_persona === idpersonalog">Yo</div>
-                                        <div class="fw-bold text-dark" v-else>{{ user.nombres }} {{ user.apellidos }}</div>
+                                        <div class="fw-bold text-dark" v-else>{{ user.nombres }} {{ user.apellidos }}
+                                        </div>
                                         <div class="text-muted small" v-if="user.fecha_nacimiento">
                                             Edad: {{ calcularEdad(user.fecha_nacimiento) }} años
                                         </div>
@@ -146,18 +165,21 @@
                                         title="Ver información completa" style="color: #1D2A68;">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" v-if="user.id_persona !== idpersonalog"
-                                        data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
-                                        title="Editar detalles de esta persona" style="color: #F4B324;">
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="modal"
+                                        v-if="user.id_persona !== idpersonalog" data-bs-target="#modalEditUsuario"
+                                        @click="cargarDatosEdicion(user)" title="Editar detalles de esta persona"
+                                        style="color: #F4B324;">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger"
                                         @click="eliminar(user.id_persona, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado == 1 && user.id_persona !== idpersonalog" title="Inhabilitar esta persona">
+                                        v-if="user.estado == 1 && user.id_persona !== idpersonalog"
+                                        title="Inhabilitar esta persona">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success"
-                                        @click="habilitar(user.id_persona, user.nombres + ' ' + user.apellidos)" v-if="user.id_persona !== idpersonalog && user.estado == 0"
+                                        @click="habilitar(user.id_persona, user.nombres + ' ' + user.apellidos)"
+                                        v-if="user.id_persona !== idpersonalog && user.estado == 0"
                                         title="Habilitar esta persona nuevamente">
                                         <i class="fas fa-check"></i>
                                     </button>
@@ -573,7 +595,7 @@
                                     Nacimiento</small>
                                 <span class="fw-medium">
                                     <i class="far fa-calendar-alt me-1" style="color: #F4B324;"></i> {{
-                                    personaSeleccionada.fecha_nacimiento }}
+                                        personaSeleccionada.fecha_nacimiento }}
                                 </span>
                             </div>
                             <div class="col-6">
@@ -592,7 +614,7 @@
                                     style="color: rgba(29, 42, 104, 0.7);">Teléfono</small>
                                 <span class="fw-medium">
                                     <i class="fas fa-phone-alt me-1" style="color: #F4B324;"></i> {{
-                                    personaSeleccionada.telefono }}
+                                        personaSeleccionada.telefono }}
                                 </span>
                             </div>
                             <div class="col-6">
@@ -605,7 +627,7 @@
                                     Electrónico</small>
                                 <span class="fw-medium">
                                     <i class="far fa-envelope me-1" style="color: #F4B324;"></i> {{
-                                    personaSeleccionada.correo }}
+                                        personaSeleccionada.correo }}
                                 </span>
                             </div>
                             <div class="col-12">
@@ -613,7 +635,7 @@
                                     style="color: rgba(29, 42, 104, 0.7);">Dirección</small>
                                 <span class="fw-medium">
                                     <i class="fas fa-map-marker-alt me-1" style="color: #F4B324;"></i> {{
-                                    personaSeleccionada.direccion }}
+                                        personaSeleccionada.direccion }}
                                 </span>
                             </div>
                         </div>

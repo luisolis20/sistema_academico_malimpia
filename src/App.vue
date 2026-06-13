@@ -281,21 +281,33 @@ export default {
     }
   },
   watch: {
+    // Protección en el Watcher
     rolUsuario: {
       immediate: true,
       handler(newRol) {
+        // SI ESTÁ EN EL LOGIN, ABORTAR INMEDIATAMENTE (Evita el bucle infinito)
+        if (this.$route.path === '/login') return;
+
         if (newRol === 'Docente') {
           this.verificarSiEsTutor();
           this.VerificarFamilia();
         }
       }
+    },
+    // Monitorear la ruta: Si pasa al login, limpiamos los estados internos
+    '$route.path'(newPath) {
+      if (newPath === '/login') {
+        this.esTutor = false;
+        this.esFamiliar = false;
+      }
     }
   },
   methods: {
     async verificarSiEsTutor() {
-      // Si no es docente, no tiene sentido hacer la petición
-      if (this.rolUsuario !== 'Docente') return;
+      // 1. Doble protección: Si está en login o no es Docente, salir.
+      if (this.$route.path === '/login' || this.rolUsuario !== 'Docente') return;
 
+      // 2. Si no hay token, no tiene sentido consultar a la API
       const token = localStorage.getItem("token_sitma");
       if (!token) return;
 
@@ -306,7 +318,6 @@ export default {
           },
         });
         
-        // Asignamos el valor que nos devuelve el backend
         this.esTutor = response.data.es_tutor;
       } catch (error) {
         console.error("❌ Error al verificar si el docente es tutor:", error);
@@ -314,15 +325,20 @@ export default {
       }
     },
     async VerificarFamilia(){
+      // 1. Protección de ruta
+      if (this.$route.path === '/login') return;
+
+      // 2. Protección de token vacío
+      const token = localStorage.getItem("token_sitma");
+      if (!token) return;
+
       try {
-        const token = localStorage.getItem("token_sitma");
         const response = await API.get("/sistma/tiene-familia", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        // Asignamos el valor que nos devuelve el backend
         this.esFamiliar = response.data.tiene_familia;
       } catch (error) { 
         console.error("❌ Error al verificar si el usuario es familiar:", error);

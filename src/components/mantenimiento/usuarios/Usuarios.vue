@@ -1,22 +1,37 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-user-edit fs-4"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión Global de Usuarios
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de credenciales y perfiles de acceso.
-                    </p>
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+                <div class="mb-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-user-edit fs-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión Global de Usuarios
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de credenciales y perfiles de acceso.
+                        </p>
+                    </div>
                 </div>
             </div>
+
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-user-lock fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Directiva de Control de Acceso:</strong> Desde este panel estratégico se gestionan los
+                    estados de activación y las credenciales de ingreso a la plataforma. Con el fin de evitar un
+                    auto-bloqueo crítico de credenciales (*lockout*), el sistema restringe de forma estricta la
+                    posibilidad de suspender o revocar los accesos de **tu propio usuario administrador en sesión**.
+                    Esta política técnica garantiza la persistencia operativa y el cumplimiento del principio de
+                    no-repudio en las auditorías informáticas.
+                </p>
+            </div>
+
         </header>
         <div class="row mb-4"
             v-if="estadisticas && estadisticas.totales_por_rol && Object.keys(estadisticas.totales_por_rol).length > 0">
@@ -201,7 +216,7 @@
                                 </div>
                             </td>
                             <td v-if="user.username"><span class="fw-bold" style="color: #1D2A68;">{{ user.username
-                            }}</span></td>
+                                    }}</span></td>
                             <td class="text-muted small" v-else>Sin usuario</td>
                             <td v-if="user.nombre_rol"><span class="badge text-dark border"
                                     style="background-color: rgba(244, 179, 36, 0.2);">{{ user.nombre_rol }}</span></td>
@@ -226,12 +241,14 @@
                             <td class="text-center">
                                 <div class="btn-group">
                                     <button class="btn btn-sm btn-light text-primary border shadow-sm"
-                                        @click="abrirModalCrear(user)" v-if="!user.id_usuario && user.id_usuario !== idusuariolog"
+                                        @click="abrirModalCrear(user)"
+                                        v-if="!user.id_usuario && user.id_usuario !== idusuariolog"
                                         title="Asignar y crear usuario">
                                         <i class="fas fa-user-plus me-1"></i> Crear Usuario
                                     </button>
                                     <button class="btn btn-sm btn-light border shadow-sm ms-1" style="color: #1D2A68;"
-                                        @click="abrirModalEditar(user)" v-if="user.id_usuario && user.id_usuario !== idusuariolog"
+                                        @click="abrirModalEditar(user)"
+                                        v-if="user.id_usuario && user.id_usuario !== idusuariolog"
                                         title="Editar Rol de Usuario">
                                         <i class="fas fa-user-edit"></i> Editar
                                     </button>
@@ -242,7 +259,8 @@
                                     </button>
                                     <button class="btn btn-sm btn-light text-danger border shadow-sm ms-1"
                                         @click="eliminar(user.id_usuario, user.nombres + ' ' + user.apellidos)"
-                                        v-if="user.estado == 1 && user.id_usuario && user.id_usuario !== idusuariolog" title="Inhabilitar esta persona">
+                                        v-if="user.estado == 1 && user.id_usuario && user.id_usuario !== idusuariolog"
+                                        title="Inhabilitar esta persona">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-light text-success border shadow-sm ms-1"
@@ -334,7 +352,7 @@
                             <h5 class="mt-3 fw-bold" style="color: #1D2A68;">{{ personaSeleccionada.nombres }} {{
                                 personaSeleccionada.apellidos }}</h5>
                             <span class="badge" style="background-color: #1D2A68;">C.I. {{ personaSeleccionada.cedula
-                            }}</span>
+                                }}</span>
                         </div>
 
                         <div class="mb-3">
@@ -383,7 +401,7 @@
                             <h5 class="mt-3 fw-bold" style="color: #1D2A68;">{{ personaSeleccionada.nombres }} {{
                                 personaSeleccionada.apellidos }}</h5>
                             <span class="badge" style="background-color: #1D2A68;">C.I. {{ personaSeleccionada.cedula
-                            }}</span>
+                                }}</span>
                         </div>
 
                         <div class="mb-3">

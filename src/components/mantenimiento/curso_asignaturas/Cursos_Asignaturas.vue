@@ -1,22 +1,39 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión Global de Asignaturas en cada Curso
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de asignaturas, aquí se asignarán materias de cada curso a los docentes.
-                    </p>
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+            <!-- FILA SUPERIOR: Título e Icono Principal -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+                <div class="mb-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión Global de Asignaturas en cada Curso
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de asignaturas, aquí se asignarán materias de cada curso a los docentes.
+                        </p>
+                    </div>
                 </div>
             </div>
+
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-network-wired fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Articulación del distributivo y Carga Académica:</strong> Este módulo actúa como el puente
+                    integrador definitivo del sistema, donde converge el catálogo maestro de asignaturas con la
+                    estructura de cursos vigentes. Desde aquí se parametriza la malla curricular específica de cada aula
+                    y se delega la responsabilidad evaluativa a los docentes correspondientes. Un correcto mapeo en este
+                    panel es crucial, ya que provee al backend las relaciones necesarias para habilitar los perfiles de
+                    ingreso de calificaciones de los profesores y estructurar los horarios de clases de la institución.
+                </p>
+            </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -195,7 +212,7 @@
                                             class="rounded-circle mb-3 border border-3"
                                             style="width: 100px; height: 100px; object-fit: cover; border-color: #F4B324 !important;">
                                         <h5 class="fw-bold mb-0" style="color: #1D2A68;">{{ personaSeleccionada.nombres
-                                            }} {{ personaSeleccionada.apellidos }}</h5>
+                                        }} {{ personaSeleccionada.apellidos }}</h5>
                                         <p class="text-muted small mb-0"><i class="far fa-id-card me-1"></i>{{
                                             personaSeleccionada.cedula }}</p>
                                     </div>
@@ -213,8 +230,8 @@
                                                 style="background-color: rgba(29, 42, 104, 0.05); color: #1D2A68; border-left: 4px solid #F4B324;">
                                                 <strong>Docente Tutor de:</strong><br>
                                                 {{ personaSeleccionada.tutor_nivel }} - {{
-                                                personaSeleccionada.tutor_especialidad }} "{{
-                                                personaSeleccionada.tutor_paralelo }}"
+                                                    personaSeleccionada.tutor_especialidad }} "{{
+                                                    personaSeleccionada.tutor_paralelo }}"
                                             </div>
                                             <div v-if="esTutorRestringido" class="text-danger small mb-2">
                                                 <i class="fas fa-exclamation-triangle"></i> Por su nivel/especialidad,
@@ -234,7 +251,7 @@
                                                         @change="actualizarTablaSeleccion">
                                                     <label class="form-check-label small">
                                                         {{ curso.nombre_nivel }} {{ curso.nombre_especialidad }} "{{
-                                                        curso.paralelo }}"
+                                                            curso.paralelo }}"
                                                     </label>
                                                 </div>
                                             </div>

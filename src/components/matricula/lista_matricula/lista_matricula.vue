@@ -1,24 +1,54 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5">
-      <div class="row align-items-center">
-        <div class="col-md-7">
-          <h2 class="fw-bold text-blue mb-1">Historial Académico del Estudiante</h2>
-          <p class="text-muted mb-0">
-            <i class="fas fa-info-circle me-2 text-gold"></i>
-            Ingrese el número de cédula del estudiante para buscar su historial de matrículas.
-          </p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+      <!-- FILA SUPERIOR: Títulos y Buscador -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
+
+        <!-- Título e Icono Principal -->
+        <div class="mb-2 mb-md-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-user-graduate fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Historial Académico
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Ingrese la cédula del estudiante para consultar su expediente de matrículas.
+            </p>
+          </div>
         </div>
-        <div class="col-md-5 mt-3 mt-md-0">
-          <div class="input-group">
-            <input type="text" class="form-control border-gold" placeholder="Ej. 0801234567" v-model="cedulaBusqueda"
-              @keyup.enter="buscarEstudiante" :disabled="buscando">
-            <button class="btn btn-gold fw-bold px-4" @click="buscarEstudiante" :disabled="!cedulaBusqueda || buscando">
+
+        <!-- Componentes de la Derecha (Buscador) -->
+        <div class="d-flex align-items-center flex-grow-1 flex-md-grow-0" style="max-width: 450px; width: 100%;">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden border"
+            style="border-color: rgba(29, 42, 104, 0.2) !important;">
+            <input type="text" class="form-control border-0 px-4 py-2" placeholder="Ej. 0801234567"
+              v-model="cedulaBusqueda" @keyup.enter="buscarEstudiante" :disabled="buscando" style="box-shadow: none;">
+            <button class="btn fw-bold px-4 border-0 d-flex align-items-center transition-all" @click="buscarEstudiante"
+              :disabled="!cedulaBusqueda || buscando" style="background-color: #F4B324; color: #1D2A68;">
               <i class="fas fa-search me-2"></i> Buscar
             </button>
           </div>
         </div>
       </div>
+
+      <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-archive fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Trazabilidad y Auditoría de Expedientes:</strong> Este motor de búsqueda consolida la trayectoria
+          histórica del estudiante a lo largo de múltiples periodos lectivos. A nivel de base de datos, el sistema
+          extrae de forma eficiente registros relacionales que son inmutables (matrículas pasadas). Esta consolidación
+          garantiza la <strong>persistencia a largo plazo</strong> de la información académica, proveyendo a la
+          institución de una herramienta auditable y robusta para la validación de perfiles y emisión de certificados.
+        </p>
+      </div>
+
     </header>
 
     <div class="row" v-if="estudiante">
@@ -56,7 +86,8 @@
                   <span :class="mat.estado === 'Anulada' ? 'badge bg-danger x-small' : 'badge bg-success x-small'">
                     {{ mat.estado || 'Activa' }}
                   </span>
-                  <span v-if="mat.curso.periodo.estado_activo == 1" class="badge bg-primary x-small text-white">ACTIVO</span>
+                  <span v-if="mat.curso.periodo.estado_activo == 1"
+                    class="badge bg-primary x-small text-white">ACTIVO</span>
                   <span v-else class="badge bg-secondary x-small">CERRADO</span>
                 </div>
               </div>
@@ -82,8 +113,10 @@
                   <h4 class="fw-bold text-blue mb-0">
                     {{ matriculaSeleccionada.curso.nivel.nombre }} "{{ matriculaSeleccionada.curso.paralelo }}"
                   </h4>
-                  <span :class="matriculaSeleccionada.estado === 'Anulada' ? 'badge bg-danger fs-6' : 'badge bg-success fs-6'">
-                    <i :class="matriculaSeleccionada.estado === 'Anulada' ? 'fas fa-ban me-1' : 'fas fa-check-circle me-1'"></i>
+                  <span
+                    :class="matriculaSeleccionada.estado === 'Anulada' ? 'badge bg-danger fs-6' : 'badge bg-success fs-6'">
+                    <i
+                      :class="matriculaSeleccionada.estado === 'Anulada' ? 'fas fa-ban me-1' : 'fas fa-check-circle me-1'"></i>
                     {{ matriculaSeleccionada.estado || 'Activa' }}
                   </span>
                 </div>
@@ -93,8 +126,8 @@
                 <span class="badge bg-blue fs-6 px-3 py-2 border border-gold">
                   {{ matriculaSeleccionada.curso.periodo.nombre }}
                 </span>
-                
-                <button v-if="matriculaSeleccionada.estado !== 'Anulada'" 
+
+                <button v-if="matriculaSeleccionada.estado !== 'Anulada'"
                   @click="confirmarAnulacion(matriculaSeleccionada.id_matricula)"
                   class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm mt-1 animate__animated animate__fadeIn">
                   <i class="fas fa-times-circle me-1"></i> Anular Matrícula
@@ -143,7 +176,8 @@
                       <span class="badge bg-light text-dark border">{{ ca.horas_semanales }} h</span>
                     </td>
                   </tr>
-                  <tr v-if="!matriculaSeleccionada.curso.curso_asignaturas || matriculaSeleccionada.curso.curso_asignaturas.length === 0">
+                  <tr
+                    v-if="!matriculaSeleccionada.curso.curso_asignaturas || matriculaSeleccionada.curso.curso_asignaturas.length === 0">
                     <td colspan="4" class="text-center py-4 text-muted">
                       No hay asignaturas registradas para este curso en este periodo.
                     </td>
@@ -232,13 +266,13 @@ export default {
         try {
           // Llamada dinámica mediante axios mutando el estado en la base de datos
           const response = await API.put(`${this.baseUrl}/anular_matricula/${id_matricula}`);
-          
+
           if (response.data.success) {
             mostraralertas(response.data.message, "success");
-            
+
             // Actualización reactiva local sin recargar forzosamente la vista completa
             this.matriculaSeleccionada.estado = 'Anulada';
-            
+
             // Sincronizar el cambio dentro de la lista lateral de periodos matriculados
             const idx = this.estudiante.matriculasestudiantes.findIndex(m => m.id_matricula === id_matricula);
             if (idx !== -1) {

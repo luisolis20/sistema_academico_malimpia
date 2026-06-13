@@ -1,23 +1,40 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-calendar-alt fs-4" style="color: #F4B324;"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión de Horarios de Clases
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de horarios para asignaturas, cursos y docentes. Crea, edita y organiza los
-                        horarios de clases de manera eficiente para garantizar una planificación académica óptima.
-                    </p>
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+            <!-- FILA SUPERIOR: Título e Icono Principal -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+                <div class="mb-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-calendar-alt fs-4" style="color: #F4B324;"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión de Horarios de Clases
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de horarios para asignaturas, cursos y docentes. Crea, edita y organiza los
+                            horarios de clases de manera eficiente para garantizar una planificación académica óptima.
+                        </p>
+                    </div>
                 </div>
             </div>
+
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-clock fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Sincronización y Control de Colisiones Temporales:</strong> Este panel es el encargado de
+                    orquestar la dimensión temporal de la institución, cruzando las variables de asignaturas, aulas
+                    físicas y disponibilidad docente. La correcta distribución en esta matriz es indispensable para
+                    asegurar que los flujos académicos operen sin contratiempos. El sistema valida las inserciones de
+                    datos para evitar **conflictos de superposición horaria** (un mismo docente o curso en dos
+                    asignaturas distintas a la misma hora), garantizando la integridad de la planificación diaria.
+                </p>
+            </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -250,6 +267,26 @@
                                     :disabled="!formValido" style="background-color: #1D2A68;">
                                     <i class="fas fa-arrow-left" style="color: #F4B324;"></i> Añadir a la Vista Previa
                                 </button>
+                                <hr class="my-4" style="border-color: rgba(29, 42, 104, 0.2);">
+
+                                <!-- Sección de Carga Masiva -->
+                                <div class="p-3 rounded-3 shadow-sm"
+                                    style="background-color: rgba(244, 179, 36, 0.05); border: 1px dashed #F4B324;">
+                                    <h6 class="fw-bold mb-3" style="color: #1D2A68;">
+                                        <i class="fas fa-file-csv me-1" style="color: #F4B324;"></i> Carga Masiva (CSV)
+                                    </h6>
+                                    <div class="mb-2">
+                                        <label for="csvUpload" class="form-label small fw-bold text-muted mb-1">Subir
+                                            archivo de horarios (.csv)</label>
+                                        <input type="file" class="form-control form-control-sm border-0 shadow-sm"
+                                            id="csvUpload" accept=".csv" @change="procesarCSV">
+                                    </div>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">
+                                        <strong>Formato requerido:</strong><br>
+                                        <code>Nombre Materia, Día, Hora Inicio, Hora Fin</code><br>
+                                        <em>Ej: Matemáticas, Lunes, 07:00, 08:30</em>
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -465,6 +502,96 @@ export default {
         await this.getData();
     },
     methods: {
+        procesarCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                this.parsearYAgregarCSV(text, event.target);
+            };
+            reader.readAsText(file);
+        },
+        parsearYAgregarCSV(text, inputElement) {
+            // Dividir por saltos de línea (manejando \r\n de Windows y \n de Linux/Mac)
+            const lineas = text.split(/\r?\n/);
+            let errores = [];
+            let agregados = 0;
+
+            // Iteramos desde 1 asumiendo que la fila 0 tiene los encabezados
+            for (let i = 1; i < lineas.length; i++) {
+                const linea = lineas[i].trim();
+                if (!linea) continue; // Saltamos líneas vacías
+
+                // Dividir por comas y limpiar espacios
+                const [nombreMateria, dia, horaInicio, horaFin] = linea.split(',').map(item => item?.trim());
+
+                if (!nombreMateria || !dia || !horaInicio || !horaFin) {
+                    errores.push(`Fila ${i + 1}: Datos incompletos.`);
+                    continue;
+                }
+
+                // 1. Validar que la asignatura exista en el curso seleccionado (ignorando mayúsculas)
+                const asignatura = this.cursoSeleccionado?.asignaturas_asignadas.find(
+                    a => a.asignatura.toLowerCase() === nombreMateria.toLowerCase()
+                );
+
+                if (!asignatura) {
+                    errores.push(`Fila ${i + 1}: La materia "${nombreMateria}" no está asignada al curso.`);
+                    continue;
+                }
+
+                // 2. Validar que la hora de inicio sea menor a la de fin
+                const horasAAsignar = this.calcularDiferenciaHoras(horaInicio, horaFin);
+                if (horasAAsignar <= 0) {
+                    errores.push(`Fila ${i + 1} (${nombreMateria}): La hora de fin debe ser mayor a la inicial.`);
+                    continue;
+                }
+
+                // 3. Calcular cuántas horas ya tiene ocupadas ESTA asignatura en la vista previa
+                let horasOcupadas = 0;
+                this.horarioPreview.forEach(h => {
+                    if (h.id_curso_asignatura === asignatura.id_curso_asignatura) {
+                        horasOcupadas += this.calcularDiferenciaHoras(h.hora_inicio, h.hora_fin);
+                    }
+                });
+
+                // 4. Validar que no exceda el límite semanal
+                const horasRestantes = asignatura.horas_semanales - horasOcupadas;
+                if (horasAAsignar > horasRestantes) {
+                    errores.push(`Fila ${i + 1} (${nombreMateria}): Excede sus horas semanales permitidas.`);
+                    continue;
+                }
+
+                // Si pasa todas las validaciones, se inyecta a la vista previa
+                this.horarioPreview.push({
+                    id_curso_asignatura: asignatura.id_curso_asignatura,
+                    dia_semana: dia,
+                    hora_inicio: horaInicio,
+                    hora_fin: horaFin
+                });
+
+                agregados++;
+            }
+
+            // Actualizar dinámicamente las horas del select actual si el usuario tenía uno abierto
+            this.calcularHorasRestantes();
+
+            // Limpiar el input file para poder volver a subir el mismo si hubo correcciones
+            inputElement.value = '';
+
+            // Notificaciones de feedback al usuario
+            if (errores.length > 0) {
+                // Muestra los errores si hubieron datos inconsistentes
+                console.warn("Errores en la importación CSV:", errores);
+                mostraralertas2(`Se importaron ${agregados} registros. Hubo problemas con ${errores.length} filas (Revisa la consola para detalles).`, 'warning');
+            } else if (agregados > 0) {
+                mostraralertas2(`Carga exitosa. Se añadieron ${agregados} bloques de horario.`, 'success');
+            } else {
+                mostraralertas2('No se pudo cargar ningún registro válido.', 'error');
+            }
+        },
         cambiarPagina(page) {
             if (page >= 1 && page <= this.lastPage) {
                 this.currentPage = page;

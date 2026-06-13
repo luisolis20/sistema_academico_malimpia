@@ -1,23 +1,39 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
 
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-users-cog fs-4"></i>
-                </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión de Familias
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración y control de las familias asignadas a los representantes.
-                    </p>
+            <!-- FILA SUPERIOR: Título e Icono Principal -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+                <div class="mb-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-users-cog fs-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión de Familias
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración y control de las familias asignadas a los representantes.
+                        </p>
+                    </div>
                 </div>
             </div>
+
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-sitemap fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Consistencia de Vínculos Relacionales:</strong> Este panel regula la arquitectura de tutoría
+                    legal del sistema, enlazando de forma estricta a los representantes con la población estudiantil.
+                    Con el propósito de salvaguardar la coherencia transaccional de los datos, el software restringe la
+                    modificación o eliminación de <strong>tu propio núcleo familiar asignado</strong> (en caso de que
+                    cuentes con uno). Esta política previene la existencia de registros académicos huérfanos y garantiza
+                    la fiabilidad de las bitácoras institucionales.
+                </p>
+            </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -58,7 +74,23 @@
                     <tbody>
                         <tr v-for="user in objetoList" :key="user.personID">
                             <td class="ps-4 fw-bold text-secondary">{{ user.personID }}</td>
-                            <td class="ps-4 py-3">
+                            <td class="ps-4 py-3" v-if="user.personID === idpersonalogueado">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3 rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+                                        style="width: 45px; height: 45px; flex-shrink: 0; background-color: rgba(244, 179, 36, 0.15); border: 2px solid #F4B324;">
+                                        <img :src="getPhotoUrl(user.personID)" @error="handleImageError" alt="Foto"
+                                            class="w-100 h-100" style="object-fit: cover;" />
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small fw-bold mb-1"><i class="far fa-id-card me-1"></i>{{
+                                            user.cedula }}</div>
+                                        <div class="fw-bold text-dark">Yo</div>
+                                        <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
+                                            calcularEdad(user.fecha_nacimiento) }} años</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="ps-4 py-3" v-else>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar-sm me-3 rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
                                         style="width: 45px; height: 45px; flex-shrink: 0; background-color: rgba(244, 179, 36, 0.15); border: 2px solid #F4B324;">
@@ -74,6 +106,7 @@
                                     </div>
                                 </div>
                             </td>
+
 
                             <td>
                                 <div v-if="user.familiares && user.familiares.length > 0"
@@ -96,15 +129,19 @@
                             </td>
 
                             <td class="text-center">
-                                <button v-if="user.familiares && user.familiares.length > 0"
+                                <button v-if="user.familiares && user.familiares.length > 0 "
                                     class="btn btn-sm btn-light border shadow-sm rounded-pill px-3"
                                     style="color: #1D2A68;" @click="abrirModalActualizar(user)">
                                     <i class="fas fa-user-edit me-1"></i> Actualizar Familia
                                 </button>
-                                <button v-else class="btn btn-sm btn-light border shadow-sm rounded-pill px-3"
+                                <button v-if="!user.familiares && user.familiares.length < 0 && user.personID !== idpersonalogueado" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3"
                                     style="color: #F4B324;" @click="abrirModalAsignar(user)">
                                     <i class="fas fa-users-cog me-1"></i> Asignar Familia
                                 </button>
+                                <button v-if="user.personID === idpersonalogueado" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3"
+                                    style="color: #F4B324;" disabled>
+                                    <i class="fas fa-users-cog me-1"></i> No puedes asignar familia a ti mismo
+                                </button>       
                             </td>
                         </tr>
 
@@ -323,7 +360,7 @@
                         </h5>
                         <p class="text-muted small mb-2">
                             <i class="far fa-id-card me-1" style="color: #F4B324;"></i>{{
-                            detalleFamiliarData?.familiar.cedula }}
+                                detalleFamiliarData?.familiar.cedula }}
                         </p>
 
                         <div class="p-3 rounded-4 mt-3 border"
@@ -332,7 +369,7 @@
                                 Parentesco con <br>
                                 <strong style="color: #1D2A68;">
                                     {{ detalleFamiliarData?.representante.nombres }} {{
-                                    detalleFamiliarData?.representante.apellidos }}
+                                        detalleFamiliarData?.representante.apellidos }}
                                 </strong>
                             </p>
                             <span class="badge border px-3 py-2 fs-6 shadow-sm"
@@ -352,6 +389,7 @@
 import API from "@/assets/js/axios";
 import { mostraralertas2 } from "@/assets/js/funciones/functions";
 import * as bootstrap from 'bootstrap';
+import { getMe } from "@/assets/js/auth";
 
 export default {
     data() {
@@ -375,6 +413,7 @@ export default {
 
             // Variables para Modal Detalle
             detalleFamiliarData: null,
+            idpersonalogueado: null,
         }
     },
     computed: {
@@ -397,6 +436,8 @@ export default {
         }
     },
     async mounted() {
+        const me = await getMe();
+        this.idpersonalogueado = me.id_persona;
         await this.getData();
     },
     methods: {

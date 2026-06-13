@@ -1,16 +1,54 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5">
-      <div class="row align-items-center">
-        <div class="col-md-8">
-          <h2 class="fw-bold text-blue mb-1">Control de la subida de calificaciones</h2>
-          <p class="text-muted mb-0">
-            <i class="fas fa-info-circle me-2 text-gold"></i>
-            Controla y supervisa la subida de calificaciones por parte de los docentes. 
-            <strong v-if="periodoActivo" class="text-blue ms-1">Periodo Activo: {{ periodoActivo.nombre }}</strong>
-          </p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+      <!-- FILA SUPERIOR: Títulos y Estado del Periodo -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
+
+        <!-- Título e Icono Principal -->
+        <div class="mb-2 mb-md-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-clipboard-check fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Control de Subida de Calificaciones
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Panel de monitoreo y autorización para el registro de notas docentes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Componentes de la Derecha (Badge de Periodo Activo) -->
+        <div class="d-flex align-items-center flex-grow-1 flex-md-grow-0">
+          <div v-if="periodoActivo"
+            class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm w-100 justify-content-center"
+            style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68; white-space: nowrap;">
+            <i class="fas fa-flag-checkered me-2" style="color: #F4B324;"></i>
+            <span class="fw-medium">
+              Periodo Activo: <strong class="ms-1">{{ periodoActivo.nombre }}</strong>
+            </span>
+          </div>
         </div>
       </div>
+
+      <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-user-shield fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Monitoreo Transaccional y Cierre de Auditoría:</strong> Este panel ejerce un control estricto sobre
+          los permisos de escritura en la base de datos de calificaciones. Gestionar las ventanas de tiempo en las que
+          los docentes pueden interactuar con las matrices previene modificaciones extemporáneas y asegura el principio
+          de integridad de la información. A nivel de arquitectura, estas restricciones actúan como bloqueos de
+          seguridad (<em>locks</em>) que validan el estado del periodo antes de permitir cualquier operación de
+          inserción o actualización, garantizando la emisión de actas consolidadas y fiables.
+        </p>
+      </div>
+
     </header>
 
     <div class="card border-0 shadow-sm rounded-4">
@@ -31,32 +69,31 @@
                 <td class="ps-4 fw-bold text-blue">
                   <i class="fas fa-calendar-check me-2 text-gold"></i> {{ formatNombreFase(fase) }}
                 </td>
-                
+
                 <template v-if="getControl(fase)">
                   <td>{{ formatearFechaVisual(getControl(fase).fecha_inicio) }}</td>
                   <td>{{ formatearFechaVisual(getControl(fase).fecha_fin) }}</td>
                   <td>
-                    <span class="badge px-3 py-2" :class="getControl(fase).habilitado == 1 ? 'bg-success' : 'bg-secondary'">
+                    <span class="badge px-3 py-2"
+                      :class="getControl(fase).habilitado == 1 ? 'bg-success' : 'bg-secondary'">
                       {{ getControl(fase).habilitado == 1 ? 'HABILITADO' : 'INHABILITADO' }}
                     </span>
                   </td>
                   <td class="text-center pe-4">
-                    <button @click="abrirModalEditar(getControl(fase))" 
-                            class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-3 me-2"
-                            title="Editar Fechas">
+                    <button @click="abrirModalEditar(getControl(fase))"
+                      class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-3 me-2" title="Editar Fechas">
                       <i class="fas fa-edit"></i>
                     </button>
 
-                    <button v-if="getControl(fase).habilitado == 1" 
-                            @click="cambiarEstado(getControl(fase).id_control, 'inhabilitar')" 
-                            class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
+                    <button v-if="getControl(fase).habilitado == 1"
+                      @click="cambiarEstado(getControl(fase).id_control, 'inhabilitar')"
+                      class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
                       <i class="fas fa-times-circle me-1"></i> Deshabilitar
                     </button>
-                    <button v-else 
-                            @click="cambiarEstado(getControl(fase).id_control, 'habilitar')" 
-                            class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3"
-                            :disabled="faseDeshabilitadaPorRegla(fase)"
-                            :title="faseDeshabilitadaPorRegla(fase) ? 'Bloqueado por reglas de Quimestre' : ''">
+                    <button v-else @click="cambiarEstado(getControl(fase).id_control, 'habilitar')"
+                      class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3"
+                      :disabled="faseDeshabilitadaPorRegla(fase)"
+                      :title="faseDeshabilitadaPorRegla(fase) ? 'Bloqueado por reglas de Quimestre' : ''">
                       <i class="fas fa-check-circle me-1"></i> Habilitar
                     </button>
                   </td>
@@ -67,9 +104,8 @@
                     No configurado para este periodo
                   </td>
                   <td class="text-center pe-4">
-                    <button @click="abrirModalCrear(fase)" 
-                            class="btn btn-sm btn-gold fw-bold rounded-pill px-3"
-                            :disabled="faseDeshabilitadaPorRegla(fase)">
+                    <button @click="abrirModalCrear(fase)" class="btn btn-sm btn-gold fw-bold rounded-pill px-3"
+                      :disabled="faseDeshabilitadaPorRegla(fase)">
                       <i class="fas fa-cog me-1"></i> Configurar
                     </button>
                   </td>
@@ -101,7 +137,8 @@
                 <input type="datetime-local" class="form-control border-gold" v-model="form.fecha_fin" required>
               </div>
               <div class="form-check form-switch mb-3">
-                <input class="form-check-input" type="checkbox" id="habilitarInmediato" v-model="form.habilitado" :disabled="faseDeshabilitadaPorRegla(form.fase_evaluacion)">
+                <input class="form-check-input" type="checkbox" id="habilitarInmediato" v-model="form.habilitado"
+                  :disabled="faseDeshabilitadaPorRegla(form.fase_evaluacion)">
                 <label class="form-check-label text-muted" for="habilitarInmediato">Habilitar subida de notas</label>
                 <div v-if="faseDeshabilitadaPorRegla(form.fase_evaluacion)" class="text-danger small mt-1">
                   No se puede habilitar debido a reglas de quimestre.
@@ -130,7 +167,7 @@ import * as bootstrap from 'bootstrap'; // Asegúrate de tener bootstrap importa
 export default {
   data() {
     return {
-      fasesPermitidas: ['Q1_P1','Q1_P2','Q1_P3','Q1_EXAMEN','Q2_P1','Q2_P2','Q2_P3','Q2_EXAMEN','SUPLETORIO','REMEDIAL','GRACIA'],
+      fasesPermitidas: ['Q1_P1', 'Q1_P2', 'Q1_P3', 'Q1_EXAMEN', 'Q2_P1', 'Q2_P2', 'Q2_P3', 'Q2_EXAMEN', 'SUPLETORIO', 'REMEDIAL', 'GRACIA'],
       controlesCreados: [],
       periodoActivo: null,
       cargando: false,
@@ -206,14 +243,14 @@ export default {
     },
     formatearParaInput(fecha) {
       if (!fecha) return '';
-      return fecha.replace(' ', 'T').slice(0, 16); 
+      return fecha.replace(' ', 'T').slice(0, 16);
     },
     // Formatea para mostrar en la tabla más bonito
     formatearFechaVisual(fecha) {
       if (!fecha) return '';
-      return new Date(fecha).toLocaleString('es-ES', { 
-        year: 'numeric', month: '2-digit', day: '2-digit', 
-        hour: '2-digit', minute:'2-digit' 
+      return new Date(fecha).toLocaleString('es-ES', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
       });
     },
     abrirModalCrear(fase) {
@@ -250,7 +287,7 @@ export default {
       this.guardando = true;
       try {
         const payload = { ...this.form, habilitado: this.form.habilitado ? 1 : 0 };
-        
+
         let response;
         if (this.form.id_control) {
           // Si tiene ID, hacemos un UPDATE (PUT)
@@ -259,10 +296,10 @@ export default {
           // Si no tiene ID, hacemos un CREATE (POST)
           response = await API.post(`${this.baesUrl}/control_subida_notas`, payload);
         }
-        
+
         mostraralertas(response.data.mensaje, "success");
         this.modalInstance.hide();
-        this.cargarControles(); 
+        this.cargarControles();
       } catch (error) {
         let msj = "Error al guardar el control";
         if (error.response && error.response.data.mensaje) {
@@ -281,7 +318,7 @@ export default {
         const metodo = accion === 'habilitar' ? API.delete : API.get; // Ajusta según tu routes/api.php
 
         const response = await metodo(ruta);
-        
+
         mostraralertas(response.data.mensaje, "success");
         this.cargarControles();
       } catch (error) {

@@ -1,39 +1,56 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-user-edit fs-4" style="color: #F4B324;"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión Global de Cursos
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de cursos, aquí se asignarán los docentes tutores de cada curso.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión Global de Cursos
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de cursos, aquí se asignarán los docentes tutores de cada curso.
-                    </p>
+
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3 w-sm-100">
+                    <button v-if="peridoactivo" @click="confirmarReasignacionMasiva"
+                        class="btn text-white fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 px-3 py-2 border-0"
+                        style="background-color: #1D2A68; border-radius: 50px; font-size: 0.9rem;">
+                        <i class="fas fa-users-cog text-warning"></i>
+                        Reasignar mismos docentes a mismos cursos del periodo actual
+                    </button>
+
+                    <div class="stat-badge d-flex align-items-center justify-content-center px-3 py-2 rounded-pill border shadow-sm"
+                        style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
+                        <i class="fas fa-book me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold">
+                            Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="d-flex flex-column flex-md-row align-items-center gap-3">
-                <button v-if="peridoactivo" @click="confirmarReasignacionMasiva"
-                    class="btn text-white fw-bold shadow-sm d-flex align-items-center gap-2 px-3 py-2"
-                    style="background-color: #1D2A68; border-radius: 50px;">
-                    <i class="fas fa-users-cog text-warning"></i> 
-                    Reasignar mismos docentes a mismos cursos del periodo actual
-                </button>
-
-                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border shadow-sm"
-                    style="background-color: rgba(244, 179, 36, 0.1); border-color: #F4B324 !important; color: #1D2A68;">
-                    <i class="fas fa-book me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold">
-                        Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
-                    </span>
-                </div>
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-chalkboard-teacher fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Control de Tutorías y Persistencia Operativa:</strong> Este módulo define el núcleo
+                    organizativo de las aulas de clase y establece los líderes de gestión pedagógica a través de las
+                    tutorías docentes. Para optimizar los tiempos de configuración al inicio de un nuevo ciclo, el
+                    sistema cuenta con una función de <strong>reasignación transaccional masiva</strong>. Esta directiva
+                    hereda y clona automáticamente la estructura de tutores del periodo lectivo anterior, reduciendo la
+                    carga administrativa, evitando errores manuales de asignación doble y blindando la jerarquía de los
+                    reportes de comportamiento y juntas de curso.
+                </p>
             </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -114,7 +131,7 @@
                                         </div>
                                         <span title="Paralelo" class="small text-secondary">
                                             Rol: <span style="color: #1D2A68; font-weight: 500;">{{ user.nombre_rol
-                                            }}</span>
+                                                }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -862,7 +879,7 @@ export default {
         async ejecutarReasignacionMasiva() {
             this.cargando = true;
             let progressInterval;
-            
+
             // 1. Levantamos un SweetAlert que no se pueda cerrar con la barra de progreso
             Swal.fire({
                 title: 'Procesando Reasignación...',
@@ -889,7 +906,7 @@ export default {
                             clearInterval(progressInterval); // Pausar al 90% hasta que responda el server
                         } else {
                             width += Math.floor(Math.random() * 10) + 2; // Incremento aleatorio
-                            if(width > 90) width = 90;
+                            if (width > 90) width = 90;
                             progressBar.style.width = width + '%';
                             progressBar.innerHTML = width + '%';
                         }
@@ -900,7 +917,7 @@ export default {
             try {
                 // 3. Ejecutamos la petición al backend
                 const response = await API.post(`${this.baseUrl}/reasignacion_masiva`);
-                
+
                 // 4. Petición exitosa: forzar la barra al 100%
                 clearInterval(progressInterval);
                 const progressBar = document.getElementById('swal-progress-bar');
@@ -918,7 +935,7 @@ export default {
                     // Usamos warning/info si hubo omitidos, success si fue perfecto
                     const tipoAlerta = response.data.omitidos > 0 ? "warning" : "success";
                     mostraralertas2(response.data.mensaje, tipoAlerta);
-                    
+
                     await this.getData(); // Refresca la tabla automáticamente
                 }, 800);
 
@@ -926,9 +943,9 @@ export default {
                 // Manejo de errores
                 clearInterval(progressInterval);
                 Swal.close();
-                
+
                 if (error.response && error.response.status === 404) {
-                    mostraralertas2(error.response.data.mensaje, "info"); 
+                    mostraralertas2(error.response.data.mensaje, "info");
                 } else {
                     mostraralertas2("Error al ejecutar la reasignación masiva. Verifique la conexión o contacte soporte.", "error");
                 }

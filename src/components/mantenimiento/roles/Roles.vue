@@ -1,41 +1,62 @@
 <template>
     <div class="container-fluid py-4">
-        <header
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center bg-white p-4 rounded-4 shadow-sm mb-4 custom-header"
-            style="border-left: 6px solid #F4B324;">
+        <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
 
-            <div class="mb-3 mb-md-0 d-flex align-items-center">
-                <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
-                    style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
-                    <i class="fas fa-users fs-4"></i>
+            <!-- FILA SUPERIOR: Títulos, Estadísticas y Botón de Acción -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+
+                <!-- Título e Icono Principal -->
+                <div class="mb-3 mb-md-0 d-flex align-items-center">
+                    <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+                        style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px;">
+                        <i class="fas fa-users fs-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+                            Gestión de Roles
+                        </h2>
+                        <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+                            Administración de roles para cada usuario.
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
-                        Gestión de Roles
-                    </h2>
-                    <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
-                        Administración de roles para cada usuario.
-                    </p>
+
+                <!-- Componentes de la Derecha (Badge y Botón) -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border"
+                        style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68;">
+                        <i class="fas fa-users me-2" style="color: #F4B324;"></i>
+                        <span class="fw-medium">
+                            Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
+                        </span>
+                    </div>
+
+                    <button
+                        class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
+                        style="background-color: #1D2A68; color: white;" data-bs-toggle="modal"
+                        data-bs-target="#modalUsuario" @click="limpiar">
+                        <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
+                        <span class="fw-bold fs-6">Nuevo Registro</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="stat-badge d-flex align-items-center px-3 py-2 rounded-pill border"
-                    style="background-color: rgba(29, 42, 104, 0.05); border-color: rgba(29, 42, 104, 0.2) !important; color: #1D2A68;">
-                    <i class="fas fa-users me-2" style="color: #F4B324;"></i>
-                    <span class="fw-medium">
-                        Total: <span v-if="totaldata > 0">{{ totaldata }}</span><span v-else>0</span>
-                    </span>
-                </div>
-
-                <button
-                    class="btn btn-lg shadow-sm rounded-pill d-flex align-items-center interactive-btn px-4 border-0"
-                    style="background-color: #1D2A68; color: white;" data-bs-toggle="modal"
-                    data-bs-target="#modalUsuario" @click="limpiar">
-                    <i class="fas fa-plus-circle me-2" style="color: #F4B324;"></i>
-                    <span class="fw-bold fs-6">Nuevo Registro</span>
-                </button>
+            <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+            <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+                style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+                <i class="fas fa-shield-alt fs-5 mt-1" style="color: #F4B324;"></i>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+                    <strong>Guía de Seguridad:</strong> En esta sección se listan todos los roles configurados en la
+                    plataforma.
+                    Como medida de protección y resguardo del sistema, las funciones de edición y eliminación están
+                    estrictamente
+                    <strong>deshabilitadas para tu propio rol de Administrador</strong>. Esta restricción previene la
+                    pérdida accidental
+                    de privilegios críticos y garantiza la estabilidad de los módulos operativos mientras mantienes una
+                    sesión activa.
+                </p>
             </div>
+
         </header>
 
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
@@ -81,13 +102,14 @@
                     </thead>
                     <tbody>
                         <tr v-for="user in objetoList" :key="user.id_rol">
-                            <td class="ps-4 fw-bold text-secondary">{{ user.id_rol }}</td>
+                            <td class="ps-4 fw-bold text-secondary">{{ user.id_rol }}
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <span class="fw-medium" style="color: #1D2A68;">{{ user.nombre }}</span>
                                 </div>
                             </td>
-                            <td style="max-width: 250px;">
+                            <td style="max-width: 250px;" >
                                 <div v-if="user.descripcion && user.descripcion.length > 40">
                                     {{ user.descripcion.substring(0, 40) }}...
                                     <button class="btn btn-link btn-sm p-0 text-decoration-none ms-1 fw-semibold"
@@ -104,7 +126,7 @@
                                 <span
                                     class="badge bg-success-subtle text-success border border-success px-3">Activo</span>
                             </td>
-                            <td class="text-center" v-else>
+                            <td class="text-center" v-if="user.estado == 0">
                                 <span
                                     class="badge bg-danger-subtle text-danger border border-danger px-3">Inactivo</span>
                             </td>
@@ -119,7 +141,7 @@
                                     <i class="far fa-edit me-1" style="color: #F4B324;"></i> {{ user.updated_at }}
                                 </span>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" v-if="user.id_rol !== id_rollog">
                                 <div class="btn-group shadow-sm rounded">
                                     <button class="btn btn-sm btn-light" data-bs-toggle="modal"
                                         data-bs-target="#modalEditUsuario" @click="cargarDatosEdicion(user)"
@@ -341,6 +363,7 @@
 <script>
 import API from "@/assets/js/axios"
 import { confimar, confimarhabi, mostraralertas2 } from "@/assets/js/funciones/functions";
+import { getMe } from "@/assets/js/auth";
 
 export default {
     data() {
@@ -374,6 +397,7 @@ export default {
             lastPage: 1,
             descripcionActiva: "",
             totaldata: 0,
+            id_rollog: 0,
         }
     },
     computed: {
@@ -405,6 +429,8 @@ export default {
         }
     },
     async mounted() {
+        const me = await getMe();
+        this.id_rollog = me.id_rol;
         await this.getData();
     },
     methods: {
