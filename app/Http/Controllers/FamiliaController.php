@@ -28,9 +28,12 @@ class FamiliaController extends Controller
                 'personas.apellidos',
                 'personas.foto',
                 'personas.fecha_nacimiento',
-                'personas.sexo'
+                'personas.sexo',
+                'usuarios.id_rol',  
+                'roles.nombre as nombre_rol',
             )
                 ->join('usuarios', 'usuarios.id_persona', '=', 'personas.id_persona')
+                ->join('roles', 'roles.id_rol', '=', 'usuarios.id_rol')
                 ->whereRaw('TIMESTAMPDIFF(YEAR, personas.fecha_nacimiento, CURDATE()) >= 20')
                 ->where('usuarios.estado', 1);
 

@@ -138,17 +138,24 @@ class CursosController extends Controller
                 'niveles_academicos.nombre as nombre_nivel',
                 'especialidades.id_especialidad as EspecialidadID',
                 'especialidades.nombre as nombre_especialidad',
+                // Opcional: puedes traer el nombre del periodo si lo necesitas en el frontend
+                'periodos_lectivos.nombre as nombre_periodo'
             )
                 ->join('niveles_academicos', 'niveles_academicos.id_nivel', '=', 'cursos.id_nivel')
                 ->join('especialidades', 'especialidades.id_especialidad', '=', 'cursos.id_especialidad')
+                // 1. Agregamos el JOIN con la tabla de periodos lectivos
+                ->join('periodos_lectivos', 'periodos_lectivos.id_periodo', '=', 'cursos.id_periodo')
                 ->where('cursos.estado', 1)
+                // 2. Agregamos la condición para que solo traiga el periodo activo
+                ->where('periodos_lectivos.estado_activo', 1)
                 ->get();
+
             return response()->json([
                 'status' => true,
                 'data' => $cursos,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al codificar los datos a JSON: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error al procesar los datos: ' . $e->getMessage()], 500);
         }
     }
     public function reasignacionMasiva(Request $request)

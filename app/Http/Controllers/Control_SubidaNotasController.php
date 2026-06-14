@@ -230,7 +230,7 @@ class Control_SubidaNotasController extends Controller
         $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
         // Si no hay periodo activo, retornamos un arreglo vacío de inmediato
-        if (!$periodoActivo) {
+        if (! $periodoActivo) {
             return response()->json([], 200);
         }
 
@@ -250,71 +250,89 @@ class Control_SubidaNotasController extends Controller
     // 2. Obtener estudiantes, sus calificaciones y fases activas para una asignatura
     public function getEstudiantesAsignatura($id_curso_asignatura)
     {
-        // 1. Buscamos la asignatura y usamos tus relaciones anidadas que ya sabemos que funcionan
-        $asignatura = Curso_Asignaturas::with([
-            'curso.matriculas.estudiante',
-            'curso.matriculas.calificaciones' => function ($q) use ($id_curso_asignatura) {
-                // Importante: Solo traer las calificaciones de esta materia específica
-                $q->where('id_curso_asignatura', $id_curso_asignatura);
-            },
-        ])->find($id_curso_asignatura);
+        try {
+            // 1. Obtener el periodo lectivo activo actual
+            $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
-        if (! $asignatura) {
-            return response()->json(['mensaje' => 'Asignatura no encontrada'], 404);
-        }
-
-        // Fases habilitadas
-        $fasesActivas = Control_subida_notas::where('habilitado', 1)->pluck('fase_evaluacion');
-
-        // 2. Mapeamos las matrículas del curso igual que en tu método de asistencia
-        $estudiantes = $asignatura->curso->matriculas->map(function ($m) use ($id_curso_asignatura) {
-            $calificacion = $m->calificaciones->first();
-
-            // Si no tiene registro, armamos el esqueleto en ceros
-            if (! $calificacion) {
-                $calificacion = [
-                    'id_matricula' => $m->id_matricula,
-                    'id_curso_asignatura' => $id_curso_asignatura,
-                    'q1_p1' => '0.00',
-                    'q1_p2' => '0.00',
-                    'q1_p3' => '0.00',
-                    'q1_examen' => '0.00',
-                    'q1_promedio' => '0.00',
-                    'q2_p1' => '0.00',
-                    'q2_p2' => '0.00',
-                    'q2_p3' => '0.00',
-                    'q2_examen' => '0.00',
-                    'q2_promedio' => '0.00',
-                    'promedio_anual' => '0.00',
-                    'nota_supletorio' => null,
-                    'nota_remedial' => null,
-                    'nota_gracia' => null,
-                    'nota_final_definitiva' => '0.00',
-                    'estado_asignatura' => 'Reprobado',
-                ];
+            if (!$periodoActivo) {
+                return response()->json(['mensaje' => 'No hay un periodo lectivo activo configurado.'], 404);
             }
 
-            return [
-                'id_matricula' => $m->id_matricula,
-                'estudiante' => [
-                    'id_persona' => $m->estudiante->id_persona,
-                    'cedula' => $m->estudiante->cedula,
-                    'nombres' => $m->estudiante->nombres,
-                    'apellidos' => $m->estudiante->apellidos,
-                    // Codificamos la foto igual que en tu código
-                    'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
-                ],
-                'calificaciones' => $calificacion,
-            ];
-        })->sortBy(function ($item) {
-            // Ordenamos alfabéticamente por apellido
-            return $item['estudiante']['apellidos'];
-        })->values(); // Garantiza que sea un array puro para Vue
+            // 2. Buscamos la asignatura FORZANDO que el curso pertenezca al periodo activo
+            $asignatura = Curso_Asignaturas::with([
+                'curso.matriculas.estudiante',
+                'curso.matriculas.calificaciones' => function ($q) use ($id_curso_asignatura) {
+                    // Solo traer las calificaciones de esta materia específica
+                    $q->where('id_curso_asignatura', $id_curso_asignatura);
+                },
+            ])
+                ->whereHas('curso', function ($q) use ($periodoActivo) {
+                    // Integridad referencial: El curso debe ser del periodo activo
+                    $q->where('id_periodo', $periodoActivo->id_periodo);
+                })
+                ->find($id_curso_asignatura);
 
-        return response()->json([
-            'estudiantes' => $estudiantes,
-            'fases_activas' => $fasesActivas,
-        ], 200);
+            if (!$asignatura) {
+                return response()->json(['mensaje' => 'Asignatura no encontrada o no corresponde al periodo activo.'], 404);
+            }
+
+            // 3. Fases habilitadas filtradas ESTRICTAMENTE por el periodo activo
+            // Evita que fases "activas" de años anteriores afecten el ingreso actual
+            $fasesActivas = Control_subida_notas::where('id_periodo', $periodoActivo->id_periodo)
+                ->where('habilitado', 1)
+                ->pluck('fase_evaluacion');
+
+            // 4. Mapeamos las matrículas del curso
+            $estudiantes = $asignatura->curso->matriculas->map(function ($m) use ($id_curso_asignatura) {
+                $calificacion = $m->calificaciones->first();
+
+                // Si no tiene registro, armamos el esqueleto en ceros
+                if (!$calificacion) {
+                    $calificacion = [
+                        'id_matricula' => $m->id_matricula,
+                        'id_curso_asignatura' => $id_curso_asignatura,
+                        'q1_p1' => '0.00',
+                        'q1_p2' => '0.00',
+                        'q1_p3' => '0.00',
+                        'q1_examen' => '0.00',
+                        'q1_promedio' => '0.00',
+                        'q2_p1' => '0.00',
+                        'q2_p2' => '0.00',
+                        'q2_p3' => '0.00',
+                        'q2_examen' => '0.00',
+                        'q2_promedio' => '0.00',
+                        'promedio_anual' => '0.00',
+                        'nota_supletorio' => null,
+                        'nota_remedial' => null,
+                        'nota_gracia' => null,
+                        'nota_final_definitiva' => '0.00',
+                        'estado_asignatura' => 'Reprobado',
+                    ];
+                }
+
+                return [
+                    'id_matricula' => $m->id_matricula,
+                    'estudiante' => [
+                        'id_persona' => $m->estudiante->id_persona,
+                        'cedula' => $m->estudiante->cedula,
+                        'nombres' => $m->estudiante->nombres,
+                        'apellidos' => $m->estudiante->apellidos,
+                        'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
+                    ],
+                    'calificaciones' => $calificacion,
+                ];
+            })->sortBy(function ($item) {
+                return $item['estudiante']['apellidos'];
+            })->values();
+
+            return response()->json([
+                'estudiantes' => $estudiantes,
+                'fases_activas' => $fasesActivas,
+                'periodo_actual' => $periodoActivo->nombre // Útil si necesitas pintarlo en el frontend
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error interno en el servidor: ' . $e->getMessage()], 500);
+        }
     }
 
     // 3. Guardar las calificaciones

@@ -258,6 +258,7 @@ class Cronograma_matriculasController extends Controller
 
         // 2. Consulta base de cronogramas vigentes por fecha
         $querySchedules = Cronograma_matriculas::with(['periodo', 'nivel', 'especialidad'])
+            ->where('id_periodo', $periodoActivo->id_periodo)
             ->where('fecha_inicio', '<=', $hoy)
             ->where('fecha_fin', '>=', $hoy);
 
@@ -618,7 +619,6 @@ class Cronograma_matriculasController extends Controller
         // 1. Buscamos el periodo lectivo activo
         $periodoActivo = Periodos_lectivos::where('estado_activo', 1)->first();
 
-        // Si no hay periodo activo, retornamos un arreglo vacío
         if (!$periodoActivo) {
             return response()->json([]);
         }
@@ -627,7 +627,6 @@ class Cronograma_matriculasController extends Controller
         $asignaturas = Curso_Asignaturas::where('id_docente', $id_docente)
             ->where('estado', 1)
             ->whereHas('curso', function ($query) use ($periodoActivo) {
-                // Filtro clave: Asegura que el curso al que pertenece la asignatura sea del periodo actual
                 $query->where('id_periodo', $periodoActivo->id_periodo);
             })
             ->with([
@@ -635,13 +634,15 @@ class Cronograma_matriculasController extends Controller
                 'curso.nivel',
                 'curso.especialidad',
                 'curso.matriculas.estudiante',
-                'curso.matriculas.asistencias' // Cargamos todas las del día
+                // 🚨 SOLUCIÓN: Filtramos la relación para que la Base de Datos solo entregue las de HOY
+                'curso.matriculas.asistencias' => function ($query) use ($hoy) {
+                    $query->whereDate('fecha', $hoy);
+                }
             ])
             ->get();
 
         // 3. Transformación de datos
-        $data = $asignaturas->map(function ($item) use ($hoy) {
-            // Guardamos el ID de la asignatura actual para filtrar dentro del map
+        $data = $asignaturas->map(function ($item) {
             $id_actual = $item->id_curso_asignatura;
 
             return [
@@ -650,23 +651,24 @@ class Cronograma_matriculasController extends Controller
                 'curso_info' => $item->curso->nivel->nombre . ' "' . $item->curso->paralelo . '"',
                 'especialidad' => $item->curso->especialidad->nombre,
                 'total_estudiantes' => $item->curso->matriculas->count(),
-                'estudiantes' => $item->curso->matriculas->map(function ($m) use ($hoy, $id_actual) {
+                'estudiantes' => $item->curso->matriculas->map(function ($m) use ($id_actual) {
 
-                    // CRÍTICO: Filtramos la asistencia que coincida con la FECHA Y la ASIGNATURA actual
-                    $asistenciaHoy = $m->asistencias->where('fecha', $hoy)
-                        ->where('id_curso_asignatura', $id_actual)
-                        ->first();
+                    // Como la DB ya filtró por fecha, esta colección solo tiene 0 o 1 registro.
+                    // El consumo de memoria de esta búsqueda es casi nulo.
+                    $asistenciaHoy = $m->asistencias->where('id_curso_asignatura', $id_actual)->first();
 
                     return [
                         'id_persona' => $m->estudiante->id_persona,
                         'cedula' => $m->estudiante->cedula,
                         'nombres' => $m->estudiante->nombres,
                         'apellidos' => $m->estudiante->apellidos,
+                        // Nota: Convertir fotos BLOB a base64 también consume memoria.
+                        // Si el error persiste, considera no enviar fotos muy grandes.
                         'foto' => $m->estudiante->foto ? base64_encode($m->estudiante->foto) : null,
                         'id_matricula' => $m->id_matricula,
                         'asistencia_guardada' => $asistenciaHoy ? $asistenciaHoy->estado : null
                     ];
-                })->sortBy('apellidos')->values()->all() // Re-aseguramos el orden alfabético aquí
+                })->sortBy('apellidos')->values()->all()
             ];
         });
 
