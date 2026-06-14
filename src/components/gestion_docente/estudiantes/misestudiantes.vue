@@ -1,22 +1,58 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="row mb-4 align-items-center">
-      <div class="col-md-8">
-        <h2 class="fw-bold text-blue" style="font-family: 'Fraunces';">
-          Mis Estudiantes por Asignatura
-        </h2>
-        <p class="text-muted">Seleccione una asignatura para ver sus estudiantes y gestionar su asistencia.</p>
-      </div>
-      <div class="col-md-4 text-md-end">
-        <div class="badge bg-gold text-blue px-3 py-2 rounded-pill shadow-sm">
-          Periodo Lectivo {{ periodo_activo.nombre }}
-        </div>
-        <button v-if="todoRegistrado" @click="generarPDFGeneral"
-          class="btn btn-gold text-blue fw-bold rounded-pill shadow-sm animate__animated animate__pulse animate__infinite">
-          <i class="fas fa-file-pdf me-2"></i> Reporte General de Hoy
-        </button>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
 
+      <!-- FILA SUPERIOR: Títulos, Badge de Periodo y Botón de Reporte -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
+
+        <!-- Título e Icono Principal -->
+        <div class="mb-2 mb-md-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-user-check fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Mis Estudiantes por Asignatura
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Seleccione una asignatura para ver sus estudiantes y gestionar su asistencia.
+            </p>
+          </div>
+        </div>
+
+        <!-- Componentes de la Derecha (Badge Dinámico y Botón Animado) -->
+        <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
+          <div class="stat-badge d-flex align-items-center px-4 py-2 rounded-pill shadow-sm justify-content-center"
+            style="background-color: rgba(29, 42, 104, 0.05); color: #1D2A68; border: 1px solid rgba(29, 42, 104, 0.2); white-space: nowrap;">
+            <i class="fas fa-calendar-alt me-2" style="color: #F4B324;"></i>
+            <span class="fw-bold">Periodo Lectivo {{ periodo_activo.nombre }}</span>
+          </div>
+
+          <!-- Botón Reactivo de PDF -->
+          <button v-if="todoRegistrado" @click="generarPDFGeneral"
+            class="btn fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center border-0 animate__animated animate__pulse animate__infinite"
+            style="background-color: #F4B324; color: #1D2A68; white-space: nowrap;">
+            <i class="fas fa-file-pdf me-2"></i> Reporte General de Hoy
+          </button>
+        </div>
       </div>
+
+      <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-tasks fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Cierre Transaccional y Validación de Completitud:</strong> Este módulo descentraliza el control de
+          asistencia delegando la captura de datos métricos diarios a los docentes en tiempo real. A nivel de
+          arquitectura lógica, el sistema implementa validadores de estado: el motor de reportes consolidados (PDF) y el
+          cierre de jornada se mantienen bloqueados hasta que el algoritmo verifica que el 100% de los registros
+          requeridos han sido ingresados exitosamente. Esta restricción estructural previene la emisión de informes con
+          datos nulos o parciales, garantizando la fiabilidad absoluta de las estadísticas institucionales.
+        </p>
+      </div>
+
     </header>
 
     <div class="container-fluid py-4 bg-light min-vh-100">

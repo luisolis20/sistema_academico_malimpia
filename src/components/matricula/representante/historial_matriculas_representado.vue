@@ -1,17 +1,42 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5 no-print">
-      <div class="row align-items-center">
-        <div class="col-md-12">
-          <h2 class="fw-bold text-blue mb-1">
-            <i class="fas fa-id-card me-2 text-gold"></i>Historial de Matrículas del Representado
-          </h2>
-          <p class="text-muted mb-0">
-            <i class="fas fa-info-circle me-2 text-gold"></i>
-            Seleccione a su representado para consultar sus actas de matrícula, docentes tutores y asignaturas por cada periodo cursado.
-          </p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header no-print"
+      style="border-left: 6px solid #F4B324;">
+
+      <!-- FILA SUPERIOR: Título e Icono Principal -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+        <div class="mb-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-folder-open fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Historial de Matrículas del Representado
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Seleccione a su representado para consultar sus actas de matrícula, docentes tutores y asignaturas por
+              cada periodo cursado.
+            </p>
+          </div>
         </div>
       </div>
+
+      <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-file-contract fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Transparencia Documental y Política Paperless:</strong> Este módulo expone el archivo histórico
+          consolidado directamente al núcleo familiar mediante un repositorio digital de alta disponibilidad. A nivel de
+          procesos, esta arquitectura elimina la dependencia estricta de archivos físicos (fomentando una política
+          institucional <em>cero papel</em>) y democratiza el acceso a la información. Al proveer a los representantes
+          de herramientas de autogestión para la consulta y descarga de actas, se reduce de forma drástica el volumen de
+          solicitudes manuales en secretaría, optimizando los recursos de la institución.
+        </p>
+      </div>
+
     </header>
 
     <div v-if="loading" class="text-center py-5">
@@ -28,23 +53,23 @@
     </div>
 
     <div v-else class="accordion mb-5" id="accordionEstudiantes">
-      <div v-for="f in familiares" :key="f.id_persona" class="accordion-item border-0 shadow-sm rounded-4 mb-3 overflow-hidden">
-        
+      <div v-for="f in familiares" :key="f.id_persona"
+        class="accordion-item border-0 shadow-sm rounded-4 mb-3 overflow-hidden">
+
         <h2 class="accordion-header" :id="'heading-est-' + f.id_persona">
-          <button class="accordion-button collapsed bg-white text-blue fw-bold p-3" 
-                  type="button" 
-                  data-bs-toggle="collapse" 
-                  :data-bs-target="'#collapse-est-' + f.id_persona" 
-                  aria-expanded="false" 
-                  :aria-controls="'collapse-est-' + f.id_persona"
-                  @click="cargarHistorialMatriculas(f.id_persona)">
-            
+          <button class="accordion-button collapsed bg-white text-blue fw-bold p-3" type="button"
+            data-bs-toggle="collapse" :data-bs-target="'#collapse-est-' + f.id_persona" aria-expanded="false"
+            :aria-controls="'collapse-est-' + f.id_persona" @click="cargarHistorialMatriculas(f.id_persona)">
+
             <div class="d-flex align-items-center gap-3 w-100 pe-3">
-              <img v-if="f.foto" :src="'data:image/jpeg;base64,' + f.foto" class="rounded-circle border border-gold object-cover" style="width: 50px; height: 50px;" alt="Perfil"/>
-              <div v-else class="bg-blue text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <img v-if="f.foto" :src="'data:image/jpeg;base64,' + f.foto"
+                class="rounded-circle border border-gold object-cover" style="width: 50px; height: 50px;"
+                alt="Perfil" />
+              <div v-else class="bg-blue text-white rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 50px; height: 50px;">
                 <i class="fas fa-user-graduate fa-lg"></i>
               </div>
-              
+
               <div>
                 <h5 class="mb-0 fw-bold text-blue">{{ f.nombres }} {{ f.apellidos }}</h5>
                 <span class="small text-muted">
@@ -56,29 +81,29 @@
           </button>
         </h2>
 
-        <div :id="'collapse-est-' + f.id_persona" class="accordion-collapse collapse" :aria-labelledby="'heading-est-' + f.id_persona" data-bs-parent="#accordionEstudiantes">
+        <div :id="'collapse-est-' + f.id_persona" class="accordion-collapse collapse"
+          :aria-labelledby="'heading-est-' + f.id_persona" data-bs-parent="#accordionEstudiantes">
           <div class="accordion-body bg-light border-top p-4">
-            
+
             <div v-if="historialMatriculas[f.id_persona]?.loading" class="text-center py-4">
               <div class="spinner-border spinner-border-sm text-blue" role="status"></div>
               <p class="small text-muted mt-2 mb-0">Buscando matrículas de {{ f.nombres.split(' ')[0] }}...</p>
             </div>
 
-            <div v-else-if="!historialMatriculas[f.id_persona] || historialMatriculas[f.id_persona].data.length === 0" class="text-center py-3 text-muted">
+            <div v-else-if="!historialMatriculas[f.id_persona] || historialMatriculas[f.id_persona].data.length === 0"
+              class="text-center py-3 text-muted">
               <i class="fas fa-folder-open mb-2 fa-2x"></i>
               <p class="mb-0">Este estudiante no registra matrículas en el sistema.</p>
             </div>
 
             <div v-else class="accordion" :id="'accordionMatriculas-' + f.id_persona">
-              <div v-for="mat in historialMatriculas[f.id_persona].data" :key="mat.id_matricula" class="accordion-item border shadow-sm rounded-3 mb-2 overflow-hidden transition-all">
-                
+              <div v-for="mat in historialMatriculas[f.id_persona].data" :key="mat.id_matricula"
+                class="accordion-item border shadow-sm rounded-3 mb-2 overflow-hidden transition-all">
+
                 <h2 class="accordion-header" :id="'heading-mat-' + mat.id_matricula">
-                  <button class="accordion-button collapsed bg-white text-blue fw-bold p-3 fs-6" 
-                          type="button" 
-                          data-bs-toggle="collapse" 
-                          :data-bs-target="'#collapse-mat-' + mat.id_matricula" 
-                          aria-expanded="false" 
-                          :aria-controls="'collapse-mat-' + mat.id_matricula">
+                  <button class="accordion-button collapsed bg-white text-blue fw-bold p-3 fs-6" type="button"
+                    data-bs-toggle="collapse" :data-bs-target="'#collapse-mat-' + mat.id_matricula"
+                    aria-expanded="false" :aria-controls="'collapse-mat-' + mat.id_matricula">
                     <div class="d-flex align-items-center justify-content-between w-100 pe-3">
                       <div>
                         <i class="fas fa-graduation-cap me-2 text-gold"></i>
@@ -92,9 +117,11 @@
                   </button>
                 </h2>
 
-                <div :id="'collapse-mat-' + mat.id_matricula" class="accordion-collapse collapse" :aria-labelledby="'heading-mat-' + mat.id_matricula" :data-bs-parent="'#accordionMatriculas-' + f.id_persona">
+                <div :id="'collapse-mat-' + mat.id_matricula" class="accordion-collapse collapse"
+                  :aria-labelledby="'heading-mat-' + mat.id_matricula"
+                  :data-bs-parent="'#accordionMatriculas-' + f.id_persona">
                   <div class="accordion-body bg-white border-top p-4">
-                    
+
                     <div class="row g-3 mb-4">
                       <div class="col-md-6 col-lg-3">
                         <div class="p-3 bg-light rounded-3 h-100 border-start border-blue border-3">
@@ -126,7 +153,8 @@
                       <h6 class="fw-bold text-blue mb-2 mb-sm-0">
                         <i class="fas fa-book me-2 text-gold"></i>Malla Curricular Asignada
                       </h6>
-                      <button @click="generarPDFMatricula(mat, f)" class="btn btn-gold btn-sm rounded-pill px-4 shadow-sm fw-bold">
+                      <button @click="generarPDFMatricula(mat, f)"
+                        class="btn btn-gold btn-sm rounded-pill px-4 shadow-sm fw-bold">
                         <i class="fas fa-file-pdf me-2"></i>Descargar Certificado
                       </button>
                     </div>
@@ -145,7 +173,8 @@
                             <td class="px-4 text-start fw-bold text-muted">{{ aIdx + 1 }}</td>
                             <td class="text-start fw-bold text-secondary">{{ asig.nombre }}</td>
                             <td class="text-center">
-                              <span class="badge bg-light text-blue border border-blue px-2 py-1 rounded-2 small">Regular</span>
+                              <span
+                                class="badge bg-light text-blue border border-blue px-2 py-1 rounded-2 small">Regular</span>
                             </td>
                           </tr>
                           <tr v-if="mat.asignaturas.length === 0">
@@ -184,7 +213,7 @@ export default {
       idpersona: null,
       loading: true,
       Persona: {},
-      familiares: [], 
+      familiares: [],
       historialMatriculas: {}, // Objeto para almacenar matrículas por ID de estudiante
     }
   },
@@ -238,12 +267,12 @@ export default {
       // Banner Principal
       doc.setFillColor(29, 42, 104);
       doc.rect(0, 0, 210, 24, "F");
-      
+
       doc.setTextColor(244, 181, 36);
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(14);
       doc.text("CERTIFICADO DE MATRÍCULA OFICIAL", 14, 11);
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(9);
       doc.setFont("Helvetica", "normal");
@@ -300,7 +329,7 @@ export default {
 
       // Firmas de Responsabilidad al final del documento
       const finalY = doc.lastAutoTable.finalY + 35;
-      
+
       doc.setDrawColor(180, 180, 180);
       doc.line(30, finalY, 80, finalY);
       doc.line(130, finalY, 180, finalY);
@@ -323,28 +352,61 @@ export default {
 </script>
 
 <style scoped>
-.text-blue { color: #1D2A68; }
-.text-gold { color: #F4B324; }
-.bg-blue { background-color: #1D2A68; }
-.border-gold { border-color: #F4B324 !important; }
-.bg-gold { background-color: #F4B324; }
-.border-blue { border-color: #1D2A68 !important; }
+.text-blue {
+  color: #1D2A68;
+}
+
+.text-gold {
+  color: #F4B324;
+}
+
+.bg-blue {
+  background-color: #1D2A68;
+}
+
+.border-gold {
+  border-color: #F4B324 !important;
+}
+
+.bg-gold {
+  background-color: #F4B324;
+}
+
+.border-blue {
+  border-color: #1D2A68 !important;
+}
 
 .btn-gold {
   background-color: #F4B324;
   color: #1D2A68;
   border: none;
 }
+
 .btn-gold:hover {
   background-color: #e0a216;
   color: #1D2A68;
 }
 
-.font-black { font-weight: 800; }
-.transition-all { transition: all 0.3s ease; }
-.x-small { font-size: 0.7rem; letter-spacing: 0.3px; }
-.fs-7 { font-size: 0.78rem !important; }
-.object-cover { object-fit: cover; }
+.font-black {
+  font-weight: 800;
+}
+
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.x-small {
+  font-size: 0.7rem;
+  letter-spacing: 0.3px;
+}
+
+.fs-7 {
+  font-size: 0.78rem !important;
+}
+
+.object-cover {
+  object-fit: cover;
+}
 
 /* Estilos Personalizados del Acordeón para conservar la línea gráfica */
 .accordion-item {
@@ -352,10 +414,10 @@ export default {
 }
 
 /* Acordeón Nivel 1 (Estudiantes) */
-#accordionEstudiantes > .accordion-item > .accordion-header .accordion-button:not(.collapsed) {
+#accordionEstudiantes>.accordion-item>.accordion-header .accordion-button:not(.collapsed) {
   background-color: rgba(29, 42, 104, 0.05) !important;
   color: #1D2A68 !important;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
   border-left: 5px solid #F4B324 !important;
 }
 
@@ -363,7 +425,7 @@ export default {
 .accordion-body .accordion-button:not(.collapsed) {
   background-color: rgba(244, 181, 36, 0.1) !important;
   color: #1D2A68 !important;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
   border-left: 4px solid #1D2A68 !important;
 }
 

@@ -1,12 +1,37 @@
 <template>
   <div class="container-fluid py-4">
-    <header class="row mb-4 align-items-center">
-      <div class="col-md-8">
-        <h2 class="fw-bold text-blue" style="font-family: 'Fraunces';">
-          Cursos del familiar matriculado
-        </h2>
-        <p class="text-muted">Lista de cursos asignados a sus familiares representados.</p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+        <div class="mb-0 d-flex align-items-center">
+          <div class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-users fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Cursos del Familiar Matriculado
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Lista de cursos asignados a sus estudiantes representados.
+            </p>
+          </div>
+        </div>
       </div>
+
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-link fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Vinculación Parental y Control de Accesos (RBAC):</strong> Este panel materializa la relación de
+          dependencia entre los perfiles de representante y estudiante. A nivel de arquitectura de software, el sistema
+          emplea un estricto control de acceso para filtrar y desplegar de manera exclusiva la información de los
+          familiares vinculados. Esta segmentación de consultas asegura la total privacidad de los datos frente a
+          terceros, fomentando al mismo tiempo la transparencia institucional y el seguimiento continuo del rendimiento
+          por parte del núcleo familiar.
+        </p>
+      </div>
+
     </header>
 
     <div class="row g-4">
@@ -27,9 +52,9 @@
               <p class="small fw-bold text-gold text-uppercase mb-1">{{ m.curso.especialidad.nombre }}</p>
               <p class="x-small text-muted">
                 <i class="fas fa-chalkboard-teacher me-1"></i> Tutor:
-                {{ m.curso.docentetutor ? 
-                m.curso.docentetutor.nombres + ' ' + 
-                m.curso.docentetutor.apellidos : 'No asignado' }}
+                {{ m.curso.docentetutor ?
+                  m.curso.docentetutor.nombres + ' ' +
+                  m.curso.docentetutor.apellidos : 'No asignado' }}
               </p>
             </div>
 
@@ -266,14 +291,25 @@ export default {
 .avatar-estudiante img {
   object-fit: cover;
 }
-.text-blue { color: #1D2A68 !important; }
-.bg-blue { background-color: #1D2A68 !important; }
-.text-gold { color: #F4B324 !important; }
+
+.text-blue {
+  color: #1D2A68 !important;
+}
+
+.bg-blue {
+  background-color: #1D2A68 !important;
+}
+
+.text-gold {
+  color: #F4B324 !important;
+}
 
 /* Estilo exacto para la fila de RECREO */
 .bg-recreo {
-  background-color: #F4B324 !important; /* Color Oro/Naranja */
-  letter-spacing: 15px; /* Espaciado entre letras como en la imagen */
+  background-color: #F4B324 !important;
+  /* Color Oro/Naranja */
+  letter-spacing: 15px;
+  /* Espaciado entre letras como en la imagen */
   font-size: 1.2rem;
   border-left: none !important;
   border-right: none !important;

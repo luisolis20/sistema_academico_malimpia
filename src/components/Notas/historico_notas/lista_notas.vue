@@ -1,25 +1,52 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5">
-      <div class="row align-items-center">
-        <div class="col-md-7">
-          <h2 class="fw-bold text-blue mb-1">Histórico de Notas del Estudiante</h2>
-          <p class="text-muted mb-0">
-            <i class="fas fa-info-circle me-2 text-gold"></i>
-            Ingrese el número de cédula del estudiante para buscar su historial completo de calificaciones.
-          </p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
+
+        <div class="mb-2 mb-md-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-clipboard-list fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Histórico de Notas del Estudiante
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Ingrese la cédula del estudiante para buscar su historial completo de calificaciones.
+            </p>
+          </div>
         </div>
-        <div class="col-md-5 mt-3 mt-md-0">
-          <div class="input-group">
-            <input type="text" class="form-control border-gold" placeholder="Ej. 0801234567" v-model="cedulaBusqueda"
-              @keyup.enter="buscarEstudiante" :disabled="buscando">
-            <button class="btn btn-gold fw-bold px-4" @click="buscarEstudiante" :disabled="!cedulaBusqueda || buscando">
+
+        <div class="d-flex align-items-center flex-grow-1 flex-md-grow-0" style="max-width: 450px; width: 100%;">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden border"
+            style="border-color: rgba(29, 42, 104, 0.2) !important;">
+            <input type="text" class="form-control border-0 px-4 py-2" placeholder="Ej. 0801234567"
+              v-model="cedulaBusqueda" @keyup.enter="buscarEstudiante" :disabled="buscando" style="box-shadow: none;">
+            <button class="btn fw-bold px-4 border-0 d-flex align-items-center transition-all" @click="buscarEstudiante"
+              :disabled="!cedulaBusqueda || buscando" style="background-color: #F4B324; color: #1D2A68;">
               <span v-if="buscando" class="spinner-border spinner-border-sm me-2" role="status"></span>
               <i v-else class="fas fa-search me-2"></i> Buscar
             </button>
           </div>
         </div>
       </div>
+
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-database fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Consolidación Longitudinal e Inmutabilidad de Datos:</strong> Este motor de búsqueda ejecuta consultas
+          relacionales profundas para unificar el récord académico del estudiante a través del tiempo. Extrae las
+          métricas de rendimiento de periodos cerrados (actas finales), lo que garantiza la estricta inmutabilidad de la
+          información pasada ante cualquier intento de alteración. Esta estructura es vital para dotar al sistema de la
+          fiabilidad necesaria al momento de generar mallas de promoción, reportes analíticos y la emisión de
+          certificados oficiales.
+        </p>
+      </div>
+
     </header>
 
     <div v-if="estudiante" class="row g-4">
@@ -96,10 +123,12 @@
                 }}</span>
               </small>
             </div>
-            
+
             <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-white bg-opacity-25 border border-light px-3 py-2 rounded-pill" title="Asistencia General del Periodo">
-                <i class="fas fa-user-clock me-1 text-gold"></i> Asistencia: {{ periodoMatriculado.porcentaje_asistencia }}%
+              <span class="badge bg-white bg-opacity-25 border border-light px-3 py-2 rounded-pill"
+                title="Asistencia General del Periodo">
+                <i class="fas fa-user-clock me-1 text-gold"></i> Asistencia: {{ periodoMatriculado.porcentaje_asistencia
+                }}%
               </span>
 
               <span class="badge rounded-pill px-3 py-2 border border-light"
@@ -125,7 +154,8 @@
                   <td>
                     <span class="badge px-3 py-1.5 rounded-pill"
                       :class="materia.estado === 'APROBADO' || materia.estado === 'Aprobado' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
-                      <i class="fas me-1" :class="materia.estado === 'APROBADO' || materia.estado === 'Aprobado' ? 'fa-check' : 'fa-times'"></i>
+                      <i class="fas me-1"
+                        :class="materia.estado === 'APROBADO' || materia.estado === 'Aprobado' ? 'fa-check' : 'fa-times'"></i>
                       {{ materia.estado }}
                     </span>
                   </td>
@@ -296,7 +326,7 @@ export default {
       const anchoMaxTexto = xLogo - xTextoInicio - 4;
 
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(14); 
+      doc.setFontSize(14);
       doc.setTextColor(...blue);
 
       const nombreInstitucion = 'UNIDAD EDUCATIVA ESTANDARIZADA DEL MILENIO "MALIMPIA"';
@@ -305,7 +335,7 @@ export default {
       let runningY = yOffset + 4;
       lineasNombre.forEach((linea) => {
         doc.text(linea, xTextoInicio, runningY);
-        runningY += 6; 
+        runningY += 6;
       });
 
       doc.setFontSize(9);
@@ -390,7 +420,7 @@ export default {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8.5);
         doc.setTextColor(255, 255, 255);
-        
+
         // MODIFICACIÓN: Inyectando la asistencia y el estado en el PDF
         doc.text(`PERIODO: ${periodo.periodo} | CURSO: ${periodo.nivel_nombre} "${periodo.paralelo}"`, 18, yOffset + 4.5);
         doc.text(`ASISTENCIA: ${periodo.porcentaje_asistencia}%  |  ESTADO: ${periodo.estado_curso}`, 130, yOffset + 4.5);

@@ -1,16 +1,42 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5 no-print">
-      <div class="row align-items-center g-3">
-        <div class="col-md-12">
-          <h2 class="fw-bold text-blue mb-1">
-            <i class="fas fa-users me-2 text-gold"></i>Histórico de Notas de Representados
-          </h2>
-          <p class="text-muted mb-0">
-            Despliegue el acordeón de cualquiera de sus representados registrados para consultar su trayectoria académica completa y exportar sus reportes oficiales.
-          </p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header no-print"
+      style="border-left: 6px solid #F4B324;">
+
+      <!-- FILA SUPERIOR: Título e Icono Principal -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+        <div class="mb-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-users fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0" style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Histórico de Notas de Representados
+            </h2>
+            <p class="text-muted mb-0 mt-1" style="font-size: 0.95rem;">
+              Despliegue el acordeón de cualquiera de sus representados para consultar su trayectoria académica y
+              exportar sus reportes oficiales.
+            </p>
+          </div>
         </div>
       </div>
+
+      <!-- FILA INFERIOR: Texto de Guía Informativo e Instructivo -->
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-chart-line fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Inteligencia de Datos y Generación Dinámica de Reportes:</strong> Este panel funciona como un tablero
+          de control (<em>Dashboard</em>) orientado al usuario final. El sistema ejecuta consultas relacionales
+          complejas para agrupar y renderizar el historial de calificaciones. La funcionalidad de exportación compila
+          estos datos bajo demanda mediante un motor de renderizado asíncrono, garantizando que el documento descargado
+          sea un reflejo exacto de las actas inmutables del servidor. Esto empodera al representante con autonomía total
+          y reduce la carga operativa del personal docente y administrativo.
+        </p>
+      </div>
+
     </header>
 
     <div v-if="loading" class="text-center py-5">
@@ -23,32 +49,33 @@
     <div v-else-if="familiares.length === 0" class="alert alert-info rounded-4 p-4 text-center shadow-sm">
       <i class="fas fa-user-slash fa-2x text-blue mb-2"></i>
       <h5>Sin representados asignados</h5>
-      <p class="mb-0 text-muted">Usted no consta como representante legal de ningún estudiante activo en este periodo.</p>
+      <p class="mb-0 text-muted">Usted no consta como representante legal de ningún estudiante activo en este periodo.
+      </p>
     </div>
 
     <div v-else class="accordion mb-5" id="accordionEstudiantes">
-      <div v-for="(f, index) in familiares" :key="f.id_persona" class="accordion-item border-0 shadow-sm rounded-4 mb-3 overflow-hidden">
-        
+      <div v-for="(f, index) in familiares" :key="f.id_persona"
+        class="accordion-item border-0 shadow-sm rounded-4 mb-3 overflow-hidden">
+
         <h2 class="accordion-header" :id="'heading-' + f.id_persona">
-          <button class="accordion-button collapsed bg-white text-blue fw-bold p-3" 
-                  type="button" 
-                  data-bs-toggle="collapse" 
-                  :data-bs-target="'#collapse-' + f.id_persona" 
-                  aria-expanded="false" 
-                  :aria-controls="'collapse-' + f.id_persona"
-                  @click="cargarHistorialEstudiante(f.id_persona)">
-            
+          <button class="accordion-button collapsed bg-white text-blue fw-bold p-3" type="button"
+            data-bs-toggle="collapse" :data-bs-target="'#collapse-' + f.id_persona" aria-expanded="false"
+            :aria-controls="'collapse-' + f.id_persona" @click="cargarHistorialEstudiante(f.id_persona)">
+
             <div class="d-flex align-items-center gap-3 w-100 pe-3">
-              <img v-if="f.foto" :src="'data:image/jpeg;base64,' + f.foto" class="rounded-circle border border-gold object-cover" style="width: 50px; height: 50px;" alt="Perfil"/>
-              <div v-else class="bg-blue text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <img v-if="f.foto" :src="'data:image/jpeg;base64,' + f.foto"
+                class="rounded-circle border border-gold object-cover" style="width: 50px; height: 50px;"
+                alt="Perfil" />
+              <div v-else class="bg-blue text-white rounded-circle d-flex align-items-center justify-content-center"
+                style="width: 50px; height: 50px;">
                 <i class="fas fa-user-graduate fa-lg"></i>
               </div>
-              
+
               <div>
                 <h5 class="mb-0 fw-bold text-blue">{{ f.nombres }} {{ f.apellidos }}</h5>
                 <span class="small text-muted">
                   <span class="badge bg-gold text-blue me-2 text-uppercase font-black">{{ f.parentesco }}</span>
-                  | Cédula: <strong>{{ f.cedula }}</strong> 
+                  | Cédula: <strong>{{ f.cedula }}</strong>
                   <span v-if="f.correo" class="d-none d-md-inline"> | Correo: {{ f.correo }}</span>
                 </span>
               </div>
@@ -57,15 +84,17 @@
           </button>
         </h2>
 
-        <div :id="'collapse-' + f.id_persona" class="accordion-collapse collapse" :aria-labelledby="'heading-' + f.id_persona" data-bs-parent="#accordionEstudiantes">
+        <div :id="'collapse-' + f.id_persona" class="accordion-collapse collapse"
+          :aria-labelledby="'heading-' + f.id_persona" data-bs-parent="#accordionEstudiantes">
           <div class="accordion-body bg-white border-top p-4">
-            
+
             <div v-if="historiales[f.id_persona]?.loading" class="text-center py-4">
               <div class="spinner-border spinner-border-sm text-blue" role="status"></div>
               <p class="small text-muted mt-2 mb-0">Consultando base de datos académica...</p>
             </div>
 
-            <div v-else-if="!historiales[f.id_persona] || historiales[f.id_persona].data.length === 0" class="text-center py-3 text-muted">
+            <div v-else-if="!historiales[f.id_persona] || historiales[f.id_persona].data.length === 0"
+              class="text-center py-3 text-muted">
               <i class="fas fa-folder-open mb-2"></i>
               <p class="mb-0 small">Este estudiante no registra calificaciones finales históricas consolidadas.</p>
             </div>
@@ -90,14 +119,17 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <template v-for="(curso, cIdx) in historiales[f.id_persona].data" :key="'curso-'+cIdx">
-                      <tr v-for="(asig, aIdx) in curso.asignaturas" :key="'asig-'+cIdx+'-'+aIdx" class="grade-row-hover">
-                        
-                        <td v-if="aIdx === 0" :rowspan="curso.asignaturas.length" class="bg-light border-end-heavy align-middle">
+                    <template v-for="(curso, cIdx) in historiales[f.id_persona].data" :key="'curso-' + cIdx">
+                      <tr v-for="(asig, aIdx) in curso.asignaturas" :key="'asig-' + cIdx + '-' + aIdx"
+                        class="grade-row-hover">
+
+                        <td v-if="aIdx === 0" :rowspan="curso.asignaturas.length"
+                          class="bg-light border-end-heavy align-middle">
                           <div class="p-2 text-center">
                             <span class="d-block fw-bold text-blue mb-1 fs-6">{{ curso.periodo }}</span>
                             <span class="d-block text-dark fw-bold mb-1">{{ curso.nivel }} "{{ curso.paralelo }}"</span>
-                            <span class="badge bg-blue fw-normal text-wrap" style="max-width: 140px;">{{ curso.especialidad }}</span>
+                            <span class="badge bg-blue fw-normal text-wrap" style="max-width: 140px;">{{
+                              curso.especialidad }}</span>
                           </div>
                         </td>
 
@@ -106,23 +138,28 @@
                           {{ formatNota(asig.nota_final) }}
                         </td>
                         <td>
-                          <span class="badge px-2.5 py-1.5 rounded-pill fs-7 text-uppercase" :class="getBadgeEstado(asig.estado)">
+                          <span class="badge px-2.5 py-1.5 rounded-pill fs-7 text-uppercase"
+                            :class="getBadgeEstado(asig.estado)">
                             {{ asig.estado }}
                           </span>
                         </td>
 
                         <td v-if="aIdx === 0" :rowspan="curso.asignaturas.length" class="border-start align-middle">
                           <div class="d-flex flex-column align-items-center px-2">
-                            <span class="fw-bold fs-5 mb-1" :class="curso.asistencia_curso < 75 ? 'text-danger' : 'text-success'">
+                            <span class="fw-bold fs-5 mb-1"
+                              :class="curso.asistencia_curso < 75 ? 'text-danger' : 'text-success'">
                               {{ curso.asistencia_curso }}%
                             </span>
                             <div class="progress w-100" style="height: 5px;">
-                              <div class="progress-bar" :class="curso.asistencia_curso < 75 ? 'bg-danger' : 'bg-success'" :style="{ width: curso.asistencia_curso + '%' }"></div>
+                              <div class="progress-bar"
+                                :class="curso.asistencia_curso < 75 ? 'bg-danger' : 'bg-success'"
+                                :style="{ width: curso.asistencia_curso + '%' }"></div>
                             </div>
                           </div>
                         </td>
                         <td v-if="aIdx === 0" :rowspan="curso.asignaturas.length" class="align-middle border-end-heavy">
-                          <span class="badge px-3 py-2 fs-7 rounded-pill text-uppercase shadow-sm" :class="getBadgeEstado(curso.estado_curso)">
+                          <span class="badge px-3 py-2 fs-7 rounded-pill text-uppercase shadow-sm"
+                            :class="getBadgeEstado(curso.estado_curso)">
                             {{ curso.estado_curso }}
                           </span>
                         </td>
@@ -189,8 +226,8 @@ export default {
       try {
         const res = await API.get(`${this.baseUrl}/personas/${this.idpersona}`);
         this.Persona = res.data.data[0] || res.data.data;
-      } catch (err) { 
-        console.error("Error cargando perfil del representante:", err); 
+      } catch (err) {
+        console.error("Error cargando perfil del representante:", err);
       }
     },
     async getFamiliares() {
@@ -225,7 +262,7 @@ export default {
       return isNaN(num) ? "0.00" : num.toFixed(2);
     },
     getBadgeEstado(estado) {
-      if(!estado) return "bg-secondary text-white";
+      if (!estado) return "bg-secondary text-white";
       switch (estado.toLowerCase()) {
         case "aprobado": return "bg-success text-white";
         case "reprobado": return "bg-danger text-white";
@@ -248,7 +285,7 @@ export default {
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(13);
       doc.text("EXPEDIENTE ACADÉMICO HISTÓRICO CONSOLIDADO", 14, 10);
-      
+
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(9);
       doc.setFont("Helvetica", "normal");
@@ -275,15 +312,15 @@ export default {
 
       // Procesamiento bidimensional de filas de AutoTable con Rowspan
       const bodyData = [];
-      
+
       infoHistorial.data.forEach(curso => {
         curso.asignaturas.forEach((asig, index) => {
           if (index === 0) {
             bodyData.push([
-              { 
-                content: `${curso.periodo}\n${curso.nivel} "${curso.paralelo}"\nEsp: ${curso.especialidad}`, 
-                rowSpan: curso.asignaturas.length, 
-                styles: { valign: 'middle', halign: 'center', fillColor: [248, 249, 250] } 
+              {
+                content: `${curso.periodo}\n${curso.nivel} "${curso.paralelo}"\nEsp: ${curso.especialidad}`,
+                rowSpan: curso.asignaturas.length,
+                styles: { valign: 'middle', halign: 'center', fillColor: [248, 249, 250] }
               },
               asig.nombre,
               this.formatNota(asig.nota_final),
@@ -332,46 +369,96 @@ export default {
 </script>
 
 <style scoped>
-.text-blue { color: #1D2A68; }
-.border-blue { border-color: #1D2A68 !important; }
-.bg-blue { background-color: #1D2A68 !important; }
-.text-gold { color: #F4B324; }
-.bg-gold { background-color: #F4B324 !important; }
+.text-blue {
+  color: #1D2A68;
+}
+
+.border-blue {
+  border-color: #1D2A68 !important;
+}
+
+.bg-blue {
+  background-color: #1D2A68 !important;
+}
+
+.text-gold {
+  color: #F4B324;
+}
+
+.bg-gold {
+  background-color: #F4B324 !important;
+}
+
 .btn-gold {
   background-color: #F4B324;
   color: #1D2A68;
   border: none;
 }
+
 .btn-gold:hover {
   background-color: #e0a216;
   color: #1D2A68;
 }
-.fw-black { font-weight: 900; }
-.font-black { font-weight: 800; }
-.object-cover { object-fit: cover; }
+
+.fw-black {
+  font-weight: 900;
+}
+
+.font-black {
+  font-weight: 800;
+}
+
+.object-cover {
+  object-fit: cover;
+}
 
 /* Estructuración de tablas */
-.custom-table-grades { border: 2px solid #1D2A68 !important; }
+.custom-table-grades {
+  border: 2px solid #1D2A68 !important;
+}
+
 .header-double-level th {
   font-size: 0.85rem;
   letter-spacing: 0.5px;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   padding: 12px 6px;
 }
-.bg-blue-dark { background-color: #141f4f !important; }
-.bg-attendance { background-color: #216d43 !important; }
-.bg-status { background-color: #b78311 !important; }
-.border-end-heavy { border-right: 3px solid #1D2A68 !important; }
-.bg-gold-light-cell { background-color: rgba(244, 181, 36, 0.12) !important; }
-.grade-row-hover:hover { background-color: rgba(29, 42, 104, 0.02); }
-.fs-7 { font-size: 0.72rem !important; }
+
+.bg-blue-dark {
+  background-color: #141f4f !important;
+}
+
+.bg-attendance {
+  background-color: #216d43 !important;
+}
+
+.bg-status {
+  background-color: #b78311 !important;
+}
+
+.border-end-heavy {
+  border-right: 3px solid #1D2A68 !important;
+}
+
+.bg-gold-light-cell {
+  background-color: rgba(244, 181, 36, 0.12) !important;
+}
+
+.grade-row-hover:hover {
+  background-color: rgba(29, 42, 104, 0.02);
+}
+
+.fs-7 {
+  font-size: 0.72rem !important;
+}
 
 /* Ajustes del Acordeón */
 .accordion-button:not(.collapsed) {
   background-color: rgba(29, 42, 104, 0.03);
   color: #1D2A68;
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
 }
+
 .accordion-button::after {
   background-size: 1.25rem;
 }

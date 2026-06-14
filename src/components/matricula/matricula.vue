@@ -1,15 +1,53 @@
 <template>
   <div class="container-fluid py-4 bg-light min-vh-100">
-    <header
-      class="mb-4 d-flex justify-content-between align-items-center bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5">
-      <div>
-        <h2 class="fw-bold text-blue mb-1">Gestión de Matrículas periodo {{ periodo_activo.nombre }}</h2>
-        <p class="text-muted mb-0"><i class="fas fa-info-circle me-2"></i>Seleccione un familiar para iniciar el proceso
-          de asignación académica.</p>
+    <header class="bg-white p-4 rounded-4 shadow-sm mb-4 custom-header" style="border-left: 6px solid #F4B324;">
+
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
+
+        <div class="mb-2 mb-md-0 d-flex align-items-center">
+          <div
+            class="header-icon shadow-sm rounded-circle d-flex justify-content-center align-items-center me-3 min-vw-auto"
+            style="background-color: #1D2A68; color: #F4B324; width: 55px; height: 55px; min-width: 55px;">
+            <i class="fas fa-id-badge fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0 d-flex align-items-center flex-wrap gap-2"
+              style="color: #1D2A68; font-family: 'Fraunces', serif;">
+              Gestión de Matrículas
+              <span class="badge fs-6 fw-normal rounded-pill"
+                style="background-color: rgba(244, 179, 36, 0.2); color: #1D2A68; border: 1px solid #F4B324;">
+                {{ periodo_activo.nombre }}
+              </span>
+            </h2>
+            <p class="text-muted mb-0 mt-2" style="font-size: 0.95rem;">
+              Seleccione un familiar para iniciar el proceso de asignación académica.
+            </p>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center flex-grow-1 flex-md-grow-0">
+          <div
+            class="stat-badge d-flex align-items-center px-4 py-2 rounded-pill shadow-sm w-100 justify-content-center"
+            style="background-color: #1D2A68; color: white; white-space: nowrap;">
+            <i class="fas fa-sun me-2" style="color: #F4B324;"></i>
+            <span class="fw-bold">Ciclo Costa</span>
+          </div>
+        </div>
       </div>
-      <div class="text-end">
-        <span class="badge bg-blue px-3 py-2 rounded-pill">Ciclo Costa</span>
+
+      <div class="mt-3 p-3 rounded-3 d-flex align-items-start gap-3"
+        style="background-color: rgba(29, 42, 104, 0.04); border: 1px dashed rgba(29, 42, 104, 0.15);">
+        <i class="fas fa-clipboard-user fs-5 mt-1" style="color: #F4B324;"></i>
+        <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.45;">
+          <strong>Autogestión y Flujo Transaccional Descentralizado:</strong> Este módulo revoluciona el proceso de
+          inscripción tradicional al delegar la ejecución transaccional a los propios representantes legales bajo un
+          modelo de autoservicio (<em>Self-Service</em>). A nivel arquitectónico, esta decisión descentraliza las
+          peticiones al servidor y reduce drásticamente los cuellos de botella en la secretaría académica durante las
+          fechas pico. El sistema valida las relaciones familiares y genera registros íntegros que insertan
+          automáticamente al estudiante en el distributivo de cursos del periodo vigente.
+        </p>
       </div>
+
     </header>
 
     <div class="row">
@@ -232,7 +270,7 @@ export default {
       cargando: false,
       Persona: {},
       periodo_activo: {},
-      tieneHistorial: true, 
+      tieneHistorial: true,
       tipoEstudiante: null, // 'inicial' o 'nuevo'
       nivelesListado: [],   // Lista de niveles para el dropdown externo
       formHistorial: {
@@ -272,13 +310,13 @@ export default {
       } catch (e) { console.error(e); }
       finally { this.cargandoFamilia = false; }
     },
-    async getCronogramas(id_estudiante,tipo = null) {
+    async getCronogramas(id_estudiante, tipo = null) {
       try {
         let url = `${this.baseUrl}/cronograma_matriculas_activo/${id_estudiante}`;
         if (tipo) url += `?tipo=${tipo}`;
-        
+
         const res = await API.get(url);
-        
+
         this.tieneHistorial = res.data.tiene_historial;
         this.cronogramas = res.data.cronogramas;
       } catch (err) {
@@ -294,7 +332,7 @@ export default {
       this.cursoSel = null;
       this.cronogramaSel = null;
       this.tipoEstudiante = null;
-      this.tieneHistorial = true; 
+      this.tieneHistorial = true;
 
       if (!this.estaMatriculado(f.id_persona)) {
         this.getCronogramas(f.id_persona);
@@ -341,11 +379,11 @@ export default {
         });
 
         mostraralertas("Historial externo registrado. Ahora se listará el nivel inmediato superior disponible.", "success");
-        
+
         // Reset de campos de control
         this.tipoEstudiante = null;
         this.formHistorial = { institucion_origen: '', ultimo_nivel_aprobado: null, promedio_final: '', archivo_notas: null };
-        
+
         // Volver a consultar: Como ahora el Backend detectará un historial externo, calculará automáticamente el nivel jerárquico siguiente.
         await this.getCronogramas(this.familiarSel.id_persona);
 

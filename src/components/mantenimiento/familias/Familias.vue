@@ -103,6 +103,9 @@
                                         <div class="fw-bold text-dark">{{ user.nombres }} {{ user.apellidos }}</div>
                                         <div class="text-muted small" v-if="user.fecha_nacimiento">Edad: {{
                                             calcularEdad(user.fecha_nacimiento) }} años</div>
+                                        <span title="Rol">
+                                            Rol: {{ user.nombre_rol }}
+                                        </span>
                                     </div>
                                 </div>
                             </td>
