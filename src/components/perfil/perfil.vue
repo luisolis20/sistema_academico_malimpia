@@ -1,21 +1,34 @@
 <template>
+  <!-- Contenedor principal del componente -->
   <div class="container mt-5 pb-5">
+    <!-- Contenedor del componente -->
     <div class="card shadow-lg border-0 overflow-hidden mb-4 rounded-4">
+      <!-- Contenedor del header -->
       <div class="profile-header-bg"></div>
+      <!-- Contenedor del cuerpo -->
       <div class="card-body pt-0 px-4">
+        <!-- Contenedor de la información -->
         <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end profile-content">
+          <!-- Contenedor del avatar -->
           <div class="profile-avatar-container shadow-sm mb-3 mb-md-0">
+            <!-- Imagen del perfil, usamos el método getPhotoUrl para obtener la URL de la imagen -->
             <img :src="getPhotoUrl(Persona.id_persona)" class="profile-avatar" alt="Foto de perfil">
+            <!-- Etiqueta para cambiar la foto -->
             <label for="fileInput" class="avatar-edit-badge" title="Cambiar foto">
               <i class="fas fa-camera"></i>
             </label>
+            <!-- Botón para seleccionar la foto, se usa el evento change para ejecutar el método onFileSelected -->
             <input type="file" id="fileInput" @change="onFileSelected" hidden accept="image/*">
           </div>
-
+          <!-- Contenedor de la información -->
           <div class="ms-md-4 text-center text-md-start mb-3">
+            <!-- Título con nombre y apellidos del usuario logueado-->
             <h2 class="fw-bold text-blue mb-0">{{ Persona.nombres }} {{ Persona.apellidos }}</h2>
+            <!-- Subtítulo -->
             <p class="text-muted mb-0">
-              <span class="badge bg-gold-soft text-blue me-2">ID: {{ Persona.cedula }}</span>
+              <!-- Cédula del usuario -->
+              <span class="badge bg-gold-soft text-blue me-2">Cédula: {{ Persona.cedula }}</span>
+              <!-- Rol del usuario -->
               <span class="small fw-bold text-uppercase"><i class="fas fa-id-badge me-1"></i> Perfil de Usuario</span>
               {{ Usuario.nombre_rol }}
             </p>
@@ -23,45 +36,61 @@
         </div>
       </div>
     </div>
-
+    <!-- Contenedor del componente -->
     <div class="card shadow-sm border-0 rounded-4">
+      <!-- Contenedor del header -->
       <div class="card-header bg-white border-0 p-0">
+        <!-- Contenedor de las navegaciones -->
         <ul class="nav nav-pills custom-nav-pills px-3 pt-3" id="perfilTabs" role="tablist">
+          <!-- Navegación del perfil -->
           <li class="nav-item" role="presentation">
+            <!-- Nav de Datos Personales -->
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#personales" type="button">
               <i class="fas fa-user-edit me-2"></i>Datos Personales
             </button>
           </li>
+          <!-- Navegación de Seguridad -->
           <li class="nav-item" role="presentation">
+            <!-- Nav de Seguridad -->
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#usuario" type="button">
               <i class="fas fa-shield-alt me-2"></i>Seguridad de Cuenta
             </button>
           </li>
+          <!-- Navegación de Familias, solo se muestra si el rol es diferente a Estudiante -->
           <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol !== 'Estudiante'">
+            <!-- Nav de Familias, se llama al método getFamiliares para obtener las familias del usuario -->
             <button @click="getFamiliares" class="nav-link" data-bs-toggle="tab" data-bs-target="#familias"
               type="button">
               <i class="fas fa-users me-2"></i>Familias
             </button>
           </li>
+          <!-- Navegación de Representantes, solo se muestra si el rol es Estudiante -->
           <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Estudiante'">
+            <!-- Nav de Representantes, se llama al método getEstFamiliares para obtener los representantes del usuario -->
             <button @click="getEstFamiliares" class="nav-link" data-bs-toggle="tab" data-bs-target="#estufamilias"
               type="button">
               <i class="fas fa-users me-2"></i>Mi(s) Representante
             </button>
           </li>
+          <!-- Navegación de Cursos, solo se muestra si el rol es Docente -->
           <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <!-- Nav de Cursos, se llama al método getCargaDocente para obtener los cursos del usuario -->
             <button @click="getCargaDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-tutorias"
               type="button">
               <i class="fas fa-chalkboard-teacher me-2"></i>Mis Tutorías
             </button>
           </li>
+          <!-- Navegación de Asignaturas, solo se muestra si el rol es Docente -->
           <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <!-- Nav de Asignaturas, se llama al método getCargaDocente para obtener las asignaturas del usuario -->
             <button @click="getCargaDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#mis-asignaturas"
               type="button">
               <i class="fas fa-book me-2"></i>Asignaturas Asignadas
             </button>
           </li>
+          <!-- Navegación de Horarios, solo se muestra si el rol es Docente -->
           <li class="nav-item" role="presentation" v-if="Usuario.nombre_rol === 'Docente'">
+            <!-- Nav de Horarios, se llama al método getHorarioDocente para obtener el horario del usuario -->  
             <button @click="getHorarioDocente" class="nav-link" data-bs-toggle="tab" data-bs-target="#horario-clases"
               type="button">
               <i class="fas fa-calendar-alt me-2"></i>Mi Horario
@@ -69,33 +98,48 @@
           </li>
         </ul>
       </div>
-
+      <!-- Contenedor del cuerpo -->
       <div class="card-body p-4">
+        <!-- Contenedor de la información de cada nav tap -->
         <div class="tab-content" id="myTabContent">
-
+          <!-- Contenedor del contenido, se muestra si se da click en Datos personales -->
           <div class="tab-pane fade show active" id="personales" role="tabpanel">
+            <!-- Contenedor del cuerpo -->    
             <div class="info-section mb-4">
+              <!-- Título -->
               <h5 class="text-blue fw-bold border-bottom pb-2">Información Básica</h5>
+              <!-- Texto -->
               <p class="text-muted small">Desde aquí puedes gestionar tu información de contacto. Para cambios en
                 nombres o cédula, contacta a secretaría.</p>
             </div>
-
+              <!-- Contenedor de los campos de datos -->
             <div class="row g-3">
+                <!-- Campo de correo -->  
               <div class="col-md-6">
+                <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">CORREO ELECTRÓNICO</label>
+                <!-- Campo de correo, se llena con el valor de la propiedad Persona.correo -->
                 <input v-model="Persona.correo" type="email" class="form-control custom-input-profile"
                   placeholder="correo@ejemplo.com">
               </div>
+                <!-- Campo de teléfono -->  
               <div class="col-md-6">
+                  <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">TELÉFONO</label>
+                <!-- Campo de teléfono, se llena con el valor de la propiedad Persona.telefono -->
                 <input v-model="Persona.telefono" type="text" class="form-control custom-input-profile"
                   placeholder="09xxxxxxxx">
               </div>
+                <!-- Campo de dirección -->
               <div class="col-md-12">
+                  <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">DIRECCIÓN DE DOMICILIO</label>
+                <!-- Campo de dirección, se llena con el valor de la propiedad Persona.direccion -->
                 <input v-model="Persona.direccion" type="text" class="form-control custom-input-profile">
               </div>
+                <!-- Botón de guardar -->
               <div class="col-12 text-end mt-4">
+                <!-- Botón, se usa el evento click para llamar al método actualizarDatosPersonales, se usa v-bind:disabled="cargando" para deshabilitar el botón si está cargando -->
                 <button @click="actualizarDatosPersonales" class="btn btn-gold px-4 fw-bold shadow-sm"
                   :disabled="cargando">
                   <i class="fas fa-save me-2"></i> {{ cargando ? 'Guardando...' : 'Guardar Cambios' }}
@@ -103,44 +147,60 @@
               </div>
             </div>
           </div>
-
+          <!-- Contenedor del contenido, se muestra si se da click en Seguridad de Cuenta -->
           <div class="tab-pane fade" id="usuario" role="tabpanel">
+            <!-- Contenedor del cuerpo -->
             <div class="info-section mb-4">
+              <!-- Título -->
               <h5 class="text-blue fw-bold border-bottom pb-2">Gestión de Acceso</h5>
+              <!-- Texto -->
               <p class="text-muted small">Mantén tu cuenta segura cambiando tu contraseña periódicamente. El nombre de
                 usuario no puede ser modificado.</p>
             </div>
-
+              <!-- Contenedor de los campos de datos -->
             <div class="row g-3">
+                <!-- Campo de nombre de usuario -->
               <div class="col-md-6">
+                  <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">NOMBRE DE USUARIO</label>
+                <!-- Campo de nombre de usuario, se llena con el valor de la propiedad Usuario.username -->
                 <input v-model="Usuario.username" type="text" class="form-control bg-light text-muted" readonly>
               </div>
-              <div class="col-md-6"></div>
-
+              <!-- Contenedor del campo de contraseña -->
               <div class="col-md-6">
+                <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">NUEVA CONTRASEÑA</label>
+                <!-- Campo de contraseña, se llena con el valor de la propiedad nuevaClave -->
                 <input v-model="nuevaClave" type="password" class="form-control custom-input-profile"
                   placeholder="Mínimo 8 caracteres">
               </div>
+              <!-- Contenedor del campo de confirmación de contraseña -->
               <div class="col-md-6">
+                <!-- Etiqueta -->
                 <label class="form-label small fw-bold text-muted">CONFIRMAR CONTRASEÑA</label>
+                <!-- Campo de confirmación de contraseña, se llena con el valor de la propiedad confirmarClave -->
                 <input v-model="confirmarClave" type="password" class="form-control custom-input-profile">
               </div>
-
+              <!-- Contenedor del mensaje de recomendación -->
               <div class="col-12 mt-4">
+                <!-- Alerta de información -->
                 <div class="alert alert-info border-0 shadow-sm rounded-3">
+                  <!-- Contenedor del texto -->
                   <div class="d-flex align-items-center">
+                    <!-- Icono -->
                     <i class="fas fa-info-circle fa-2x me-3"></i>
                     <div>
+                      <!-- Título --> 
                       <h6 class="mb-0 fw-bold">Recomendación</h6>
+                      <!-- Texto -->  
                       <small>Tu contraseña debe ser difícil de adivinar y no debes compartirla con nadie.</small>
                     </div>
                   </div>
                 </div>
               </div>
-
+                <!-- Botón de guardar --> 
               <div class="col-12 text-end">
+                <!-- Botón, se usa el evento click para llamar al método actualizarCredenciales, se usa v-bind:disabled="cargando" para deshabilitar el botón si está cargando -->
                 <button @click="actualizarCredenciales" class="btn btn-blue px-4 fw-bold shadow-sm"
                   :disabled="cargando">
                   <i class="fas fa-key me-2"></i> Cambiar Contraseña
@@ -148,45 +208,68 @@
               </div>
             </div>
           </div>
+          <!-- Contenedor del contenido, se muestra si se da click en Familias -->
           <div class="tab-pane fade" id="familias" role="tabpanel">
+            <!-- Contenedor del cuerpo -->
             <div class="info-section mb-4">
+              <!-- Título --> 
               <h5 class="text-blue fw-bold border-bottom pb-2">Núcleo Familiar Registrado</h5>
+              <!-- Texto -->
               <p class="text-muted small">A continuación se listan los familiares vinculados a su cuenta en el sistema
                 académico.</p>
             </div>
-
+              <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
             <div v-if="cargandoFamilia" class="text-center py-5">
+              <!-- Indicador de carga -->
               <div class="spinner-border text-gold" role="status"></div>
+              <!-- Texto -->
               <p class="mt-2 text-muted">Cargando familiares...</p>
             </div>
-
+              <!-- Contenedor de mensaje de error, se muestra cuando no hay familiares -->
             <div v-else-if="familiares.length === 0" class="alert alert-warning border-0 shadow-sm rounded-4 p-4">
+              <!-- Contenedor del texto -->
               <div class="d-flex align-items-center">
+                <!-- Icono -->
                 <i class="fas fa-exclamation-circle fa-3x me-3 text-warning"></i>
+                <!-- Contenedor del texto -->
                 <div>
+                  <!-- Título -->
                   <h6 class="fw-bold mb-1">Usted no posee familia asignada</h6>
+                  <!-- Texto -->
                   <p class="mb-0 small">Debe dirigirse a la institución para registrar a su grupo familiar y completar
                     su expediente.</p>
                 </div>
               </div>
             </div>
-
+            <!-- Contenedor de los datos de la familia, se muestra cuando hay familiares -->
             <div v-else class="row g-3">
+              <!-- Contenedor de cada familia, se usa v-for para recorrer el array de familiares y agregar datos a la página -->
               <div v-for="familiar in familiares" :key="familiar.id_persona" class="col-md-6">
+                <!-- Contenedor del componente -->
                 <div class="card border shadow-sm rounded-4 h-100 hvr-light">
+                  <!-- Contenedor del cuerpo -->
                   <div class="card-body">
+                    <!-- Contenedor de la información -->
                     <div class="d-flex align-items-center">
+                      <!-- Contenedor del avatar/imagen de la familia, se usa el método getPhotoUrl para obtener la URL de la imagen -->
                       <img :src="familiar.foto ? 'data:image/jpeg;base64,' + familiar.foto : getPhotoUrl(null)"
                         class="rounded-circle border border-2 border-gold shadow-sm"
                         style="width: 70px; height: 70px; object-fit: cover;">
+                        <!-- Contenedor de la información -->
                       <div class="ms-3">
+                        <!-- Nombre y apellidos -->
                         <h6 class="mb-0 fw-bold text-blue">{{ familiar.nombres }} {{ familiar.apellidos }}</h6>
+                        <!-- Parentesco -->
                         <span class="badge bg-gold text-blue small mb-1">{{ familiar.parentesco }}</span>
+                        <!-- Cédula -->
                         <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i> {{ familiar.cedula }}</p>
+                        <!-- Teléfono, si no existe, se muestra "Sinteléfono" -->
                         <p class="mb-0 text-muted small"><i class="fas fa-phone me-1"></i>
                           {{ familiar.telefono || 'Sinteléfono' }}</p>
                       </div>
+                      <!-- Contenedor de botones -->
                       <div class="mt-3 border-top pt-3 text-end">
+                        <!-- Botón, se usa el evento click para llamar al método verCalificaciones, se usa v-bind:disabled="cargando" para deshabilitar el botón si está cargando -->
                         <button @click="verCalificaciones(familiar)"
                           class="btn btn-sm btn-gold text-blue fw-bold rounded-pill px-3 shadow-sm">
                           <i class="fas fa-chart-bar me-1"></i> Ver Calificaciones
@@ -198,38 +281,62 @@
               </div>
             </div>
           </div>
+          <!-- Contenedor del contenido, se muestra si se da click en Representantes -->
           <div class="tab-pane fade" id="estufamilias" role="tabpanel">
+            <!-- Contenedor del cuerpo -->
             <div class="info-section mb-4">
+              <!-- Título -->
               <h5 class="text-blue fw-bold border-bottom pb-2">Representante(s) registrado(s)</h5>
+              <!-- Texto -->
               <p class="text-muted small">A continuación se muestra la información de los representantes registrados en
                 el sistema.</p>
             </div>
+              <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
             <div v-if="cargandoEstFamiliares" class="text-center py-5">
+              <!-- Indicador de carga -->
               <div class="spinner-border text-gold" role="status"></div>
+              <!-- Texto -->
               <p class="mt-2 text-muted">Cargando representantes...</p>
             </div>
+              <!-- Contenedor de mensaje de error, se muestra cuando no hay representantes -->
             <div v-else-if="estfamiliares.length === 0" class="alert alert-warning border-0 shadow-sm rounded-4 p-4">
+              <!-- Contenedor del texto -->
               <div class="d-flex align-items-center">
+                <!-- Icono -->
                 <i class="fas fa-exclamation-circle fa-3x me-3 text-warning"></i>
+                <!-- Contenedor del texto -->
                 <div>
+                  <!-- Título -->
                   <h6 class="fw-bold mb-1">No posee representante registrado</h6>
+                  <!-- Texto -->
                   <p class="mb-0 small">Su representante debe registrarse en el sistema para poder realizar el
                     seguimiento de su estado de estudiante.</p>
                 </div>
               </div>
             </div>
+            <!-- Contenedor de los datos de la familia, se muestra cuando hay familiares -->
             <div v-else class="row g-3">
+              <!-- Contenedor de cada familia, se usa v-for para recorrer el array de familiares y agregar datos a la página -->
               <div v-for="familiar in estfamiliares" :key="familiar.id_persona" class="col-md-6">
+                <!-- Contenedor del componente -->
                 <div class="card border shadow-sm rounded-4 h-100 hvr-light">
+                  <!-- Contenedor del cuerpo -->
                   <div class="card-body">
+                    <!-- Contenedor de la información -->
                     <div class="d-flex align-items-center">
+                      <!-- Contenedor del avatar/imagen de la familia, se usa el método getPhotoUrl para obtener la URL de la imagen -->
                       <img :src="familiar.foto ? 'data:image/jpeg;base64,' + familiar.foto : getPhotoUrl(null)"
                         class="rounded-circle border border-2 border-gold shadow-sm"
                         style="width: 70px; height: 70px; object-fit: cover;">
+                        <!-- Contenedor de la información -->
                       <div class="ms-3">
+                        <!-- Nombre y apellidos -->
                         <h6 class="mb-0 fw-bold text-blue">{{ familiar.nombres }} {{ familiar.apellidos }}</h6>
+                        <!-- Parentesco -->
                         <span class="badge bg-gold text-blue small mb-1">{{ familiar.parentesco }}</span>
+                        <!-- Cédula -->
                         <p class="mb-0 text-muted small"><i class="fas fa-id-card me-1"></i> {{ familiar.cedula }}</p>
+                        <!-- Teléfono, si no existe, se muestra "Sinteléfono" -->
                         <p class="mb-0 text-muted small"><i class="fas fa-phone me-1"></i>
                           {{ familiar.telefono || 'Sinteléfono' }}</p>
                       </div>
@@ -239,27 +346,38 @@
               </div>
             </div>
           </div>
+          <!-- Contenedor del contenido, se muestra si se da click en Mis tutorias -->
           <div class="tab-pane fade" id="mis-tutorias" role="tabpanel">
+            <!-- Contenedor del cuerpo -->
             <div class="info-section mb-4">
+              <!-- Título -->
               <h5 class="text-blue fw-bold border-bottom pb-2">Cursos bajo mi Tutoría</h5>
+              <!-- Texto -->
               <p class="text-muted small">Como docente tutor, usted es responsable del seguimiento integral de estos
                 paralelos.</p>
             </div>
-
+              <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
             <div v-if="cargaDocente.tutorias.length === 0" class="alert alert-light border shadow-sm rounded-4">
+              <!-- Icono con texto-->
               <i class="fas fa-info-circle me-2"></i> Usted no tiene cursos asignados como tutor en este periodo.
             </div>
-
+              <!-- Contenedor de los cursos, se muestra cuando hay cursos -->
             <div class="row g-3">
+                <!-- Contenedor de cada curso, se usa v-for para recorrer el array de cursos y agregar datos a la página -->
               <div v-for="curso in cargaDocente.tutorias" :key="curso.id_curso" class="col-md-6">
+                <!-- Contenedor del componente -->
                 <div class="card border-start border-gold border-4 shadow-sm rounded-3">
+                  <!-- Contenedor del cuerpo -->
                   <div class="card-body">
+                      <!-- Título -->
                     <h6 class="fw-bold text-blue mb-1">
                       {{ curso.nivel.nombre }} "{{ curso.paralelo }}"
                     </h6>
+                      <!-- Texto -->
                     <p class="mb-0 small text-muted text-uppercase fw-bold">
                       {{ curso.especialidad.nombre }}
                     </p>
+                      <!-- Contenedor de la información -->
                     <div class="mt-2">
                       <span class="badge bg-gold-soft text-blue">Periodo: {{ curso.periodo.nombre }}</span>
                     </div>
@@ -268,20 +386,27 @@
               </div>
             </div>
           </div>
-
+          <!-- Contenedor del contenido, se muestra si se da click en Mis asignaturas -->
           <div class="tab-pane fade" id="mis-asignaturas" role="tabpanel">
+            <!-- Contenedor del cuerpo -->
             <div class="info-section mb-4">
+              <!-- Título -->
               <h5 class="text-blue fw-bold border-bottom pb-2">Asignaturas que Imparto</h5>
+              <!-- Texto -->
               <p class="text-muted small">Listado de materias asignadas y los cursos correspondientes.</p>
             </div>
-
+              <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
             <div v-if="cargaDocente.asignaturas.length === 0" class="alert alert-light border shadow-sm rounded-4">
+              <!-- Icono con texto--> 
               <i class="fas fa-info-circle me-2"></i> No se encontraron asignaturas asignadas a su perfil.
             </div>
-
+              <!-- Contenedor de la tabla, animación Fade Up -->
             <div class="table-responsive">
+                <!-- Contenedor de la tabla --> 
               <table class="table table-hover align-middle border rounded-3 overflow-hidden">
+                <!-- Contenedor de la cabecera -->
                 <thead class="table-light text-blue">
+                  <!-- Contenedor de la cabecera -->  
                   <tr>
                     <th class="small fw-bold">ASIGNATURA</th>
                     <th class="small fw-bold">CURSO / PARALELO</th>
@@ -289,20 +414,29 @@
                   </tr>
                 </thead>
                 <tbody>
+                  <!-- Contenedor de los datos de la tabla, se usa v-for para recorrer el array de asignaturas y agregar datos a la tabla -->
                   <tr v-for="item in cargaDocente.asignaturas" :key="item.id_curso_asignatura">
+                    <!-- Contenedor del cuerpo -->
                     <td>
+                      <!-- Contenedor de la información -->
                       <div class="d-flex align-items-center">
+                        <!-- Contenedor del icono -->
                         <div class="icon-box bg-blue-soft text-blue me-2">
+                            <!-- Icono -->
                           <i class="fas fa-book-open"></i>
                         </div>
+                        <!-- Nombre de la asignatura -->
                         <span class="fw-bold">{{ item.asignatura.nombre }}</span>
                       </div>
                     </td>
                     <td>
+                      <!-- Nombre del nivel y paralelo -->
                       <span class="text-muted">{{ item.curso.nivel.nombre }} "{{ item.curso.paralelo }}"</span>
                       <br>
+                      <!-- Nombre de la especialidad -->
                       <small class="text-gold fw-bold">{{ item.curso.especialidad.nombre }}</small>
                     </td>
+                      <!-- Contenedor de la información -->
                     <td class="text-center">
                       <span class="badge rounded-pill bg-light text-dark border">{{ item.horas_semanales }} horas</span>
                     </td>
@@ -311,26 +445,37 @@
               </table>
             </div>
           </div>
+          <!-- Contenedor del contenido, se muestra si se da click en Horarios clases -->
           <div class="tab-pane fade" id="horario-clases" role="tabpanel">
+              <!-- Contenedor del cuerpo -->  
             <div class="info-section mb-4">
+              <!-- Título --> 
               <h5 class="text-blue fw-bold border-bottom pb-2">Horario Semanal de Clases</h5>
+              <!-- Texto -->  
               <p class="text-muted small">Visualice su planificación semanal. Los horarios están sujetos a cambios por
                 parte de coordinación académica.</p>
             </div>
-
+              <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
             <div v-if="cargandoHorario" class="text-center py-5">
+              <!-- Indicador de carga -->
               <div class="spinner-border text-gold" role="status"></div>
+              <!-- Texto -->
               <p class="mt-2 text-muted">Generando cronograma...</p>
             </div>
-
+              <!-- Contenedor de mensaje de error, se muestra cuando no hay horarios -->
             <div v-else-if="horario.length === 0" class="alert alert-light border shadow-sm rounded-4 text-center">
+              <!-- Icono con texto-->
               <i class="fas fa-calendar-times fa-2x mb-2 text-muted"></i>
+              <!-- Texto -->
               <p class="mb-0">No se han registrado horas de clase para su usuario todavía.</p>
             </div>
-
+              <!-- Contenedor de la tabla, animación Fade Up -->  
             <div v-else class="table-responsive shadow-sm rounded-4">
+                <!-- Contenedor de la tabla -->   
               <table class="table table-bordered align-middle mb-0 text-center custom-table-schedule">
+                <!-- Contenedor de la cabecera -->
                 <thead class="bg-blue text-white">
+                  <!-- Contenedor de la cabecera -->  
                   <tr>
                     <th class="py-3">Hora</th>
                     <th class="py-3">Lunes</th>
@@ -341,26 +486,32 @@
                   </tr>
                 </thead>
                 <tbody>
+                  <!-- Contenedor de los datos de la tabla, se usa v-for para recorrer el array de horarios y agregar datos a la tabla -->
                   <tr v-for="(fila, index) in horario" :key="index">
+                    <!-- Contenedor del cuerpo , rango de filas para diseñar el horario -->
                     <td class="fw-bold text-blue bg-light" style="width: 15%;">
                       {{ fila.rango }}
                     </td>
-
+                      <!-- Contenedor de los datos de la fila, se usa v-for para recorrer los días y agregar datos a la fila -->
                     <td v-for="dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']" :key="dia"
                       class="p-0 position-relative" style="width: 17%; height: 80px;">
-
+                      <!-- Contenedor del cuerpo, se usa v-if para mostrar el contenido de la fila para cada día -->
                       <div v-if="fila[dia]" class="p-2 h-100 d-flex flex-column justify-content-center">
+                        <!-- Nombre de la asignatura -->
                         <div class="fw-bold text-blue mb-1" style="font-size: 0.85rem; line-height: 1.2;">
                           {{ fila[dia].asignatura }}
                         </div>
+                        <!-- Nombre del curso -->
                         <div class="text-muted mb-1" style="font-size: 0.75rem;">
+                            <!-- Icono mas informacion-->
                           <i class="fas fa-chalkboard text-gold me-1"></i> {{ fila[dia].curso }}
                         </div>
+                        <!-- Nombre de la especialidad -->
                         <div class="text-uppercase fw-bold text-blue" style="font-size: 0.65rem; opacity: 0.8;">
                           {{ fila[dia].especialidad }}
                         </div>
                       </div>
-
+                      <!-- Contenedor del cuerpo, si no hay datos se muestra un fondo blanco -->
                       <div v-else class="h-100 bg-white"></div>
                     </td>
                   </tr>
@@ -372,35 +523,52 @@
       </div>
     </div>
   </div>
+  <!-- Contenedor del modal de reporte de calificaciones -->
   <div class="modal fade" id="modalCalificaciones" tabindex="-1" aria-hidden="true">
+    <!-- Contenedor del cuerpo -->
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <!-- Contenedor del cuerpo -->
       <div class="modal-content border-0 shadow-lg rounded-4">
+        <!-- Contenedor del encabezado -->
         <div class="modal-header bg-blue text-white rounded-top-4">
+          <!-- Título -->
           <h5 class="modal-title fw-bold">
+            <!-- Icono -->
             <i class="fas fa-user-graduate me-2"></i> Reporte de Calificaciones
           </h5>
+          <!-- Botón de cerrar el modal -->
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-
+        <!-- Contenedor del cuerpo -->
         <div class="modal-body p-4" style="background-color: #f8f9fa;">
+          <!-- Contenedor carga de datos, se muestra mientras se está cargando los datos -->
           <div v-if="cargandoCalificaciones" class="text-center py-5">
+            <!-- Indicador de carga -->
             <div class="spinner-border text-gold" role="status"></div>
+            <!-- Texto -->
             <p class="mt-2 text-muted">Consultando registro académico...</p>
           </div>
-
+            <!-- Contenedor de datos, se muestra cuando hay datos -->
           <div v-else-if="datosAcademicos">
+            <!-- Contenedor del componente -->
             <div class="card border-0 shadow-sm rounded-4 mb-4 border-start border-gold border-5">
+              <!-- Contenedor del cuerpo -->
               <div class="card-body">
+                  <!-- Contenedor de la información -->
                 <div class="row align-items-center">
+                  <!-- Contenedor del texto -->
                   <div class="col-md-8">
+                      <!-- Información del curso -->
                     <h5 class="fw-bold text-blue mb-1">
                       {{ datosAcademicos.curso.nivel }} "{{ datosAcademicos.curso.paralelo }}"
                     </h5>
+                      <!-- Información de la especialidad -->
                     <p class="text-muted mb-0 small">
                       <span v-if="datosAcademicos.curso.especialidad">{{ datosAcademicos.curso.especialidad }} |</span>
                       Periodo Lectivo: <span class="fw-bold">{{ datosAcademicos.curso.periodo }}</span>
                     </p>
                   </div>
+                  <!-- Contenedor del botón -->
                   <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <span class="badge bg-gold text-blue fs-6 px-3 py-2">
                       {{ estudianteSeleccionado?.nombres }} {{ estudianteSeleccionado?.apellidos }}
@@ -409,9 +577,13 @@
                 </div>
               </div>
             </div>
+            <!-- Contenedor de la información de las notas del estudiante -->
             <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4" role="alert">
+              <!-- Título -->
               <h6 class="fw-bold mb-2"><i class="fas fa-calculator me-2"></i> ¿Cómo se calculan las notas?</h6>
+              <!-- Contenedor de la información -->
               <ul class="mb-0 small">
+                <!-- Contenedor de la información -->
                 <li><strong>Parciales (P1, P2, P3):</strong> Se promedian 4 insumos: Tareas, A. Individuales, A.
                   Grupales y
                   Lecciones.</li>
@@ -424,42 +596,57 @@
                   10.</li>
               </ul>
             </div>
-
+            <!-- Contenedor de la tabla de notas -->
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <!-- Contenedor de la tabla -->
               <div class="table-responsive">
+                <!-- Contenedor de la tabla -->
                 <table class="table table-hover table-bordered align-middle mb-0 text-center text-nowrap">
-
+                  <!-- Contenedor de la cabecera -->
                   <thead class="bg-blue text-white">
+                    <!-- Contenedor de la cabecera -->
                     <tr>
+                      <!-- Contenedor de la cabecera de la asignatura -->
                       <th rowspan="2" class="text-start ps-4 align-middle">Asignatura</th>
+                      <!-- Contenedor de la cabecera de la quimestre 1 -->
                       <th colspan="4" class="text-center">Quimestre 1</th>
+                      <!-- Contenedor de la cabecera de la quimestre 2, se muestra si hay notas de quimestre 2 -->
                       <th v-if="mostrarColumnas.q2" colspan="4" class="text-center border-start border-light">Quimestre
                         2</th>
+                        <!-- Contenedor de la cabecera de la promedio anual, se muestra si hay notas de quimestre 2 -->
                       <th v-if="mostrarColumnas.q2" rowspan="2"
                         class="align-middle bg-secondary bg-opacity-25 border-start text-white border-light">Prom. Anual
                       </th>
+                      <!-- Contenedor de la cabecera de la supletorio, se muestra si hay notas de supletorio -->
                       <th v-if="mostrarColumnas.supletorio" rowspan="2" class="align-middle bg-warning text-dark">
                         Supletorio</th>
+                        <!-- Contenedor de la cabecera de la remedial, se muestra si hay notas de remedial -->
                       <th v-if="mostrarColumnas.remedial" rowspan="2" class="align-middle bg-info text-dark">Remedial
                       </th>
+                      <!-- Contenedor de la cabecera de la gracia, se muestra si hay notas de gracia -->  
                       <th v-if="mostrarColumnas.gracia" rowspan="2" class="align-middle bg-primary text-white">Gracia
                       </th>
+                      <!-- Contenedor de la cabecera de la nota final, se muestra si hay notas de quimestre 2 --> 
                       <th v-if="mostrarColumnas.q2" rowspan="2" class="align-middle bg-gold text-blue">Nota Final</th>
+                      <!-- Contenedor de la cabecera de la estado, se muestra si hay notas de quimestre 2 -->
                       <th v-if="mostrarColumnas.q2" rowspan="2" class="align-middle">Estado</th>
                     </tr>
+                    <!-- Contenedor de la cabecera de la promedio parcial -->   
                     <tr class="bg-blue-light text-white" style="background-color: #2a3d8f;">
                       <th class="small fw-normal">P1</th>
                       <th class="small fw-normal">P2</th>
                       <th class="small fw-normal">P3</th>
                       <th class="small fw-bold">Prom</th>
+                      <!-- Contenedor de la cabecera de la promedio parcial, se muestra si hay notas de quimestre 2 --> 
                       <th v-if="mostrarColumnas.q2" class="small fw-normal border-start border-light">P1</th>
                       <th v-if="mostrarColumnas.q2" class="small fw-normal">P2</th>
                       <th v-if="mostrarColumnas.q2" class="small fw-normal">P3</th>
                       <th v-if="mostrarColumnas.q2" class="small fw-bold">Prom</th>
                     </tr>
                   </thead>
-
+                  
                   <tbody>
+                    <!-- Contenedor de los datos de la tabla, se usa v-for para recorrer el array de calificaciones y agregar datos a la tabla -->
                     <tr v-for="cal in datosAcademicos.calificaciones" :key="cal.asignatura">
                       <td class="text-start ps-4 fw-bold text-blue">{{ cal.asignatura }}</td>
 
