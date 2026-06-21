@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
+//Importación de clases necesarias para el controlador Niveles_academicosController
+use App\Models\Niveles_academicos;//Importación de la clase Niveles_academicos
+use Illuminate\Http\Request;//Importación de la clase Request para manejar las solicitudes HTTP
 
-use App\Models\Niveles_academicos;
-use Illuminate\Http\Request;
-
-
+//Clase Niveles_academicosController que representa un controlador en la aplicación para manejar las operaciones relacionadas con los niveles académicos
 class Niveles_academicosController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Función que muestra una lista de niveles académicos, las cuales pueden ser filtradas por página y por búsqueda.
+     * La función index es la encargada de mostrar una lista de niveles académicos, recibiendo como parámetros el objeto Request que contiene los datos enviados por el formulario.
      */
     public function index(Request $request)
     {
