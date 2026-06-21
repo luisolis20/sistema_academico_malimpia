@@ -313,16 +313,6 @@ npm run lint
 - **`vue.config.js`** - Configuración personalizada de Vue
 - **`package.json`** - Dependencias y scripts del proyecto
 
-### Variables de Entorno
-
-Crea un archivo `.env.local` en la raíz del proyecto para configurar:
-
-```
-VUE_APP_API_URL=http://localhost:3000/api
-VUE_APP_ENVIRONMENT=development
-```
-
----
 
 ## 🔗 Referencias
 
