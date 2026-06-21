@@ -1,17 +1,34 @@
 <template>
+  <!-- Llamada al componente Cursos -->
   <Cursos/>
 </template>
 <script>
-// @ is an alias to /src
-import Cursos from '@/components/mantenimiento/cursos/Cursos.vue'
-import { getMe } from "@/assets/js/auth";
+/**
+ * CursosView es un componente de Vista que se encarga de mostrar el componente Cursos
+ * Se importa Cursos desde @/components/mantenimiento/cursos/Cursos.vue
+ * Luego la usamos en el template de esta vista
+ * Se importa getMe desde @/assets/js/auth para obtener el token del usuario
+ */
+import Cursos from '@/components/mantenimiento/cursos/Cursos.vue'// Importa el componente Cursos
+import { getMe } from "@/assets/js/auth";// Importa la función getMe
+/**
+ * Exporta la vista CursosView
+ * Usamos solo name para nombrar la vista, components para definir los componentes que se usan 
+ * en la vista y mounted para definir el método que se ejecuta al montar la vista
+ */
 export default {
-  name: 'CursosView',
+  name: 'CursosView',// Nombre de la vista
+  /**
+   * Define los componentes que se usan en la vista
+   */
   components: {
     Cursos
   },
+  /**
+   * Mounted se ejecuta al montar la vista, se usa async y await para hacer llamadas a la API
+   */
   async mounted() {
-    await getMe();
+    await getMe();// Llamada a la API para obtener el token del usuario
   }
 }
 </script>
