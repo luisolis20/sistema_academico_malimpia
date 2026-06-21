@@ -310,7 +310,7 @@ npm run lint
 
 - **`babel.config.js`** - Configuración del transpilador Babel
 - **`jsconfig.json`** - Configuración de rutas y módulos de JavaScript
-- **vue.config.js** - Configuración personalizada de Vue CLI ![Logo Frontmilenio](src/assets/img/logo.png)
+- **`vue.config.js`** - Configuración personalizada de V![Logo Frontmilenio](src/assets/img/mile.png)![Logo Frontmilenio](src/assets/img/mile.png)ue CLI
 - **`package.json`** - Dependencias y scripts del proyecto
 
 ### Variables de Entorno
