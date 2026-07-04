@@ -1,20 +1,32 @@
 <template>
+  <!-- Contenedor principal del componente -->
   <div class="container-fluid py-4 bg-light min-vh-100">
+    <!-- Cabecera del componente -->
     <header class="mb-4 bg-white p-4 rounded-4 shadow-sm border-start border-gold border-5 no-print">
+      <!-- FILA SUPERIOR: Títulos y Estado del Periodo -->
       <div class="row align-items-center g-3">
+        <!-- Título e Icono Principal -->
         <div class="col-md-7">
+          <!-- Título -->
           <h2 class="fw-bold text-blue mb-1">
             <i class="fas fa-file-invoice-doll me-2 text-gold"></i>Mis Calificaciones Consolidadas
           </h2>
+          <!-- Subtítulo -->
           <p class="text-muted mb-0">
             Consulta tus parciales, exámenes quimestrales, registros definitivos y porcentajes de asistencia por periodo lectivo.
           </p>
         </div>
+        <!-- contenedor para seleccionar el periodo lectivo -->
         <div class="col-md-5 text-md-end">
+          <!-- contenedor de la selección de periodo lectivo -->
           <div class="d-inline-block text-start style-select-container">
+            <!-- etiqueta para el selector de periodo lectivo -->
             <label class="small fw-bold text-blue mb-1 d-block">Seleccionar Periodo Lectivo:</label>
+            <!-- contenedor de la selección de periodo lectivo -->
             <div class="input-group">
+              <!-- icono de calendario -->  
               <span class="input-group-text bg-blue text-white"><i class="fas fa-calendar-alt"></i></span>
+              <!-- selector de periodo lectivo -->
               <select class="form-select border-blue shadow-sm" v-model="selectedPeriodoId" @change="cambiarPeriodo">
                 <option v-for="p in periodosHistorial" :key="p.id_periodo" :value="p.id_periodo">
                   {{ p.nombre_periodo }} {{ p.id_periodo === periodoActivoId ? '(Actual)' : '' }}
@@ -25,24 +37,29 @@
         </div>
       </div>
     </header>
-
+    <!-- Contener con spinner de carga -->
     <div v-if="loading" class="text-center py-5">
+      <!-- Spinner de carga con estilo personalizado --> 
       <div class="spinner-border text-blue" role="status">
         <span class="visually-hidden">Cargando información académica...</span>
       </div>
       <p class="mt-2 text-muted fw-bold">Obteniendo boleta de calificaciones...</p>
     </div>
-
+    <!-- Contenedor de alerta cuando no hay registros académicos -->
     <div v-else-if="periodosHistorial.length === 0" class="alert alert-info rounded-4 p-4 text-center shadow-sm">
       <i class="fas fa-exclamation-circle fa-2x text-blue mb-2"></i>
       <h5>Sin registros académicos</h5>
       <p class="mb-0 text-muted">No se encontraron matrículas o calificaciones vinculadas a tu perfil.</p>
     </div>
-
+    <!-- Contenedor que carga la información de los datos optenidos-->
     <div v-else>
+      <!-- Contenedor de alerta cuando no hay registros académicos -->
       <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+        <!-- Contenedor para mostrar el nivel y especialidad del curso -->
         <div class="bg-blue text-white p-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <!-- Contenedor para mostrar el nivel y especialidad del curso -->
           <div class="d-flex align-items-center gap-3">
+            <!-- Icono de curso -->
             <div class="bg-gold p-2.5 rounded-3 text-blue font-bold">
               <i class="fas fa-graduation-cap fa-lg"></i>
             </div>
@@ -51,23 +68,29 @@
               <span class="small text-white-50">Especialidad: {{ infoCursoActual.especialidad }}</span>
             </div>
           </div>
+          <!-- Contenedor para mostrar el paralelo del curso -->
           <div class="d-flex align-items-center gap-3">
             <div class="text-end">
               <span class="badge bg-gold text-blue font-black px-3 py-2 fs-6 rounded-pill">
                 Paralelo: "{{ infoCursoActual.paralelo }}"
               </span>
             </div>
+            <!-- Botón para exportar el PDF de la boleta -->
             <button @click="generarPDFBoleta" class="btn btn-gold btn-md font-bold rounded-pill shadow-sm px-4 no-print">
               <i class="fas fa-file-pdf me-2"></i>Exportar Reporte PDF
             </button>
           </div>
         </div>
       </div>
-
+      <!-- Contenedor para mostrar la tabla de notas -->
       <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <!-- Contenedor para mostrar la tabla de notas -->
         <div class="table-responsive">
+          <!-- Contenedor para mostrar la tabla de notas -->
           <table class="table table-bordered align-middle mb-0 text-center custom-table-grades">
+            <!-- Contenedor para mostrar la tabla de notas -->
             <thead class="bg-blue text-white header-double-level">
+              <!-- Contenedor para mostrar la tabla de notas -->
               <tr>
                 <th rowspan="2" class="align-middle text-start bg-blue-dark border-end-heavy text-white" style="min-width: 220px;">Asignatura</th>
                 <th colspan="5" class="bg-quimestre-1 text-white">Primer Quimestre (Q1)</th>
@@ -78,6 +101,7 @@
                 <th rowspan="2" class="align-middle bg-attendance text-white" style="min-width: 90px;">% Asistencia</th>
                 <th rowspan="2" class="align-middle bg-status no-print">Estado</th>
               </tr>
+              <!-- Contenedor para mostrar la tabla de notas -->
               <tr class="sub-headers">
                 <th class="bg-q1-sub text-white">P1</th>
                 <th class="bg-q1-sub text-white">P2</th>
@@ -97,6 +121,7 @@
               </tr>
             </thead>
             <tbody>
+              <!-- Contenedor para mostrar la tabla de notas, se usa v-for para recorrer cada elemento de la lista notasActuales -->
               <tr v-for="(nota, idx) in notasActuales" :key="idx" class="grade-row-hover">
                 <td class="text-start fw-bold text-blue border-end-heavy">{{ nota.asignatura }}</td>
                 <td>{{ formatNota(nota.q1_p1) }}</td>
@@ -141,14 +166,45 @@
 </template>
 
 <script>
-import API from "@/assets/js/axios";
-import { mostraralertas } from "@/assets/js/funciones/functions";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import { getMe } from "@/assets/js/auth";
-
+/**
+ * mis_notas es el componente que posee toda la lógica de la aplicación para mostrar las notas de un estudiante.
+ * Importamos la API de Axios para realizar peticiones al backend
+ * Importamos la función mostraralertas para mostrar mensajes de alerta 
+ * Importamos la librería jsPDF para generar el PDF 
+ * Importamos la librería autoTable para generar la tabla de notas
+ * Importamos la función getMe para obtener la información del usuario logueado
+ */
+import API from "@/assets/js/axios";// Importamos la API de Axios para realizar peticiones al backend.
+import { mostraralertas } from "@/assets/js/funciones/functions";// Importamos la función mostraralertas para mostrar mensajes de alerta.
+import { jsPDF } from "jspdf";// Importamos la librería jsPDF para generar el PDF.
+import autoTable from "jspdf-autotable";// Importamos la librería autoTable para generar la tabla de notas.
+import { getMe } from "@/assets/js/auth";// Importamos la función getMe para obtener la información del usuario logueado.
+/**
+ * Exporta el componente Vue con su configuración, datos, métodos y ciclo de vida usados en el template.    
+ * Usamos data para definir las variables reactivas del componente, que se pueden usar en el template y en los métodos. 
+ * usamos mounted para ejecutar código cuando el componente se monta en el DOM, como obtener la información del usuario logueado y su historial de notas. 
+ * Usamos methods para definir funciones que realizan acciones específicas, como buscar estudiantes, generar PDF, etc.  
+ */
 export default {
+  /**
+   * Data: Define las variables reactivas del componente, que se pueden usar en el template y en los métodos
+   * @returns {Object} Objeto con las variables reactivas
+   */
   data() {
+    /**
+     * Return: Devuelve un objeto con las variables reactivas del componente
+     * baseUrl: URL base para las peticiones al backend
+     * idpersona: Número que identifica al usuario logueado
+     * nombreEstudiante: Nombre del estudiante logueado
+     * cedulaEstudiante: Cédula del estudiante logueado
+     * loading: Boolean que indica si se está cargando información del estudiante logueado
+     * periodosHistorial: Lista de objetos que representan los periodos del historial de notas del estudiante
+     * periodoActivoId: Número de identificación del periodo activo del historial de notas del estudiante
+     * selectedPeriodoId: Número de identificación del periodo seleccionado del historial de notas del estudiante
+     * notasActuales: Lista de objetos que representan las notas del estudiante para el periodo seleccionado
+     * infoCursoActual: Objeto que representa la información del curso actual del estudiante
+     * Persona: Objeto con la información del estudiante logueado
+     */
     return {
       baseUrl: "/sistma",
       idpersona: null,
@@ -167,17 +223,35 @@ export default {
       Persona: {},
     };
   },
+  /**
+   * mounted: Es un hook del ciclo de vida de Vue que se ejecuta cuando el componente se monta en el DOM. Se usa para inicializar datos y hacer peticiones al backend.
+   * Se obtiene la información del usuario logueado con getMe(), se asignan los valores de idpersona, se obtienen las informaciones de la persona y del usuario logueado, y se inicializa el estado cargando. 
+   * Se utiliza async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend. 
+   * Se utiliza Promise.all() para ejecutar múltiples promesas en paralelo y esperar a que todas ellas se completen antes de continuar con el código siguiente.
+   */
   async mounted() {
     try {
-      const me = await getMe();
-      this.idpersona = me.id_persona;
-      await Promise .all([this.getPersona(), this.cargarHistorialNotas()]);
+      const me = await getMe();// Se obtiene la información del usuario logueado con getMe().
+      this.idpersona = me.id_persona;// Se asignan los valores de idpersona
+      await Promise .all([this.getPersona(), this.cargarHistorialNotas()]);// Se obtienen las informaciones de la persona y del usuario logueado, y se inicializa el estado cargando.
     } catch (error) {
+      // Captura cualquier fallo crítico en la cadena de promesas (falla de red, token expirado, etc.).
       console.error("Error inicializando componente de notas:", error);
+      // Notifica visualmente al usuario que su sesión o los datos no pudieron ser validados.
       mostraralertas("Error al autenticar usuario", "error");
+      // Apaga el indicador global de carga para permitir que la interfaz reaccione o muestre un estado de error vacio.
       this.loading = false;
     }
   },
+  /**
+   * methods: Define las funciones que realizan acciones específicas, como buscar estudiantes, generar PDF, etc. Se pueden llamar desde el template o desde otros métodos.
+   * getPersona: Obtiene la información de la persona logueada desde el backend y la asigna a las variables reactivas correspondientes. Maneja errores de red o de datos. 
+   * cargarHistorialNotas: Obtiene la información de la sábana o historial completo de calificaciones del estudiante desde el backend y la asigna a las variables reactivas correspondientes.
+   * formatNota: Normaliza y formatea un valor numérico o cadena de texto que represente una calificación.
+   * cambiarPeriodo: Cambia el periodo activo del historial de notas del estudiante.
+   * getBadgeEstado: Asigna dinámicamente clases utilitarias de Bootstrap para las etiquetas de estado (Badges).
+   * generarPDFBoleta: Genera y descarga un documento PDF formal con el historial de calificaciones del estudiante.
+   */
   methods: {
     async getPersona() {
       try {

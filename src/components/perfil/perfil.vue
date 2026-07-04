@@ -682,7 +682,7 @@
               </div>
             </div>
           </div>
-
+          <!-- Contenedor de mensaje de error, se muestra cuando no hay datos -->
           <div v-else class="alert alert-warning border-0 shadow-sm rounded-4">
             No se encontró información académica para este estudiante en el periodo actual.
           </div>
@@ -693,13 +693,59 @@
 </template>
 
 <script>
-import API from "@/assets/js/axios"
-import { mostraralertas } from "@/assets/js/funciones/functions";
-import { getMe } from "@/assets/js/auth";
-import * as bootstrap from 'bootstrap';
-
+/**
+ * perfil es un componente en el que se encuentra toda la lógica de la aplicación
+ * Se muestra la información de usuario logueado, se verifica si es docente, estudiante, respresentante, administrador, etc.
+ * A más de eso se valida que el usuario loguea tenga familiares registrados, si es docente se muestra la información de sus asignaturas y cursos, si es estudiante se muestra su horario y calificaciones.
+ * Si es representante se muestra la información de sus representados y sus calificaciones.
+ * Se importa API para hacer las peticiones al backend, se importa mostraralertas para mostrar mensajes de alerta y 
+ * se importa getMe para obtener la información del usuario logueado.
+ * Se importa bootstrap para usar los modales de bootstrap.
+ * 
+ */
+import API from "@/assets/js/axios" // Importa la instancia de Axios para hacer peticiones HTTP
+import { mostraralertas } from "@/assets/js/funciones/functions";// Importa la función para mostrar alertas
+import { getMe } from "@/assets/js/auth";// Importa la función para obtener la información del usuario logueado
+import * as bootstrap from 'bootstrap'; // Importa Bootstrap para usar los modales de Bootstrap
+/**
+ * Exporta el componente Vue con su configuración, datos, métodos y ciclo de vida
+ * Usamos data para definir las variables reactivas del componente
+ * Usamos computed para definir propiedades computadas que dependen de otras variables
+ * Usamos mounted para ejecutar código cuando el componente se monta en el DOM
+ * Usamos methods para definir funciones que se pueden llamar desde el template o desde otros métodos
+ */
 export default {
+  /**
+   * Data: Define las variables reactivas del componente, que se pueden usar en el template y en los métodos
+   * @returns {Object} Objeto con las variables reactivas
+   */
   data() {
+    /**
+     * Return: Devuelve un objeto con las variables reactivas del componente
+     * baseUrl: URL base para las peticiones al backend
+     * Persona: Objeto con la información de la persona logueada
+     * Usuario: Objeto con la información del usuario logueado
+     * familiares: Array con los familiares del usuario logueado  
+     * estfamiliares: Array con los familiares del estudiante logueado
+     * nuevaClave: String con la nueva clave del usuario logueado
+     * confirmarClave: String con la confirmación de la nueva clave del usuario logueado
+     * cargando: Boolean que indica si se está cargando información del usuario logueado
+     * refreshKey: Número que se usa para actualizar la imagen del usuario logueado
+     * idpersona: Número que identifica al usuario logueado
+     * idusuario: Número que identifica al usuario logueado
+     * idrole: Número que identifica al rol del usuario logueado
+     * cargandoFamilia: Boolean que indica si se está cargando información del usuario logueado
+     * cargandoEstFamiliares: Boolean que indica si se está cargando los familiares del estudiante logueado
+     * cargaDocente: Objeto con la información del docente logueado
+     * cargandoCargaDocente: Boolean que indica si se está cargando la información académica del docente logueado
+     * horario: Array con los horarios del docente logueado
+     * cargandoHorario: Boolean que indica si se está cargando los horarios del docente logueado
+     * estudianteSeleccionado: Objeto con la información del estudiante seleccionado
+     * datosAcademicos: Objeto con la información académica del estudiante seleccionado
+     * cargandoCalificaciones: Boolean que indica si se está cargando la información académica del estudiante seleccionado
+     * modalCalificaciones: Objeto con la instancia del modal de reporte de calificaciones
+     * 
+     */
     return {
       baseUrl: "/sistma",
       Persona: {},
@@ -728,7 +774,16 @@ export default {
       modalCalificaciones: null,
     }
   },
+  /**
+   * Computed: Define propiedades computadas que dependen de otras variables y se actualizan automáticamente cuando cambian esas variables
+   * mostrarColumnas: Retorna true/false por cada columna dependiendo si hay datos en alguna asignatura
+   * @returns {Object} Objeto con las propiedades computadas
+   */
   computed: {
+    /**
+     * MostrarColumnas: Es una propiedad computada que retorna un objeto con las propiedades q2, supletorio, remedial y gracia, que indican si se deben mostrar esas columnas en la tabla de calificaciones.
+     * @returns {Object} Objeto con las propiedades computadas
+     */
     mostrarColumnas() {
       // Retorna true/false por cada columna dependiendo si hay datos en alguna asignatura
       const cal = this.datosAcademicos?.calificaciones || [];
@@ -749,100 +804,186 @@ export default {
       };
     }
   },
+  /**
+   * Mounted: Es un hook del ciclo de vida de Vue que se ejecuta cuando el componente se monta en el DOM. Se usa para inicializar datos y hacer peticiones al backend.
+   * Se obtiene la información del usuario logueado con getMe(), se asignan los valores de idpersona y idusuario, se obtienen las informaciones de la persona y del usuario logueado, y se inicializa el estado cargando.
+   * Se utiliza async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend. 
+   * El promise.all() permite ejecutar varias promesas en paralelo y esperar a que todas se resuelvan antes de continuar con la ejecución del código.
+   * @returns {Promise<void>} Retorna una promesa que se resuelve cuando se hayan realizado todas las peticiones.
+   */
   async mounted() {
-    this.cargando = true;
-    const me = await getMe();
-    this.idpersona = me.id_persona;
-    this.idusuario = me.id_usuario;
-    await Promise.all([this.getPersona(), this.getUsuario()]);
-    this.cargando = false;
+    this.cargando = true;// Inicializar el estado cargando
+    const me = await getMe();// Obtener la información del usuario logueado
+    this.idpersona = me.id_persona;// Asignar el valor de id_persona a la propiedad idpersona
+    this.idusuario = me.id_usuario;// Asignar el valor de id_usuario a la propiedad idusuario
+    await Promise.all([this.getPersona(), this.getUsuario()]);// Obtener la información de persona y usuario logueado
+    this.cargando = false;// Limpiar el estado cargando
   },
+  /**
+   * Methods: Define los métodos que se pueden llamar desde el template o desde otros métodos
+   * Los método utilizados en este componente son:
+   * verCalificaciones: Método para mostrar la información de las calificaciones del estudiante seleccionado
+   * badgeEstado: Método para obtener el color de la bandera de estado de la calificación del estudiante seleccionado
+   * getPersona: Método para obtener la información de la persona logueada
+   * getFamiliares: Método para obtener la información de los familiares del usuario logueado y actualizar la variable familiares
+   * getEstFamiliares: Método para obtener la información de los familiares del estudiante logueado y actualizar la variable estfamiliares
+   * getHorarioDocente: Método para obtener la información del horario del docente logueado y actualizar la variable horario
+   * getCargaDocente: Método para obtener la información académica del docente logueado y actualizar la variable cargaDocente
+   * getUsuario: Método para obtener la información del usuario logueado y actualizar la variable Usuario
+   * getPhotoUrl: Método para obtener la URL de la imagen del usuario logueado
+   * onFileSelected: Método para actualizar la imagen del usuario logueado
+   * actualizarDatosPersonales: Método para actualizar la información personal del usuario logueado y mostrar un mensaje de alerta  
+   * actualizarCredenciales: Método para actualizar la contraseña del usuario logueado y mostrar un mensaje de alerta 
+   */
   methods: {
+    /**
+     * verCalificaciones: Método para mostrar la información de las calificaciones del estudiante seleccionado
+     * Este método se utiliza para mostrar la información de las calificaciones del estudiante seleccionado en la página de perfil del estudiante.
+     * Se utiliza la propiedad estudianteSeleccionado para obtener la información de la calificaciones del estudiante seleccionado. 
+     * Si la información de la calificaciones del estudiante seleccionado no está cargada, se inicializa el estado cargandoCalificaciones y se invoca la función cargarDatosAcademicos para cargar la información de la calificaciones del estudiante seleccionado. 
+     * Si la información de la calificaciones del estudiante seleccionado ya está cargada, se muestra la información de la calificaciones del estudiante seleccionado en la página de perfil del estudiante.  
+     * Se recibe como parámetro familiar, que es el objeto del estudiante seleccionado.
+     * @param familiar 
+     */
     async verCalificaciones(familiar) {
-      this.estudianteSeleccionado = familiar;
-      this.datosAcademicos = null;
-      this.cargandoCalificaciones = true;
-
-      // Inicializar y mostrar modal de Bootstrap
+      this.estudianteSeleccionado = familiar;// Asignar el valor de familiar a la propiedad estudianteSeleccionado
+      this.datosAcademicos = null;// Limpiar la propiedad datosAcademicos 
+      this.cargandoCalificaciones = true;// Inicializar el estado cargandoCalificaciones   
+      //Si no existe la instancia del modal de reporte de calificaciones, se crea una nueva instancia
       if (!this.modalCalificaciones) {
-        this.modalCalificaciones = new bootstrap.Modal(document.getElementById('modalCalificaciones'));
+        this.modalCalificaciones = new bootstrap.Modal(document.getElementById('modalCalificaciones'));// Crear instancia del modal de reporte de calificaciones
       }
-      this.modalCalificaciones.show();
+      this.modalCalificaciones.show();// Mostrar el modal de reporte de calificaciones  
 
       try {
-        // Ajusta la URL según cómo la hayas registrado en Laravel (api.php)
-        const res = await API.get(`${this.baseUrl}/calificaciones-actuales/${familiar.id_persona}`);
-        this.datosAcademicos = res.data;
+        const res = await API.get(`${this.baseUrl}/calificaciones-actuales/${familiar.id_persona}`);// Llamada a la API para obtener la información de las calificaciones del estudiante seleccionado
+        this.datosAcademicos = res.data;// Asignar el valor de res.data a la propiedad datosAcademicos
       } catch (e) {
-        console.error(e);
+        console.error(e);// Si hay un error, mostrar un mensaje de error
+        //Si el error es 404, ignoramos el mensaje de error ya que ya se muestra el mensaje en el modal de reporte de calificaciones
         if (e.response && e.response.status === 404) {
           // Ignoramos el toast si es 404 porque ya mostramos el mensaje en el modal
         } else {
-          mostraralertas("Error al conectar con el servidor", "error");
+          mostraralertas("Error al conectar con el servidor", "error");// Mostrar un mensaje de error
         }
       } finally {
-        this.cargandoCalificaciones = false;
+        this.cargandoCalificaciones = false;// Limpiar el estado cargandoCalificaciones
       }
     },
-
+    /**
+     * badgeEstado: Método para obtener el color de la bandera de estado de la calificación del estudiante seleccionado
+     * Este método se utiliza para obtener el color de la bandera de estado de la calificación del estudiante seleccionado en la página de perfil del estudiante.
+     * Se utiliza la propiedad datosAcademicos para obtener la información de la calificación del estudiante seleccionado.  
+     * Si la información de la calificación del estudiante seleccionado no está cargada, se inicializa el estado cargandoCalificaciones y se invoca la función cargarDatosAcademicos para cargar la información de la calificación del estudiante seleccionado. 
+     * Si la información de la calificación del estudiante seleccionado ya está cargada, se devuelve el color de la bandera de estado de la calificación del estudiante seleccionado en la página de perfil del estudiante.  
+     * Se recibe como parámetro estado, que es el estado de la calificación del estudiante seleccionado.
+     * @param estado 
+     */
     badgeEstado(estado) {
+      //Si no existe el estado, devuelve el color de la bandera de estado de la calificación del estudiante seleccionado en la página de perfil del estudiante
       if (!estado) return 'bg-secondary';
+      //Se utiliza un switch case para devolver el color de la bandera de estado de la calificación del estudiante seleccionado en la página de perfil del estudiante
       switch (estado.toLowerCase()) {
-        case 'aprobado': return 'bg-success';
-        case 'supletorio': return 'bg-warning text-dark';
-        case 'remedial': return 'bg-info text-dark';
-        case 'gracia': return 'bg-primary';
-        case 'reprobado': return 'bg-danger';
-        default: return 'bg-secondary';
+        case 'aprobado': return 'bg-success';// Si el estado es aprobado, devuelve el color verde
+        case 'supletorio': return 'bg-warning text-dark';// Si el estado es supletorio, devuelve el color amarillo oscuro y negro
+        case 'remedial': return 'bg-info text-dark';// Si el estado es remedial, devuelve el color azul oscuro y negro
+        case 'gracia': return 'bg-primary';// Si el estado es gracia, devuelve el color azul
+        case 'reprobado': return 'bg-danger';// Si el estado es reprobado, devuelve el color rojo 
+        default: return 'bg-secondary';// Si el estado es desconocido, devuelve el color gris
       }
     },
+    /**
+     * getPersona: Método para obtener la información de la persona logueada
+     * Este método se utiliza para obtener la información de la persona logueada en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información de la persona logueada. 
+     * Si la información de la persona logueada no está cargada, se inicializa el estado cargando y se invoca la función cargarDatosPersonales para cargar la información de la persona logueada. 
+     * Si la información de la persona logueada ya está cargada, se muestra la información de la persona logueada en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend. 
+     */
     async getPersona() {
       try {
-        const res = await API.get(`${this.baseUrl}/personas/${this.idpersona}`);
+        const res = await API.get(`${this.baseUrl}/personas/${this.idpersona}`);// Llamada a la API para obtener la información de la persona logueada
         // Como el show retorna paginación en tu Backend, tomamos el primer item
         this.Persona = res.data.data[0] || res.data.data;
-      } catch (err) { console.error(err); }
+      } catch (err) { 
+        //Si hay un error, mostrar un mensaje de error
+        console.error(err); 
+      }
     },
+    /**
+     * getFamiliares: Método para obtener la información de los familiares del usuario logueado y actualizar la variable familiares
+     * Este método se utiliza para obtener la información de los familiares del usuario logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información de los familiares del usuario logueado. 
+     * Si la información de los familiares del usuario logueado no está cargada, se inicializa el estado cargandoFamilia y se invoca la función cargarDatosPersonales para cargar la información de los familiares del usuario logueado. 
+     * Si la información de los familiares del usuario logueado ya está cargada, se muestra la información de los familiares del usuario logueado en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async getFamiliares() {
       if (this.familiares.length > 0) return; // Evita recargar si ya hay datos
 
       try {
-        this.cargandoFamilia = true;
-        const res = await API.get(`${this.baseUrl}/familiares-de/${this.idpersona}`);
-        this.familiares = res.data.data;
+        this.cargandoFamilia = true;// Inicializar el estado cargandoFamilia
+        const res = await API.get(`${this.baseUrl}/familiares-de/${this.idpersona}`);// Llamada a la API para obtener la información de los familiares del usuario logueado
+        this.familiares = res.data.data;// Asignar el valor de res.data.data a la propiedad familiares
       } catch (e) {
-        console.error("Error al traer familiares:", e);
-        mostraralertas("No se pudo obtener la información de familia", "error");
+        //Si hay un error, mostrar un mensaje de error
+        console.error("Error al traer familiares:", e);//motrar error en consola
+        mostraralertas("No se pudo obtener la información de familia", "error");//mostrar un mensaje de error
       } finally {
+        //Limpiar el estado cargandoFamilia
         this.cargandoFamilia = false;
       }
     },
+    /**
+     * getEstFamiliares: Método para obtener la información de los familiares del estudiante logueado y actualizar la variable estfamiliares
+     * Este método se utiliza para obtener la información de los familiares del estudiante logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información de los familiares del estudiante logueado. 
+     * Si la información de los familiares del estudiante logueado no está cargada, se inicializa el estado cargandoEstFamiliares y se invoca la función cargarDatosPersonales para cargar la información de los familiares del estudiante logueado. 
+     * Si la información de los familiares del estudiante logueado ya está cargada, se muestra la información de los familiares del estudiante logueado en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async getEstFamiliares() {
       if (this.estfamiliares.length > 0) return; // Evita recargar si ya hay datos
 
       try {
-        this.cargandoEstFamiliares = true;
-        const res = await API.get(`${this.baseUrl}/familiares-est-de/${this.idpersona}`);
-        this.estfamiliares = res.data.data;
+        this.cargandoEstFamiliares = true;// Inicializar el estado cargandoEstFamiliares
+        const res = await API.get(`${this.baseUrl}/familiares-est-de/${this.idpersona}`);// Llamada a la API para obtener la información de los familiares del estudiante logueado
+        this.estfamiliares = res.data.data;// Asignar el valor de res.data.data a la propiedad estfamiliares
       } catch (e) {
-        console.error("Error al traer familiares:", e);
-        mostraralertas("No se pudo obtener la información de familia", "error");
+        //Si hay un error, mostrar un mensaje de error
+        console.error("Error al traer familiares:", e);//motrar error en consola
+        mostraralertas("No se pudo obtener la información de familia", "error");//mostrar un mensaje de error
       } finally {
+        //Limpiar el estado cargandoEstFamiliares
         this.cargandoEstFamiliares = false;
       }
     },
+    /**
+     * getHorarioDocente: Método para obtener la información del horario del docente logueado y actualizar la variable horario
+     * Este método se utiliza para obtener la información del horario del docente logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información del horario del docente logueado. 
+     * Si la información del horario del docente logueado no está cargada, se inicializa el estado cargandoHorario y se invoca la función cargarDatosPersonales para cargar la información del horario del docente logueado. 
+     * Si la información del horario del docente logueado ya está cargada, se muestra la información del horario del docente logueado en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async getHorarioDocente() {
       try {
-        this.cargandoHorario = true;
-        const res = await API.get(`${this.baseUrl}/horarios_docente/${this.idpersona}`);
-        const datosBrutos = res.data;
+        this.cargandoHorario = true;// Inicializar el estado cargandoHorario
+        const res = await API.get(`${this.baseUrl}/horarios_docente/${this.idpersona}`);// Llamada a la API para obtener la información del horario del docente logueado
+        const datosBrutos = res.data;// Obtener los datos brutos de la respuesta
 
         // Agrupamos por rango de hora para crear filas únicas
         const grupos = {};
-
+        //asignar los datos brutos a grupos, se utiliza un bucle forEach para recorrer cada elemento del arreglo datosBrutos
         datosBrutos.forEach(item => {
-          const rango = `${item.inicio} - ${item.fin}`;
+          const rango = `${item.inicio} - ${item.fin}`;// Obtener el rango de hora del elemento
+          //Si no existe el rango en grupos, se crea un objeto con las propiedades rango y los días de la semana inicializados en null
           if (!grupos[rango]) {
+            //Crear un objeto con las propiedades rango y los días de la semana inicializados en null
             grupos[rango] = {
               rango: rango,
               Lunes: null,
@@ -860,79 +1001,165 @@ export default {
         this.horario = Object.values(grupos).sort((a, b) => a.rango.localeCompare(b.rango));
 
       } catch (err) {
+        //Si hay un error, mostrar un mensaje de error
         mostraralertas("Error al cargar horario", "error");
       } finally {
+        //Limpiar el estado cargandoHorario
         this.cargandoHorario = false;
       }
     },
+    /**
+     * getCargaDocente: Método para obtener la información académica del docente logueado y actualizar la variable cargaDocente
+     * Este método se utiliza para obtener la información académica del docente logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información académica del docente logueado. 
+     * Si la información académica del docente logueado no está cargada, se inicializa el estado cargandoCargaDocente y se invoca la función cargarDatosPersonales para cargar la información académica del docente logueado. 
+     * Si la información académica del docente logueado ya está cargada, se muestra la información académica del docente logueado en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async getCargaDocente() {
       // Evitamos peticiones repetidas si ya cargó
       if (this.cargaDocente.tutorias.length > 0 || this.cargaDocente.asignaturas.length > 0) return;
 
       try {
-        this.cargandoCargaDocente = true;
-        const res = await API.get(`${this.baseUrl}/docente/carga-academica/${this.idpersona}`);
+        this.cargandoCargaDocente = true;// Inicializar el estado cargandoCargaDocente
+        const res = await API.get(`${this.baseUrl}/docente/carga-academica/${this.idpersona}`);// Llamada a la API para obtener la información académica del docente logueado
 
-        this.cargaDocente.tutorias = res.data.tutorias;
-        this.cargaDocente.asignaturas = res.data.asignaturas;
+        this.cargaDocente.tutorias = res.data.tutorias;// Asignar el valor de res.data.tutorias a la propiedad cargaDocente.tutorias
+        this.cargaDocente.asignaturas = res.data.asignaturas;// Asignar el valor de res.data.asignaturas a la propiedad cargaDocente.asignaturas
       } catch (err) {
-        console.error("Error al obtener carga docente:", err);
-        mostraralertas("No se pudo cargar la información académica.", "error");
+        //Si hay un error, mostrar un mensaje de error
+        console.error("Error al obtener carga docente:", err);//motrar error en consola
+        mostraralertas("No se pudo cargar la información académica.", "error");//mostrar un mensaje de error
       } finally {
+        //Limpiar el estado cargandoCargaDocente
         this.cargandoCargaDocente = false;
       }
     },
+    /**
+     * getUsuario: Método para obtener la información del usuario logueado y actualizar la variable Usuario
+     * Este método se utiliza para obtener la información del usuario logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idusuario para obtener la información del usuario logueado.
+     * Si la información del usuario logueado no está cargada, se inicializa el estado cargandoUsuario y se invoca la función cargarDatosPersonales para cargar la información del usuario logueado. 
+     * Si la información del usuario logueado ya está cargada, se muestra la información del usuario logueado en la página de perfil del estudiante.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async getUsuario() {
       try {
-        const res = await API.get(`${this.baseUrl}/usuarios/${this.idusuario}`);
-        this.Usuario = res.data.data;
-      } catch (err) { console.error(err); }
+        const res = await API.get(`${this.baseUrl}/usuarios/${this.idusuario}`);// Llamada a la API para obtener la información del usuario logueado
+        this.Usuario = res.data.data;// Asignar el valor de res.data.data a la propiedad Usuario
+      } catch (err) { 
+        //Si hay un error, mostrar un mensaje de error
+        console.error(err); 
+      }
     },
+    /**
+     * getPhotoUrl: Método para obtener la URL de la imagen del usuario logueado
+     * Este método se utiliza para obtener la URL de la imagen del usuario logueado en la página de perfil del estudiante.
+     * Si la información de la imagen del usuario logueado no está cargada, se devuelve una URL por defecto de un avatar genérico.
+     * Si la información de la imagen del usuario logueado ya está cargada, se devuelve la URL de la imagen del usuario logueado.
+     * Se recibe como parámetro ci, que es el código de identificación del usuario logueado.
+     * @param ci 
+     */
     getPhotoUrl(ci) {
+      //Si no existe la imagen del usuario logueado, devuelve una URL por defecto de un avatar genérico
       if (!ci) return "https://ui-avatars.com/api/?name=User&background=1D2A68&color=fff";
-      // Tu endpoint de imagen
+      //Retorna la URL de la imagen del usuario logueado, agregando un parámetro de refresco para evitar el cacheo de la imagen
       return `${API.defaults.baseURL}/sistma/imagenpersona/${ci}?v=${this.refreshKey}`;
     },
+    /**
+     * onFileSelected: Método para actualizar la imagen del usuario logueado
+     * Este método se utiliza para actualizar la imagen del usuario logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad Persona para obtener la información del usuario logueado.
+     * Este método abrirá un cuadro de diálogo emergente para seleccionar una imagen del usuario logueado.
+     * Una vez que se selecciona una imagen, se cargará la imagen en la página de perfil del estudiante y se actualizará la información del usuario logueado.
+     * Este método recibe como parámetro event, que es el evento de selección de archivo.
+     * @param event 
+     */
     async onFileSelected(event) {
-      const file = event.target.files[0];
+      const file = event.target.files[0];// Obtener el archivo seleccionado
+      //Si no existe el archivo seleccionado, se devuelve
       if (!file) return;
 
-      const reader = new FileReader();
+      const reader = new FileReader();// Crear un objeto FileReader
+      //Crear un objeto FileReader, se utiliza para leer el contenido del archivo seleccionado
       reader.onload = async (e) => {
-        const base64String = e.target.result.split(',')[1];
+        const base64String = e.target.result.split(',')[1];// Obtener la cadena base64 del contenido del archivo seleccionado
         try {
-          this.cargando = true;
-          const params = { ...this.Persona, foto: base64String };
-          const res = await API.put(`${this.baseUrl}/personas/${this.idpersona}`, params);
+          this.cargando = true;// Inicializar el estado cargando
+          const params = { ...this.Persona, foto: base64String };// Crear un objeto con las propiedades de Persona y foto
+          const res = await API.put(`${this.baseUrl}/personas/${this.idpersona}`, params);// Llamada a la API para actualizar la información del usuario logueado
+          //Si la respuesta es exitosa, mostrar un mensaje de alerta y actualizar la clave de refresco
           if (res.data.mensaje) {
-            mostraralertas("Foto actualizada", "success");
-            this.refreshKey = Date.now();
+            mostraralertas("Foto actualizada", "success");// Mostrar un mensaje de alerta
+            this.refreshKey = Date.now();// Actualizar la clave de refresco
           }
-        } catch (e) { mostraralertas("Error al subir foto", "error"); }
-        finally { this.cargando = false; }
+        } catch (e) { 
+          //Si hay un error, mostrar un mensaje de error
+          mostraralertas("Error al subir foto", "error"); 
+        }
+        finally { 
+          //Limpiar el estado cargando
+          this.cargando = false; 
+        }
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file);// Leer el contenido del archivo seleccionado como una cadena base64
     },
+    /**
+     * actualizarDatosPersonales: Método para actualizar la información personal del usuario logueado y mostrar un mensaje de alerta
+     * Este método se utiliza para actualizar la información personal del usuario logueado en la página de perfil del estudiante.
+     * Se utiliza la propiedad idpersona para obtener la información personal del usuario logueado.
+     * Se pasan las propiedades almacenadas en la propiedad Persona a la API para actualizar la información personal del usuario logueado.
+     * Si la respuesta es exitosa, se muestra un mensaje de alerta y se actualiza la clave de refresco.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async actualizarDatosPersonales() {
       try {
-        this.cargando = true;
-        const res = await API.put(`${this.baseUrl}/personas/${this.idpersona}`, this.Persona);
-        mostraralertas(res.data.mensaje, "success");
-      } catch (e) { mostraralertas("Error al actualizar", "error"); }
-      finally { this.cargando = false; }
+        this.cargando = true;// Inicializar el estado cargando
+        const res = await API.put(`${this.baseUrl}/personas/${this.idpersona}`, this.Persona);// Llamada a la API para actualizar la información personal del usuario logueado
+        mostraralertas(res.data.mensaje, "success");// Mostrar un mensaje de alerta
+      } catch (e) { 
+        //Si hay un error, mostrar un mensaje de error
+        mostraralertas("Error al actualizar", "error"); 
+      }
+      finally { 
+        //Limpiar el estado cargando
+        this.cargando = false; 
+      }
     },
+    /**
+     * actualizarCredenciales: Método para actualizar la contraseña del usuario logueado y mostrar un mensaje de alerta
+     * Este método se utiliza para actualizar la contraseña del usuario logueado en la página de perfil del estudiante.
+     * Primero se compara las contraseñas del usuario logueado y se confirman que sean iguales.
+     * Si las contraseñas son iguales, se validan que la nueva contraseña sea de al menos 8 caracteres.
+     * Se utiliza la propiedad idusuario para decirle a la API que se quiere actualizar la contraseña del usuario logueado.
+     * Se pasan las propiedades almacenadas en la propiedad Usuario a la API para actualizar la contraseña del usuario logueado.
+     * Si la respuesta es exitosa, se muestra un mensaje de alerta y se actualiza la clave de refresco.
+     * Este método no recibe parámetros.
+     * Se usa async en este método para evitar que se bloquee el ciclo de vida del componente mientras se realizan las peticiones al backend.
+     */
     async actualizarCredenciales() {
+      //Si las contraseñas no coinciden, se devuelve un mensaje de alerta de advertencia
       if (this.nuevaClave !== this.confirmarClave) return mostraralertas("Contraseñas no coinciden", "warning");
+      //Si la nueva contraseña no es de al menos 8 caracteres, se devuelve un mensaje de alerta de advertencia
       if (this.nuevaClave.length < 8) return mostraralertas("Muy corta", "warning");
 
       try {
-        this.cargando = true;
-        const params = { ...this.Usuario, clave: this.nuevaClave };
-        const res = await API.put(`${this.baseUrl}/usuarios/${this.idusuario}`, params);
-        mostraralertas("Contraseña actualizada con éxito", "success");
-        this.nuevaClave = ""; this.confirmarClave = "";
-      } catch (e) { mostraralertas("Error al cambiar clave", "error"); }
-      finally { this.cargando = false; }
+        this.cargando = true;// Inicializar el estado cargando
+        const params = { ...this.Usuario, clave: this.nuevaClave };// Crear un objeto con las propiedades de Usuario y clave
+        const res = await API.put(`${this.baseUrl}/usuarios/${this.idusuario}`, params);// Llamada a la API para actualizar la contraseña del usuario logueado
+        mostraralertas("Contraseña actualizada con éxito", "success");// Mostrar un mensaje de alerta
+        this.nuevaClave = ""; this.confirmarClave = "";// Limpiar las variables nuevaClave y confirmarClave
+      } catch (e) { 
+        //Si hay un error, mostrar un mensaje de error
+        mostraralertas("Error al cambiar clave", "error"); 
+      }
+      finally { 
+        //Limpiar el estado cargando
+        this.cargando = false; 
+      }
     }
   }
 }
